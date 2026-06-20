@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Inline immediate check to start in dark mode by default without flashing
+        // Immediately inject correct theme class before body renders to avoid flashing
         (function() {
             const userTheme = localStorage.getItem('theme') || 'dark';
             if (userTheme === 'dark') {
@@ -17,102 +17,123 @@
             }
         })();
 
-        // Tailwind configuration for dark mode activation via class
+        // Tailwind configuration for advanced modern styling in both modes
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        googleGray: {
-                            50: '#f8f9fa',
-                            100: '#f1f3f4',
-                            200: '#e8eaed',
-                            700: '#3c4043',
-                            800: '#303134',
-                            900: '#202124'
-                        }
+                        darkBg: '#09090b', // Deep zinc dark background
+                        darkCard: '#18181b', // Dark card
+                        darkBorder: '#27272a', // Subtle dark borders
+                        lightBg: '#f8f9fa', // Pristine soft off-white background
+                        lightCard: '#ffffff', // Clean white card
+                        lightBorder: '#e2e8f0', // Crisp slate border
+                        fraagleBlue: '#3b82f6',
+                        fraagleRed: '#ef4444',
+                        fraagleYellow: '#f59e0b',
+                        fraagleGreen: '#10b981'
                     }
                 }
             }
         }
     </script>
-    <!-- Google Fonts (Product Sans vibe) -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Google Sans', 'Roboto', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        /* Custom smooth scrollbar for premium look */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.25);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.45);
         }
     </style>
 </head>
-<body class="bg-white dark:bg-googleGray-900 text-googleGray-900 dark:text-googleGray-100 transition-colors duration-200 min-h-screen flex flex-col justify-between">
+<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
+
+    <!-- Decorative Ambient Soft Glow Gradients (Adapts beautifully to both Light & Dark modes) -->
+    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none"></div>
 
     <!-- Top Navigation Bar -->
-    <header class="flex items-center justify-between p-4 relative">
-        <!-- Left Side: Empty spacer -->
-        <div></div>
+    <header class="flex items-center justify-between p-5 relative z-10">
+        <!-- Left Side: Mini Brand Indicator -->
+        <div class="flex items-center space-x-2">
+            <span class="text-lg font-bold tracking-tight select-none bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">F.</span>
+        </div>
 
-        <!-- Right Side: Dark Mode Toggle & "Profile" Menu -->
-        <div class="flex items-center space-x-2 sm:space-x-4 relative">
+        <!-- Right Side: Dark Mode Toggle and App Launcher -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
             <!-- Theme Toggle Button -->
-            <button id="theme-toggle" class="p-2.5 rounded-full hover:bg-googleGray-100 dark:hover:bg-googleGray-800 transition-colors focus:outline-none" aria-label="Toggle Theme">
-                <!-- Sun Icon (shown in dark mode) -->
-                <svg id="theme-toggle-sun-icon" class="hidden w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 14.12l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zm0-10.606a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z"></path>
+            <button id="theme-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Theme">
+                <!-- Sun Icon (visible in dark mode to switch to light) -->
+                <svg id="theme-toggle-sun-icon" class="hidden w-5 h-5 text-yellow-500 dark:text-yellow-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
-                <!-- Moon Icon (shown in light mode) -->
-                <svg id="theme-toggle-moon-icon" class="hidden w-6 h-6 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                <!-- Moon Icon (visible in light mode to switch to dark) -->
+                <svg id="theme-toggle-moon-icon" class="hidden w-5 h-5 text-indigo-600 dark:text-indigo-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                 </svg>
             </button>
 
             <!-- Workspace Apps Launcher Icon (9-Dot Menu) -->
             <div class="relative">
-                <button id="app-launcher-btn" class="hidden p-2.5 rounded-full hover:bg-googleGray-100 dark:hover:bg-googleGray-800 transition-colors focus:outline-none" aria-label="Apps Menu">
-                    <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                <button id="app-launcher-btn" class="hidden p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Apps Menu">
+                    <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-300 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                     </svg>
                 </button>
 
                 <!-- Workspace Apps Dropdown Menu -->
-                <div id="app-launcher-dropdown" class="hidden absolute right-0 mt-2 w-80 max-h-[420px] overflow-y-auto bg-white dark:bg-googleGray-800 border border-gray-200 dark:border-googleGray-700 rounded-3xl shadow-2xl p-4 z-50 transition-all duration-150 transform scale-95 opacity-0 origin-top-right">
-                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3 px-2 uppercase tracking-wider">Quick Launcher</div>
-                    <div id="dropdown-apps-grid" class="grid grid-cols-3 gap-3">
+                <div id="app-launcher-dropdown" class="hidden absolute right-0 mt-3 w-80 max-h-[420px] overflow-y-auto bg-white/95 dark:bg-darkCard/90 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl p-4 z-50 transition-all duration-200 transform scale-95 opacity-0 origin-top-right backdrop-blur-xl">
+                    <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">Quick Launcher</div>
+                    <div id="dropdown-apps-grid" class="grid grid-cols-3 gap-2">
                         <!-- Populated dynamically with the apps -->
                     </div>
                 </div>
-            </div>
-
-            <!-- Mock Profile Button -->
-            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm select-none cursor-pointer hover:shadow-md transition-shadow">
-                A
             </div>
         </div>
     </header>
 
     <!-- Main Content Container -->
-    <main class="flex-grow flex flex-col items-center justify-center px-4 -mt-12 sm:-mt-16">
+    <main class="flex-grow flex flex-col items-center justify-center px-4 -mt-8 sm:-mt-12 relative z-10">
         
-        <!-- Fraagle Logo Placeholder (Designed with custom CSS colors matching the classic vibe) -->
-        <div class="mb-10 select-none text-center">
-            <h1 class="text-6xl sm:text-7xl font-bold tracking-tight inline-flex">
-                <span class="text-blue-500">F</span>
-                <span class="text-red-500">r</span>
-                <span class="text-yellow-500">a</span>
-                <span class="text-blue-500">a</span>
-                <span class="text-green-500">g</span>
-                <span class="text-red-500">l</span>
-                <span class="text-blue-500">e</span>
+        <!-- Fraagle Logo Placeholder -->
+        <div class="mb-8 select-none text-center">
+            <h1 class="text-6xl sm:text-8xl font-bold tracking-tight inline-flex drop-shadow-sm">
+                <span class="text-fraagleBlue">F</span>
+                <span class="text-fraagleRed">r</span>
+                <span class="text-fraagleYellow">a</span>
+                <span class="text-fraagleBlue">a</span>
+                <span class="text-fraagleGreen">g</span>
+                <span class="text-fraagleRed">l</span>
+                <span class="text-fraagleBlue">e</span>
             </h1>
         </div>
 
-        <!-- Google-style Search Box Wrapper -->
+        <!-- Sleek Search Box Wrapper with Ambient Shadows -->
         <div class="w-full max-w-[584px] mb-12 relative group" id="search-container">
-            <div class="flex items-center w-full h-[46px] sm:h-[48px] px-4 rounded-full border border-gray-200 dark:border-googleGray-700 bg-white dark:bg-googleGray-800 hover:shadow-md focus-within:shadow-md hover:border-transparent focus-within:border-transparent transition duration-200">
+            <div class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white/90 dark:bg-darkCard/70 backdrop-blur-md focus-within:bg-white dark:focus-within:bg-darkCard/90 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 focus-within:shadow-xl focus-within:shadow-indigo-500/10 focus-within:border-indigo-500/50 dark:focus-within:border-indigo-400/50 transition-all duration-300">
                 <!-- Search Icon -->
-                <svg class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 
                 <!-- Search Input Field -->
@@ -120,51 +141,54 @@
                     type="text" 
                     id="search-input"
                     placeholder="Search..." 
-                    class="w-full bg-transparent border-none outline-none text-[16px] text-googleGray-900 dark:text-googleGray-100"
+                    class="w-full bg-transparent border-none outline-none text-[16px] text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500"
                     autocomplete="off"
                     autofocus
                 >
 
-                <!-- Clear Search Button (Visible when typing) -->
-                <button id="clear-search" class="hidden p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 focus:outline-none mr-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                <!-- Clear Search Button -->
+                <button id="clear-search" class="hidden p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 focus:outline-none mr-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
 
-                <!-- Voice / Mic Icon (Decorative Google Vibe) -->
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 hover:opacity-80 cursor-pointer hidden sm:block" viewBox="0 0 24 24" fill="currentColor">
+                <!-- Voice Mic Icon -->
+                <svg class="w-5 h-5 text-zinc-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer hidden sm:block transition" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
                 </svg>
             </div>
 
-            <!-- Google-Style Autocomplete Search Results Dropdown -->
-            <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-googleGray-800 border border-gray-200 dark:border-googleGray-700 rounded-2xl shadow-xl overflow-hidden z-40 max-h-72 overflow-y-auto transition duration-150 transform scale-100">
+            <!-- Autocomplete Search Results Dropdown -->
+            <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-3 bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl overflow-hidden z-40 max-h-72 overflow-y-auto backdrop-blur-xl transition duration-150 transform scale-100">
                 <div id="dropdown-results-container" class="py-2">
                     <!-- Matches appear here -->
                 </div>
             </div>
         </div>
 
-        <!-- Apps Presentation Grid (Google Shortcuts style) wrapped in a container that can be hidden -->
-        <div id="apps-section" class="hidden w-full max-w-4xl px-4">
-            <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 text-center">Your Applications</h2>
+        <!-- Apps Presentation Grid wrapped in a container that can be hidden -->
+        <div id="apps-section" class="hidden w-full max-w-4xl px-4 mb-8">
+            <div class="flex items-center justify-between mb-6 px-1">
+                <h2 class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Your Applications</h2>
+                <div class="h-[1px] flex-grow bg-lightBorder dark:bg-darkBorder ml-4"></div>
+            </div>
             
             <!-- Dynamic Grid Target -->
-            <div id="apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-6 justify-center">
+            <div id="apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-5 justify-center">
                 <!-- Apps will render dynamically here -->
             </div>
 
             <!-- Empty / No Results State -->
             <div id="no-results" class="hidden text-center py-8">
-                <p class="text-gray-500 dark:text-gray-400">No matching apps found.</p>
+                <p class="text-zinc-500 dark:text-zinc-400">No matching apps found.</p>
             </div>
         </div>
 
         <!-- Dynamic Registry / Setup Warning Alert (Informational) -->
-        <div id="setup-warning" class="hidden mt-12 p-4 max-w-xl rounded-lg border border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-900/50 text-xs text-yellow-800 dark:text-yellow-200">
+        <div id="setup-warning" class="hidden mt-6 mb-8 p-4 max-w-xl rounded-2xl border border-yellow-500/10 bg-yellow-500/5 text-xs text-yellow-600 dark:text-yellow-400 backdrop-blur-md">
             <div class="flex items-start">
-                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-5 h-5 mr-2.5 flex-shrink-0 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                 </svg>
                 <div>
@@ -175,56 +199,34 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-googleGray-100 dark:bg-googleGray-800 text-xs sm:text-sm text-gray-600 dark:text-gray-400 w-full mt-12">
-        <div class="px-6 py-3 border-b border-gray-200 dark:border-googleGray-700">
-            <span>Germany</span>
-        </div>
-        <div class="px-6 py-3 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex space-x-6">
-                <span class="hover:underline cursor-pointer">About Vercel Host</span>
-                <span class="hover:underline cursor-pointer">Directory Config</span>
-            </div>
-            <div class="flex space-x-6">
-                <span class="hover:underline cursor-pointer">Privacy</span>
-                <span class="hover:underline cursor-pointer">Terms</span>
-                <span class="hover:underline cursor-pointer font-medium" id="quick-theme-indicator">Auto Mode</span>
-            </div>
-        </div>
-    </footer>
-
     <script>
         // --- 1. THEME TOGGLING ENGINE ---
         const themeToggleBtn = document.getElementById('theme-toggle');
         const sunIcon = document.getElementById('theme-toggle-sun-icon');
         const moonIcon = document.getElementById('theme-toggle-moon-icon');
-        const themeIndicator = document.getElementById('quick-theme-indicator');
 
-        // Force 'dark' mode on first install, or fetch previous user preference
-        const userTheme = localStorage.getItem('theme') || 'dark';
-
-        function applyTheme(isDark, isManual = false) {
+        function applyTheme(isDark) {
             if (isDark) {
                 document.documentElement.classList.add('dark');
                 sunIcon.classList.remove('hidden');
                 moonIcon.classList.add('hidden');
-                themeIndicator.textContent = isManual ? "Dark Mode" : "Auto (Dark)";
             } else {
                 document.documentElement.classList.remove('dark');
                 sunIcon.classList.add('hidden');
                 moonIcon.classList.remove('hidden');
-                themeIndicator.textContent = isManual ? "Light Mode" : "Auto (Light)";
             }
         }
 
-        // Init Theme
-        applyTheme(userTheme === 'dark');
+        // Initialize theme on load based on saved setting or fallback
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(savedTheme === 'dark');
 
-        // Listen for manual theme toggles
+        // Listen for user click interaction
         themeToggleBtn.addEventListener('click', () => {
             const isCurrentlyDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isCurrentlyDark ? 'light' : 'dark');
-            applyTheme(!isCurrentlyDark, true);
+            const nextTheme = isCurrentlyDark ? 'light' : 'dark';
+            localStorage.setItem('theme', nextTheme);
+            applyTheme(nextTheme === 'dark');
         });
 
 
@@ -244,20 +246,18 @@
             "tasks.html"
         ];
 
-        // Generate a nice soft-colored background for app circular icons
+        // Modern, premium light/dark dynamic pastel gradients for high legibility
         const iconGradients = [
-            "from-blue-400 to-blue-600",
-            "from-red-400 to-red-600",
-            "from-yellow-400 to-yellow-600",
-            "from-green-400 to-green-600",
-            "from-indigo-400 to-indigo-600",
-            "from-purple-400 to-purple-600",
-            "from-pink-400 to-pink-600",
-            "from-teal-400 to-teal-600"
+            "from-blue-500/10 to-indigo-600/20 dark:from-blue-500/20 dark:to-indigo-600/40 border-blue-500/20 dark:border-blue-500/30 text-blue-600 dark:text-blue-400",
+            "from-rose-500/10 to-red-600/20 dark:from-rose-500/20 dark:to-red-600/40 border-rose-500/20 dark:border-rose-500/30 text-rose-600 dark:text-rose-400",
+            "from-amber-500/10 to-yellow-600/20 dark:from-amber-500/20 dark:to-yellow-600/40 border-amber-500/20 dark:border-amber-500/30 text-amber-600 dark:text-amber-400",
+            "from-emerald-500/10 to-teal-600/20 dark:from-emerald-500/20 dark:to-teal-600/40 border-emerald-500/20 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
+            "from-violet-500/10 to-purple-600/20 dark:from-violet-500/20 dark:to-purple-600/40 border-violet-500/20 dark:border-violet-500/30 text-violet-600 dark:text-violet-400",
+            "from-cyan-500/10 to-blue-600/20 dark:from-cyan-500/20 dark:to-blue-600/40 border-cyan-500/20 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400",
+            "from-fuchsia-500/10 to-pink-600/20 dark:from-fuchsia-500/20 dark:to-pink-600/40 border-fuchsia-500/20 dark:border-fuchsia-500/30 text-fuchsia-600 dark:text-fuchsia-400"
         ];
 
         function getAppTitle(fileName) {
-            // Converts "my-cool-app.html" to "My Cool App"
             return fileName
                 .replace('.html', '')
                 .split(/[-_]/)
@@ -265,13 +265,11 @@
                 .join(' ');
         }
 
-        // Handles conditional visibility of launcher button and bottom directory section
         function updateUIVisibility() {
             const appsSection = document.getElementById('apps-section');
             const appLauncherBtn = document.getElementById('app-launcher-btn');
 
             if (loadedApps.length === 0) {
-                // If there's nothing found in the apps folder, completely hide directory UI
                 appsSection.classList.add('hidden');
                 appLauncherBtn.classList.add('hidden');
             } else {
@@ -297,18 +295,16 @@
                 const firstLetter = title.charAt(0).toUpperCase();
                 const gradient = iconGradients[index % iconGradients.length];
 
-                // Shortcut Card Bubble
                 const card = document.createElement('a');
                 card.href = `/apps/${app}`;
-                card.className = "flex flex-col items-center group/card p-3 rounded-2xl hover:bg-googleGray-100 dark:hover:bg-googleGray-800 transition duration-150 text-center";
+                card.className = "flex flex-col items-center group/card p-4 rounded-2xl bg-white/80 dark:bg-darkCard/40 border border-lightBorder dark:border-darkBorder hover:border-indigo-500/30 dark:hover:border-indigo-400/30 hover:bg-white dark:hover:bg-darkCard shadow-sm hover:shadow-lg dark:hover:shadow-indigo-500/5 transition-all duration-300 text-center relative overflow-hidden";
                 
                 card.innerHTML = `
-                    <!-- Circular Icon container -->
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr ${gradient} text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-sm group-hover/card:scale-105 transition duration-150 select-none">
+                    <div class="absolute -top-12 -left-12 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl group-hover/card:bg-indigo-500/10 transition-all"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-tr ${gradient} border flex items-center justify-center font-semibold text-lg sm:text-xl shadow-inner group-hover/card:scale-105 transition-all duration-300 select-none">
                         ${firstLetter}
                     </div>
-                    <!-- Label -->
-                    <span class="mt-3 text-xs sm:text-sm font-medium tracking-tight text-googleGray-700 dark:text-googleGray-200 group-hover/card:underline truncate max-w-full px-1">
+                    <span class="mt-3.5 text-xs sm:text-sm font-semibold tracking-tight text-zinc-700 dark:text-zinc-200 group-hover/card:text-indigo-600 dark:group-hover/card:text-indigo-400 transition-colors truncate max-w-full px-1">
                         ${title}
                     </span>
                 `;
@@ -317,7 +313,6 @@
             });
         }
 
-        // Render the 9-dot launcher workspace dropdown
         function renderLauncherDropdown(appsToRender) {
             const dropdownGrid = document.getElementById('dropdown-apps-grid');
             dropdownGrid.innerHTML = '';
@@ -329,13 +324,13 @@
 
                 const link = document.createElement('a');
                 link.href = `/apps/${app}`;
-                link.className = "flex flex-col items-center p-2 rounded-xl hover:bg-googleGray-100 dark:hover:bg-googleGray-700 transition text-center group";
+                link.className = "flex flex-col items-center p-2.5 rounded-xl border border-transparent hover:border-lightBorder dark:hover:border-darkBorder hover:bg-lightBg dark:hover:bg-darkBg/50 transition-all duration-200 text-center group";
 
                 link.innerHTML = `
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr ${gradient} text-white flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-105 transition">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-tr ${gradient} border flex items-center justify-center font-bold text-sm shadow-inner group-hover:scale-105 transition duration-200">
                         ${firstLetter}
                     </div>
-                    <span class="mt-1.5 text-[11px] font-medium text-gray-700 dark:text-gray-200 truncate w-full px-1">
+                    <span class="mt-2 text-[11px] font-medium text-zinc-700 dark:text-zinc-200 truncate w-full px-1">
                         ${title}
                     </span>
                 `;
@@ -343,7 +338,7 @@
             });
         }
 
-        // Load files from JSON, hide UI if it fails/is empty
+        // Fetch application registry
         fetch('/apps-list.json')
             .then(res => {
                 if (!res.ok) throw new Error("Manifest not found.");
@@ -357,13 +352,12 @@
                 renderLauncherDropdown(loadedApps);
             })
             .catch(() => {
-                // Determine if we show fallbacks locally
                 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
                 if (isLocalhost) {
                     document.getElementById('setup-warning').classList.remove('hidden');
                     loadedApps = fallbackApps;
                 } else {
-                    loadedApps = []; // empty on prod if JSON is absent -> keeps hub looking super clean!
+                    loadedApps = [];
                 }
                 currentlyFilteredApps = [...loadedApps];
                 updateUIVisibility();
@@ -398,7 +392,6 @@
             toggleDropdown();
         });
 
-        // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!launcherDropdown.contains(e.target) && e.target !== launcherBtn) {
                 launcherDropdown.classList.remove('opacity-100', 'scale-100');
@@ -416,7 +409,6 @@
         const dropdownResults = document.getElementById('search-results-dropdown');
         const resultsContainer = document.getElementById('dropdown-results-container');
 
-        // Helper to render Autocomplete Results inside the dropdown box
         function renderAutocompleteDropdown(matches, isSearching = false) {
             resultsContainer.innerHTML = '';
             
@@ -425,9 +417,8 @@
                 return;
             }
 
-            // Optional: Header section for clarity (Recommended vs Search matches)
             const header = document.createElement('div');
-            header.className = "text-[11px] font-bold text-gray-400 dark:text-gray-500 px-4 py-1.5 uppercase tracking-wider select-none";
+            header.className = "text-[10px] font-bold text-zinc-400 dark:text-zinc-500 px-4 py-2 uppercase tracking-widest select-none";
             header.textContent = isSearching ? "Search Results" : "Quick Suggestions";
             resultsContainer.appendChild(header);
 
@@ -436,15 +427,11 @@
                 
                 const item = document.createElement('a');
                 item.href = `/apps/${app}`;
-                item.className = "flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-googleGray-700 transition duration-100 cursor-pointer";
+                item.className = "flex items-center px-4 py-3 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/70 transition duration-150 cursor-pointer border-l-2 border-transparent hover:border-indigo-600 dark:hover:border-indigo-400";
                 
                 item.innerHTML = `
-                    <!-- Clock/Search mini icon -->
-                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <!-- Label -->
-                    <div class="text-sm font-medium text-googleGray-900 dark:text-googleGray-100 truncate">
+                    <div class="w-2 h-2 rounded-full bg-indigo-500/40 mr-4 flex-shrink-0"></div>
+                    <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                         ${title}
                     </div>
                 `;
@@ -455,18 +442,15 @@
             dropdownResults.classList.remove('hidden');
         }
 
-        // Show dropdown instantly when focused
         searchInput.addEventListener('focus', () => {
             const query = searchInput.value.toLowerCase().trim();
             if (query.length > 0) {
                 renderAutocompleteDropdown(currentlyFilteredApps, true);
             } else {
-                // Show default loaded applications if nothing is written yet
                 renderAutocompleteDropdown(loadedApps, false);
             }
         });
 
-        // Listen for input changes in the search input
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
 
@@ -474,26 +458,20 @@
                 clearBtn.classList.remove('hidden');
             } else {
                 clearBtn.classList.add('hidden');
-                // Automatically display all options again
                 renderAutocompleteDropdown(loadedApps, false);
                 renderApps(loadedApps);
                 return;
             }
 
-            // Filter lists based on input matches
             currentlyFilteredApps = loadedApps.filter(app => {
                 const title = getAppTitle(app).toLowerCase();
                 return title.includes(query) || app.toLowerCase().includes(query);
             });
 
-            // Update bottom shortcuts grid
             renderApps(currentlyFilteredApps);
-
-            // Update autocomplete drop-down list
             renderAutocompleteDropdown(currentlyFilteredApps, true);
         });
 
-        // Clear Search functionality
         clearBtn.addEventListener('click', () => {
             searchInput.value = '';
             clearBtn.classList.add('hidden');
@@ -503,14 +481,12 @@
             searchInput.focus();
         });
 
-        // Launch first result on "Enter" key press
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && currentlyFilteredApps.length > 0) {
                 window.location.href = `/apps/${currentlyFilteredApps[0]}`;
             }
         });
 
-        // Close search suggestion dropdown when clicking anywhere else
         document.addEventListener('click', (e) => {
             const searchContainer = document.getElementById('search-container');
             if (!searchContainer.contains(e.target)) {
@@ -518,7 +494,6 @@
             }
         });
 
-        // Focus search box with '/' and close/unfocus with 'Escape'
         window.addEventListener('keydown', (e) => {
             if (e.key === '/' && document.activeElement !== searchInput) {
                 e.preventDefault();
