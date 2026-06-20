@@ -26,7 +26,7 @@
                         excelGreen: '#107c41',
                         excelGreenHover: '#0b5931',
                         darkBg: '#101010', // Deep black background
-                        darkCard: '#18181b', // Card background
+                        darkCard: '#18181b', // Dark card
                         darkBorder: '#27272a', // Subtle dark borders
                         lightBg: '#f3f2f1', // Classic Excel high-contrast light gray
                         lightCard: '#ffffff', // Crisp white sheet cells
@@ -45,14 +45,30 @@
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             transition: background-color 0.2s ease, color 0.2s ease;
         }
+        
+        /* CSS Variable columns for dynamic sizing/auto-fitting */
+        :root {
+            --col-a: 180px;
+            --col-b: 110px;
+            --col-c: 120px;
+            --col-d: 110px;
+            --col-e: 110px;
+            --col-f: 90px;
+            --col-g: 100px;
+            --col-h: 110px;
+            --col-i: 90px;
+            --col-j: 110px;
+            --col-k: 110px;
+        }
+        
         .excel-grid {
-            grid-template-columns: 40px repeat(11, minmax(130px, 1fr));
+            grid-template-columns: 40px var(--col-a) var(--col-b) var(--col-c) var(--col-d) var(--col-e) var(--col-f) var(--col-g) var(--col-h) var(--col-i) var(--col-j) var(--col-k);
         }
         /* Excel style table gridlines */
         .excel-cell {
             border-bottom: 1px solid #cbd5e1;
             border-right: 1px solid #cbd5e1;
-            transition: background-color 0.15s ease;
+            transition: background-color 0.1s ease;
         }
         .dark .excel-cell {
             border-bottom: 1px solid #27272a;
@@ -67,7 +83,7 @@
         }
     </style>
 </head>
-<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 h-screen flex flex-col overflow-hidden">
+<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 h-screen flex flex-col overflow-hidden select-none">
 
     <!-- Excel Header Bar -->
     <header class="bg-[#107c41] text-white h-12 flex items-center justify-between px-4 shrink-0 select-none z-20">
@@ -84,11 +100,11 @@
             <!-- Theme Toggle Button inside Excel Header -->
             <button id="theme-toggle" class="p-1.5 rounded bg-white/10 hover:bg-white/20 transition-all focus:outline-none flex items-center justify-center cursor-pointer" aria-label="Toggle Theme">
                 <!-- Sun Icon -->
-                <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-300 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
                 <!-- Moon Icon -->
-                <svg id="theme-toggle-moon-icon" class="hidden w-4.5 h-4.5 text-zinc-100" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <svg id="theme-toggle-moon-icon" class="hidden w-4.5 h-4.5 text-zinc-100 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                 </svg>
             </button>
@@ -173,21 +189,38 @@
             <!-- Sticky Spreadsheet Header Row -->
             <div class="sticky top-0 left-0 right-0 z-10 bg-[#f3f2f1] dark:bg-[#1e1e21] text-xs font-semibold text-zinc-500 dark:text-zinc-400 flex items-center h-8 select-none border-b border-[#cbd5e1] dark:border-[#27272a]">
                 <!-- Row Number spacer cell -->
-                <div class="w-10 flex-shrink-0 text-center border-r border-[#cbd5e1] dark:border-[#27272a] h-full flex items-center justify-center"></div>
+                <div class="w-10 flex-shrink-0 text-center border-r border-[#cbd5e1] dark:border-[#27272a] h-full flex items-center justify-center bg-[#f3f2f1] dark:bg-[#1e1e21]"></div>
                 <!-- Column indicators -->
                 <div class="excel-grid grid flex-grow h-full items-center text-center">
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">A (Name)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">B (Short Name)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">C (Category)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">D (Base Price)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">E (Avg 24h)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">F (Weight)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">G (Caliber)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">H (Ergonomics)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">I (Recoil)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">J (Armor Class)</div>
-                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">K (Durability)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('name')">A (Name) <span id="sort-indicator-name" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('shortName')">B (Short Name) <span id="sort-indicator-shortName" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('category')">C (Category) <span id="sort-indicator-category" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('basePrice')">D (Base Price) <span id="sort-indicator-basePrice" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('avg24hPrice')">E (Avg 24h) <span id="sort-indicator-avg24hPrice" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('weight')">F (Weight) <span id="sort-indicator-weight" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('caliber')">G (Caliber) <span id="sort-indicator-caliber" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('ergonomics')">H (Ergo) <span id="sort-indicator-ergonomics" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('recoilVertical')">I (Recoil) <span id="sort-indicator-recoilVertical" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('class')">J (Class) <span id="sort-indicator-class" class="ml-1 text-[8px]"></span></div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800" onclick="sortSpreadsheet('durability')">K (Durability) <span id="sort-indicator-durability" class="ml-1 text-[8px]"></span></div>
                 </div>
+            </div>
+
+            <!-- Double click to auto-size columns bar helper notice (Decorative Excel line grid boundary indicators) -->
+            <div class="excel-grid grid w-full h-1 select-none pointer-events-none relative z-10">
+                <div class="h-full border-r border-[#cbd5e1] dark:border-[#27272a]"></div>
+                <!-- Double click areas to trigger auto-fit of columns -->
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit A" ondblclick="autoSizeColumn('col-a', 260)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit B" ondblclick="autoSizeColumn('col-b', 150)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit C" ondblclick="autoSizeColumn('col-c', 160)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit D" ondblclick="autoSizeColumn('col-d', 140)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit E" ondblclick="autoSizeColumn('col-e', 140)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit F" ondblclick="autoSizeColumn('col-f', 120)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit G" ondblclick="autoSizeColumn('col-g', 150)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit H" ondblclick="autoSizeColumn('col-h', 140)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit I" ondblclick="autoSizeColumn('col-i', 120)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit J" ondblclick="autoSizeColumn('col-j', 140)"></div>
+                <div class="h-full border-r-2 border-emerald-500/50 hover:border-emerald-500 cursor-col-resize pointer-events-auto" title="Double click to auto-fit K" ondblclick="autoSizeColumn('col-k', 140)"></div>
             </div>
 
             <!-- Spreadsheet Grid Rows container -->
@@ -202,14 +235,59 @@
             </div>
         </div>
 
-        <!-- Microsoft Excel Online Style Right-Side comparison Pane -->
+        <!-- Microsoft Excel Online Style Right-Side comparison & Inspector Pane -->
         <aside class="w-80 border-l border-[#cbd5e1] dark:border-darkBorder bg-[#faf9f8] dark:bg-darkCard/50 backdrop-blur-md flex flex-col shrink-0 overflow-y-auto">
+            
+            <!-- Item Inspector Section (Dynamic selection showcase) -->
             <div class="p-4 border-b border-[#cbd5e1] dark:border-darkBorder bg-zinc-100/50 dark:bg-zinc-800/20">
                 <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2">
-                    <span>⚖️</span>
-                    <span>Item Comparison Pane</span>
+                    <span>🔍</span>
+                    <span>Selected Item Inspector</span>
                 </h3>
-                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase tracking-wider">Spreadsheet formulas comparator</p>
+                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase tracking-wider">Spreadsheet row inspector</p>
+                
+                <!-- Inspector Card -->
+                <div id="inspector-card-container" class="mt-3 bg-white dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder rounded-xl p-3.5 shadow-sm">
+                    <div id="inspector-empty-state" class="text-center py-4 text-zinc-400 dark:text-zinc-500 text-[11px] leading-relaxed">
+                        Click on any cell inside a row to inspect its attributes here.
+                    </div>
+                    <div id="inspector-active-state" class="hidden flex flex-col space-y-2.5">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 p-1 flex items-center justify-center border border-[#cbd5e1] dark:border-darkBorder flex-shrink-0">
+                                <img id="inspector-icon" src="" alt="Icon" class="w-full h-full object-contain rounded-md" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=60'">
+                            </div>
+                            <div class="truncate">
+                                <h4 id="inspector-name" class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">M4A1 Assault Rifle</h4>
+                                <span id="inspector-category" class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Weapons</span>
+                            </div>
+                        </div>
+                        <div class="border-t border-zinc-100 dark:border-zinc-800 pt-2.5 space-y-1.5 text-[11px]">
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400">Base Price:</span>
+                                <span id="inspector-base-price" class="font-semibold">55,000 ₽</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400">Avg Market 24h:</span>
+                                <span id="inspector-avg-price" class="font-semibold">59,000 ₽</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400">Weight:</span>
+                                <span id="inspector-weight" class="font-semibold">3.1 kg</span>
+                            </div>
+                            <div id="inspector-extra-metrics" class="space-y-1.5 border-t border-dashed border-zinc-100 dark:border-zinc-800 pt-1.5">
+                                <!-- Tactical stats parsed depending on category -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Header -->
+            <div class="p-4 border-b border-[#cbd5e1] dark:border-darkBorder bg-zinc-100/30 dark:bg-zinc-800/10">
+                <h3 class="text-sm font-bold text-zinc-700 dark:text-zinc-300 flex items-center space-x-2">
+                    <span>⚖️</span>
+                    <span>Compare Selector</span>
+                </h3>
             </div>
 
             <!-- Comparison Selection Inputs -->
@@ -232,11 +310,11 @@
             </div>
 
             <!-- Interactive Comparison Results Card -->
-            <div id="comparison-results-box" class="flex-grow p-4 border-t border-[#cbd5e1] dark:border-darkBorder space-y-4">
+            <div id="comparison-results-box" class="flex-grow p-4 border-t border-[#cbd5e1] dark:border-darkBorder space-y-4 bg-zinc-50/50 dark:bg-zinc-900/10">
                 <!-- Default empty selection helper message -->
-                <div id="compare-empty-state" class="text-center py-12 text-zinc-400 dark:text-zinc-500 flex flex-col items-center">
+                <div id="compare-empty-state" class="text-center py-6 text-zinc-400 dark:text-zinc-500 flex flex-col items-center">
                     <span class="text-4xl mb-3">🧮</span>
-                    <h4 class="text-xs font-bold uppercase tracking-wider mb-1">Select Items to Compare</h4>
+                    <h4 class="text-xs font-bold uppercase tracking-wider mb-1">Spreadsheet formulas comparator</h4>
                     <p class="text-[11px] max-w-[200px] leading-relaxed">Choose two elements from the dropdowns above or double-click grid rows to analyze differences instantly!</p>
                 </div>
 
@@ -294,18 +372,28 @@
         </div>
     </footer>
 
+    <!-- Floating Mouse-Over Tooltip Preview Card -->
+    <div id="hover-tooltip" class="absolute pointer-events-none z-50 bg-white/95 dark:bg-darkCard/95 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3.5 shadow-2xl max-w-xs transition-opacity duration-200 opacity-0 text-xs flex flex-col space-y-1.5 backdrop-blur-md">
+        <!-- Filled dynamically during hover operations -->
+    </div>
+
     <script>
         // --- 1. SPREADSHEET DATABASES ---
         let itemsIndex = [];
         let activeSheetTab = 'all'; // 'all', 'weapons', 'armor'
         let selectedCellReference = "A1";
+        let selectedItemId = null; // Highlighting logic row reference ID
+
+        // Sorting state indicators
+        let activeSortCol = '';
+        let activeSortAsc = true;
 
         // Fallbacks for offline development (100% clean & age-appropriate details)
         const fallbackDatabase = [
-            { id: "1", name: "M4A1 5.56x45 assault rifle", shortName: "M4A1", basePrice: 55000, avg24hPrice: 59000, weight: 3.1, caliber: "5.56x45mm", ergonomics: 54, recoilVertical: 78, class: null, durability: null, category: "Weapons" },
-            { id: "2", name: "AK-74N 5.45x39 assault rifle", shortName: "AK-74N", basePrice: 38000, avg24hPrice: 39500, weight: 3.4, caliber: "5.45x39mm", ergonomics: 45, recoilVertical: 82, class: null, durability: null, category: "Weapons" },
-            { id: "3", name: "Altyn helmet (Olive)", shortName: "Altyn", basePrice: 120000, avg24hPrice: 155000, weight: 4.1, caliber: null, ergonomics: -15, recoilVertical: null, class: 5, durability: 45, category: "Armor" },
-            { id: "4", name: "6B43 Zabralo-Sh Body Armor", shortName: "Zabralo", basePrice: 280000, avg24hPrice: 340000, weight: 16.0, caliber: null, class: 6, durability: 85, category: "Armor" }
+            { id: "1", name: "M4A1 5.56x45 assault rifle", shortName: "M4A1", basePrice: 55000, avg24hPrice: 59000, weight: 3.1, caliber: "5.56x45mm", fireRate: 800, ergonomics: 54, recoilVertical: 78, class: null, durability: null, category: "Weapons" },
+            { id: "2", name: "AK-74N 5.45x39 assault rifle", shortName: "AK-74N", basePrice: 38000, avg24hPrice: 39500, weight: 3.4, caliber: "5.45x39mm", fireRate: 650, ergonomics: 45, recoilVertical: 82, class: null, durability: null, category: "Weapons" },
+            { id: "3", name: "Altyn helmet (Olive)", shortName: "Altyn", basePrice: 120000, avg24hPrice: 155000, weight: 4.1, caliber: null, fireRate: null, ergonomics: -15, recoilVertical: null, class: 5, durability: 45, category: "Armor" },
+            { id: "4", name: "6B43 Zabralo-Sh Body Armor", shortName: "Zabralo", basePrice: 280000, avg24hPrice: 340000, weight: 16.0, caliber: null, fireRate: null, ergonomics: null, recoilVertical: null, class: 6, durability: 85, category: "Armor" }
         ];
 
         // --- 1.5 LIGHT/DARK MODE IMPLEMENTATION ---
@@ -372,7 +460,6 @@
                 const response = await fetch('/api/tarkov-data');
                 if (response.ok) {
                     const json = await response.json();
-                    // Handle wrapped data schema differences gracefully
                     tarkovRawItems = json?.data?.pvp || json?.pvp || [];
                 } else {
                     throw new Error("Proxy offline");
@@ -421,7 +508,60 @@
             calculateSummaryStatistics();
         }
 
-        // --- 3. EXCEL SPREADSHEET ROW WRITERS ---
+        // --- 3. SORTING MECHANISM ---
+        function sortSpreadsheet(columnName) {
+            if (activeSortCol === columnName) {
+                activeSortAsc = !activeSortAsc; // Toggle order direction
+            } else {
+                activeSortCol = columnName;
+                activeSortAsc = true; // Ascending by default on new column
+            }
+
+            // Highlight sort headers visually
+            updateSortHeaderUI();
+
+            // Perform sort
+            itemsIndex.sort((a, b) => {
+                let valA = a[columnName];
+                let valB = b[columnName];
+
+                // Safely handle null/undefined sorting placement at the bottom
+                if (valA === null || valA === undefined) return 1;
+                if (valB === null || valB === undefined) return -1;
+
+                if (typeof valA === 'string' && typeof valB === 'string') {
+                    return activeSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                } else {
+                    return activeSortAsc ? valA - valB : valB - valA;
+                }
+            });
+
+            // Re-render
+            filterAndRenderSheet();
+        }
+
+        function updateSortHeaderUI() {
+            const columns = ['name', 'shortName', 'category', 'basePrice', 'avg24hPrice', 'weight', 'caliber', 'ergonomics', 'recoilVertical', 'class', 'durability'];
+            columns.forEach(col => {
+                const indicator = document.getElementById(`sort-indicator-${col}`);
+                if (indicator) {
+                    if (col === activeSortCol) {
+                        indicator.textContent = activeSortAsc ? '▲' : '▼';
+                        indicator.className = "ml-1 text-[8px] text-[#107c41] font-bold";
+                    } else {
+                        indicator.textContent = '';
+                    }
+                }
+            });
+        }
+
+        // --- 4. EXCEL AUTO-FIT COLUMNS COMPONENT ---
+        function autoSizeColumn(colVar, targetWidthPx) {
+            // Find root variables and adjust width dynamically
+            document.documentElement.style.setProperty(`--${colVar}`, `${targetWidthPx}px`);
+        }
+
+        // --- 5. EXCEL SPREADSHEET ROW WRITERS ---
         function filterAndRenderSheet() {
             const gridBody = document.getElementById('spreadsheet-grid-body');
             gridBody.innerHTML = '';
@@ -457,8 +597,16 @@
             filteredRows.forEach((row, idx) => {
                 const rowNum = idx + 1;
                 const rowDiv = document.createElement('div');
-                rowDiv.className = "flex items-center hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 border-b border-[#cbd5e1] dark:border-[#27272a] h-8 relative select-all";
                 
+                // Active file explorer selection highlight classes
+                const isSelected = row.id === selectedItemId;
+                const highlightClass = isSelected 
+                    ? "bg-emerald-50/70 dark:bg-emerald-950/20 border-y border-emerald-500/40 dark:border-emerald-500/50" 
+                    : "border-b border-[#cbd5e1] dark:border-[#27272a] hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30";
+
+                rowDiv.className = `flex items-center h-8 relative select-all transition-colors duration-100 ${highlightClass}`;
+                
+                // Correct cell selection handling: marks cell reference, active content AND highlights ONLY row background (no text highlights)
                 rowDiv.innerHTML = `
                     <!-- Row Indicator Header -->
                     <div class="w-10 flex-shrink-0 text-center border-r border-[#cbd5e1] dark:border-[#27272a] bg-[#f3f2f1] dark:bg-[#1e1e21] text-zinc-400 font-bold select-none h-full flex items-center justify-center">
@@ -467,17 +615,17 @@
                     
                     <!-- Excel Row Columns Cells -->
                     <div class="excel-grid grid flex-grow h-full items-center text-left">
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('A${rowNum}', '${row.name.replace(/'/g, "\\'")}')">${row.name}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('B${rowNum}', '${row.shortName.replace(/'/g, "\\'")}')">${row.shortName}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('C${rowNum}', '${row.category}')">${row.category}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('D${rowNum}', '=VAL(${row.basePrice})')">${row.basePrice > 0 ? row.basePrice.toLocaleString() + ' ₽' : '-'}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('E${rowNum}', '=VAL(${row.avg24hPrice})')">${row.avg24hPrice > 0 ? row.avg24hPrice.toLocaleString() + ' ₽' : '-'}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('F${rowNum}', '=VAL(${row.weight})')">${row.weight ? row.weight + ' kg' : '-'}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('G${rowNum}', '${row.caliber || '-'}')">${row.caliber || '-'}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('H${rowNum}', '${row.ergonomics !== null ? row.ergonomics : '-'}')">${row.ergonomics !== null ? row.ergonomics : '-'}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('I${rowNum}', '${row.recoilVertical !== null ? row.recoilVertical : '-'}')">${row.recoilVertical !== null ? row.recoilVertical : '-'}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('J${rowNum}', '${row.class !== null ? row.class : '-'}')">${row.class !== null ? row.class : '-'}</div>
-                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('K${rowNum}', '${row.durability !== null ? row.durability : '-'}')">${row.durability !== null ? row.durability : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'A${rowNum}', '${row.name.replace(/'/g, "\\'")}')">${row.name}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'B${rowNum}', '${row.shortName.replace(/'/g, "\\'")}')">${row.shortName}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'C${rowNum}', '${row.category}')">${row.category}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'D${rowNum}', '=VAL(${row.basePrice})')">${row.basePrice > 0 ? row.basePrice.toLocaleString() + ' ₽' : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'E${rowNum}', '=VAL(${row.avg24hPrice})')">${row.avg24hPrice > 0 ? row.avg24hPrice.toLocaleString() + ' ₽' : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'F${rowNum}', '=VAL(${row.weight})')">${row.weight ? row.weight + ' kg' : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'G${rowNum}', '${row.caliber || '-'}')">${row.caliber || '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'H${rowNum}', '${row.ergonomics !== null ? row.ergonomics : '-'}')">${row.ergonomics !== null ? row.ergonomics : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'I${rowNum}', '${row.recoilVertical !== null ? row.recoilVertical : '-'}')">${row.recoilVertical !== null ? row.recoilVertical : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'J${rowNum}', '${row.class !== null ? row.class : '-'}')">${row.class !== null ? row.class : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'K${rowNum}', '${row.durability !== null ? row.durability : '-'}')">${row.durability !== null ? row.durability : '-'}</div>
                     </div>
                 `;
 
@@ -486,11 +634,16 @@
                     loadIntoCompareDropdowns(row);
                 });
 
+                // Attach mouse-over popup handlers (Instant preview)
+                rowDiv.addEventListener('mouseenter', (e) => startHoverTooltip(e, row));
+                rowDiv.addEventListener('mousemove', positionHoverTooltip);
+                rowDiv.addEventListener('mouseleave', cancelHoverTooltip);
+
                 gridBody.appendChild(rowDiv);
             });
         }
 
-        // --- 4. EXCEL COMPILER & COMPARATOR ENGINE ---
+        // --- 6. EXCEL COMPILER & COMPARATOR ENGINE ---
         function populateComparisonSelects() {
             const selectA = document.getElementById('compare-select-a');
             const selectB = document.getElementById('compare-select-b');
@@ -527,9 +680,109 @@
             executeSpreadsheetComparison();
         }
 
-        function selectExcelCell(ref, val) {
+        // Integrated selection wrapper mapping row background highlights AND details inspector
+        function selectExcelRow(rowId, ref, cellVal) {
+            // Update spreadsheet selections indicators
+            selectedCellReference = ref;
+            selectedItemId = rowId;
+
             document.getElementById('active-cell-indicator').textContent = ref;
-            document.getElementById('excel-formula-input').value = val;
+            document.getElementById('excel-formula-input').value = cellVal;
+
+            // Retain only row highlights (File Explorer design) by re-rendering spreadsheet indices
+            const gridBody = document.getElementById('spreadsheet-grid-body');
+            const rows = gridBody.children;
+            const itemsInSheet = itemsIndex; // Ref map
+
+            filterAndRenderSheet();
+
+            // Populate the active Item Inspector panel Card
+            const selectedItem = itemsIndex.find(item => item.id === rowId);
+            if (selectedItem) {
+                populateInspectorCard(selectedItem);
+            }
+        }
+
+        // Inspector Card renderer
+        function populateInspectorCard(item) {
+            const emptyState = document.getElementById('inspector-empty-state');
+            const activeState = document.getElementById('inspector-active-state');
+            const activeImg = document.getElementById('inspector-icon');
+
+            emptyState.classList.add('hidden');
+            activeState.classList.remove('hidden');
+
+            // Set content
+            document.getElementById('inspector-name').textContent = item.name;
+            document.getElementById('inspector-category').textContent = item.category;
+            document.getElementById('inspector-base-price').textContent = item.basePrice > 0 ? item.basePrice.toLocaleString() + ' ₽' : 'N/A';
+            document.getElementById('inspector-avg-price').textContent = item.avg24hPrice > 0 ? item.avg24hPrice.toLocaleString() + ' ₽' : 'N/A';
+            document.getElementById('inspector-weight').textContent = item.weight > 0 ? item.weight + ' kg' : 'N/A';
+
+            // Safe avatar resolution
+            activeImg.src = item.iconLink || 'https://via.placeholder.com/48?text=No+Image';
+
+            const extraMetrics = document.getElementById('inspector-extra-metrics');
+            let html = '';
+
+            if (item.caliber || item.ergonomics !== null || item.recoilVertical !== null) {
+                if (item.caliber) html += `<div class="flex justify-between"><span class="text-zinc-400">Caliber:</span><span class="font-semibold text-emerald-600 dark:text-emerald-400">${item.caliber}</span></div>`;
+                if (item.fireRate) html += `<div class="flex justify-between"><span class="text-zinc-400">Fire Rate:</span><span class="font-semibold">${item.fireRate} RPM</span></div>`;
+                if (item.ergonomics) html += `<div class="flex justify-between"><span class="text-zinc-400">Ergonomics:</span><span class="font-semibold">${item.ergonomics}</span></div>`;
+                if (item.recoilVertical) html += `<div class="flex justify-between"><span class="text-zinc-400">Vertical Recoil:</span><span class="font-semibold">${item.recoilVertical}</span></div>`;
+            } else if (item.class !== null || item.durability !== null) {
+                if (item.class) html += `<div class="flex justify-between"><span class="text-zinc-400">Armor Class:</span><span class="font-semibold text-emerald-600 dark:text-emerald-400">Class ${item.class}</span></div>`;
+                if (item.durability) html += `<div class="flex justify-between"><span class="text-zinc-400">Durability:</span><span class="font-semibold">${item.durability}</span></div>`;
+            }
+
+            extraMetrics.innerHTML = html || `<div class="text-[10px] text-zinc-400 italic">No extra tactical attributes listed.</div>`;
+        }
+
+        // --- 7. INTERACTIVE MOUSE HOVER PREVIEW ---
+        const tooltip = document.getElementById('hover-tooltip');
+
+        function startHoverTooltip(e, item) {
+            positionHoverTooltip(e);
+            tooltip.classList.remove('opacity-0');
+            tooltip.classList.add('opacity-100');
+
+            const iconUrl = item.iconLink || 'https://via.placeholder.com/48?text=No+Image';
+
+            // Construct quick metrics summary card
+            tooltip.innerHTML = `
+                <div class="flex items-center space-x-2 pb-2 border-b border-lightBorder dark:border-darkBorder">
+                    <img src="${iconUrl}" alt="icon" class="w-8 h-8 object-contain rounded" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=60'">
+                    <div class="truncate">
+                        <h4 class="font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.shortName}</h4>
+                        <span class="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">${item.category}</span>
+                    </div>
+                </div>
+                <div class="pt-1.5 space-y-1 text-[10px] text-zinc-500 dark:text-zinc-400">
+                    <div class="flex justify-between"><span>Base:</span><span class="font-semibold text-zinc-700 dark:text-zinc-200">${item.basePrice > 0 ? item.basePrice.toLocaleString() + ' ₽' : '-'}</span></div>
+                    <div class="flex justify-between"><span>Weight:</span><span class="font-semibold text-zinc-700 dark:text-zinc-200">${item.weight} kg</span></div>
+                    ${item.caliber ? `<div class="flex justify-between"><span>Caliber:</span><span class="font-semibold text-emerald-600">${item.caliber}</span></div>` : ''}
+                    ${item.class ? `<div class="flex justify-between"><span>Armor:</span><span class="font-semibold text-emerald-600">Class ${item.class}</span></div>` : ''}
+                </div>
+            `;
+        }
+
+        function positionHoverTooltip(e) {
+            const cardWidth = 224; // standard tooltip size
+            const viewportWidth = window.innerWidth;
+            let left = e.pageX + 15;
+            let top = e.pageY + 15;
+
+            if (left + cardWidth > viewportWidth) {
+                left = e.pageX - cardWidth - 15;
+            }
+
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+        }
+
+        function cancelHoverTooltip() {
+            tooltip.classList.remove('opacity-100');
+            tooltip.classList.add('opacity-0');
         }
 
         function executeSpreadsheetComparison() {
@@ -548,7 +801,6 @@
             emptyState.classList.add('hidden');
             dataState.classList.remove('hidden');
 
-            // Corrected selector lookup utilizing itemsIndex list safely
             const itemA = itemsIndex.find(i => i.id === idA);
             const itemB = itemsIndex.find(i => i.id === idB);
 
