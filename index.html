@@ -93,7 +93,7 @@
                 </svg>
             </button>
 
-            <!-- Workspace Apps Launcher Icon (9-Dot Menu) -->
+            <!-- Workspace Workspace Apps Launcher Icon (9-Dot Menu) -->
             <div class="relative">
                 <button id="app-launcher-btn" class="hidden p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Apps Menu">
                     <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-300 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
@@ -113,7 +113,7 @@
     </header>
 
     <!-- Main Content Container -->
-    <main class="flex-grow flex flex-col items-center justify-start px-4 pt-10 sm:pt-16 relative z-10">
+    <main class="flex-grow flex flex-col items-center justify-start px-4 pt-10 sm:pt-16 relative z-10 w-full max-w-4xl mx-auto">
         
         <!-- Fraagle Logo Placeholder -->
         <div class="mb-6 select-none text-center">
@@ -129,7 +129,7 @@
         </div>
 
         <!-- Sleek Search Box Wrapper with Ambient Shadows -->
-        <div class="w-full max-w-[584px] mb-12 relative group" id="search-container">
+        <div class="w-full max-w-[584px] mb-8 relative group" id="search-container">
             <div class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white/90 dark:bg-darkCard/70 backdrop-blur-md focus-within:bg-white dark:focus-within:bg-darkCard/90 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 focus-within:shadow-xl focus-within:shadow-indigo-500/10 focus-within:border-indigo-500/50 dark:focus-within:border-indigo-400/50 transition-all duration-300">
                 <!-- Search Icon -->
                 <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,14 +160,56 @@
             </div>
 
             <!-- Autocomplete Search Results Dropdown -->
-            <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-3 bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl overflow-hidden z-40 max-h-72 overflow-y-auto backdrop-blur-xl transition duration-150 transform scale-100">
+            <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-3 bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl overflow-hidden z-40 max-h-80 overflow-y-auto backdrop-blur-xl transition duration-150 transform scale-100">
                 <div id="dropdown-results-container" class="py-2">
                     <!-- Matches appear here -->
                 </div>
             </div>
         </div>
 
-        <!-- Apps Presentation Grid wrapped in a container that can be hidden -->
+        <!-- Google-Style Search Results Dashboard (Hidden by default) -->
+        <div id="google-results-view" class="hidden w-full max-w-2xl px-2 mb-12">
+            <!-- Battlestate Games Channels Bar placed at the top of the search site, right below the search bar -->
+            <div id="bsg-channels-bar" class="hidden mb-4 p-4 rounded-2xl bg-white/80 dark:bg-darkCard/40 border border-lightBorder dark:border-darkBorder shadow-sm backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span class="text-xs uppercase font-semibold tracking-wider text-zinc-500 dark:text-zinc-400 select-none">Official Battlestate Games Channels</span>
+                <div class="flex items-center space-x-5 text-zinc-500 dark:text-zinc-400">
+                    <!-- Twitch -->
+                    <a href="https://www.twitch.tv/battlestategames" target="_blank" title="BSG Twitch" class="hover:text-purple-500 transition-colors">
+                        <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+                        </svg>
+                    </a>
+                    <!-- YouTube -->
+                    <a href="https://www.youtube.com/battlestategames" target="_blank" title="BSG YouTube" class="hover:text-red-500 transition-colors">
+                        <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5 12 3.5 12 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                    </a>
+                    <!-- Twitter / X -->
+                    <a href="https://twitter.com/bstategames" target="_blank" title="BSG Twitter" class="hover:text-sky-500 dark:hover:text-zinc-100 transition-colors">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 7.56 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.085L1.254 2.25h6.8l4.8 6.35 5.39-6.35zM15.902 19.77h1.832L7.284 4.59H5.318L15.902 19.77z"/>
+                        </svg>
+                    </a>
+                    <!-- Reddit -->
+                    <a href="https://www.reddit.com/r/escapefromtarkov/" target="_blank" title="Reddit r/escapefromtarkov" class="hover:text-orange-500 transition-colors">
+                        <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 11.5c0-1.65-1.35-3-3-3-.96 0-1.86.48-2.42 1.24-1.64-1-3.85-1.64-6.29-1.72l1.35-4.24 3.71.79c.04.97.86 1.75 1.86 1.75 1.02 0 1.85-.83 1.85-1.85s-.83-1.85-1.85-1.85c-.86 0-1.58.59-1.78 1.39l-4.14-.88c-.22-.05-.44.08-.51.29l-1.62 5.09c-2.47.04-4.71.69-6.39 1.71C4.41 8.99 3.5 8.5 2.5 8.5c-1.65 0-3 1.35-3 3 0 1.13.56 2.11 1.41 2.69-.06.26-.09.53-.09.81 0 3.86 4.43 7 9.88 7 5.46 0 9.88-3.14 9.88-7 0-.28-.03-.55-.09-.8.82-.57 1.38-1.55 1.38-2.69zM5.5 13.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm11.5 4.5c-1.84 1.84-5.16 1.84-7 0-.19-.19-.19-.51 0-.7.19-.19.51-.19.7 0 1.46 1.46 4.14 1.46 5.6 0 .19-.19.51-.19.7 0 .19.2.19.51 0 .7zm-1.5-6c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 flex items-center justify-between">
+                <span id="results-meta-text">About 0 results (0.00 seconds)</span>
+                <button id="results-close-btn" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">Clear Search</button>
+            </div>
+            <div id="google-results-container" class="space-y-6">
+                <!-- Search entries populate here dynamically -->
+            </div>
+        </div>
+
+        <!-- Default Shortcuts Presentation Grid wrapped in a container that can be hidden -->
         <div id="apps-section" class="hidden w-full max-w-4xl px-4 mb-8">
             <!-- Dynamic Grid Target -->
             <div id="apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-5 justify-center">
@@ -193,6 +235,11 @@
         </div>
 
     </main>
+
+    <!-- Floating Hover Detail Preview Card (translucent glass design) -->
+    <div id="hover-preview-card" class="hidden absolute pointer-events-none z-50 bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl p-4 shadow-2xl max-w-sm w-72 backdrop-blur-xl transition-all duration-150 transform scale-100">
+        <!-- Loading spinner templates or populated content rendering -->
+    </div>
 
     <script>
         // --- 1. THEME TOGGLING ENGINE ---
@@ -225,12 +272,13 @@
         });
 
 
-        // --- 2. APPS RETRIEVAL, VISIBILITY & REGISTRY ---
-        let loadedApps = [];
-        let currentlyFilteredApps = [];
+        // --- 2. EXTENSIBLE UNIFIED SEARCH INDEX SYSTEM ---
+        let searchIndex = [];
+        let currentlyFilteredApps = []; // For bottom grid view
+        let localAppsRawList = [];      // Raw copy of dashboard apps
 
-        // Pre-defined fallback apps if app-list.json is missing
-        const fallbackApps = [
+        // Default local fallback dashboard apps if app-list.json is missing
+        const fallbackAppsList = [
             "analytics.html",
             "dashboard.html",
             "editor.html",
@@ -241,7 +289,7 @@
             "tasks.html"
         ];
 
-        // Modern, premium light/dark dynamic pastel gradients for high legibility
+        // Modern, premium light/dark dynamic pastel gradients for icons
         const iconGradients = [
             "from-blue-500/10 to-indigo-600/20 dark:from-blue-500/20 dark:to-indigo-600/40 border-blue-500/20 dark:border-blue-500/30 text-blue-600 dark:text-blue-400",
             "from-rose-500/10 to-red-600/20 dark:from-rose-500/20 dark:to-red-600/40 border-rose-500/20 dark:border-rose-500/30 text-rose-600 dark:text-rose-400",
@@ -264,7 +312,7 @@
             const appsSection = document.getElementById('apps-section');
             const appLauncherBtn = document.getElementById('app-launcher-btn');
 
-            if (loadedApps.length === 0) {
+            if (localAppsRawList.length === 0) {
                 appsSection.classList.add('hidden');
                 appLauncherBtn.classList.add('hidden');
             } else {
@@ -273,6 +321,209 @@
             }
         }
 
+        // Helper to fetch directly from Tarkov GraphQL with global error shielding
+        async function fetchTarkovGraphQL(query) {
+            try {
+                const response = await fetch('https://api.tarkov.dev/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                if (!response.ok) return null;
+                const json = await response.json();
+                if (json.errors && json.errors.length > 0) {
+                    console.warn("GraphQL reported error logs:", json.errors);
+                }
+                return json.data;
+            } catch (err) {
+                console.error("Direct GraphQL request failed:", err);
+                return null;
+            }
+        }
+
+        // --- LOAD CORES ---
+        async function initializeHubData() {
+            // 1. Fetch Local Dashboard apps
+            try {
+                const res = await fetch('/app-list.json');
+                if (!res.ok) throw new Error();
+                localAppsRawList = await res.json();
+            } catch (err) {
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                if (isLocalhost) {
+                    document.getElementById('setup-warning').classList.remove('hidden');
+                    localAppsRawList = fallbackAppsList;
+                } else {
+                    localAppsRawList = [];
+                }
+            }
+
+            // Append Local Apps to the Unified Search Index
+            localAppsRawList.forEach(app => {
+                const title = getAppTitle(app);
+                searchIndex.push({
+                    id: `app-${app}`,
+                    title: title,
+                    type: 'app',
+                    url: `/apps/${app}`,
+                    description: `Launch local workspace application: ${title}. Run locally at Fraagle Hub directory, clean custom HTML logic.`,
+                    category: 'Workspace App'
+                });
+            });
+
+            // Set default grid lists
+            currentlyFilteredApps = [...localAppsRawList];
+            updateUIVisibility();
+            renderApps(localAppsRawList);
+            renderLauncherDropdown(localAppsRawList);
+
+            // 2. Load Tarkov Dev Cached Data (Ingested safely in isolated steps)
+            loadTarkovItems();
+        }
+
+        async function loadTarkovItems() {
+            let items = [];
+            let traders = [];
+            let tasks = [];
+
+            // Step 1: Ingest items either via the Vercel proxy api endpoint or fallback directly
+            try {
+                const response = await fetch('/api/tarkov-data');
+                if (response.ok) {
+                    const json = await response.json();
+                    items = json?.data?.pvp || [];
+                    console.log("Loaded Tarkov items from proxy endpoint:", items.length);
+                } else {
+                    throw new Error("Proxy response failed");
+                }
+            } catch (e) {
+                console.log("Proxy endpoint is offline or unavailable. Directing fallback query...");
+                const fallbackItemsQuery = `query {
+                    pvp: items(lang: en, gameMode: regular) {
+                        id name shortName wikiLink iconLink basePrice weight avg24hPrice category { name }
+                        properties { __typename
+                            ... on ItemPropertiesWeapon { caliber fireRate }
+                            ... on ItemPropertiesArmor { class durability }
+                        }
+                    }
+                }`;
+                const data = await fetchTarkovGraphQL(fallbackItemsQuery);
+                items = data?.pvp || [];
+                console.log("Loaded items directly from tarkov.dev:", items.length);
+            }
+
+            // Step 2: Safely ingest traders in an isolated background request
+            try {
+                const fallbackTradersQuery = `query {
+                    traders(lang: en) {
+                        id name imageLink wikiLink description
+                    }
+                }`;
+                const data = await fetchTarkovGraphQL(fallbackTradersQuery);
+                traders = data?.traders || [];
+                console.log("Loaded traders directly:", traders.length);
+            } catch (e) {
+                console.warn("Failed to load traders background query safely.");
+            }
+
+            // Step 3: Safely ingest quests in an isolated background request
+            try {
+                const fallbackQuestsQuery = `query {
+                    tasks(lang: en) {
+                        id name wikiLink minPlayerLevel trader { name }
+                    }
+                }`;
+                const data = await fetchTarkovGraphQL(fallbackQuestsQuery);
+                tasks = data?.tasks || [];
+                console.log("Loaded quests directly:", tasks.length);
+            } catch (e) {
+                console.warn("Failed to load quests background query safely.");
+            }
+
+            // Step 4: Add mapped items to Search Index safely
+            try {
+                items.filter(Boolean).forEach(item => {
+                    const itemName = item.name || 'Unknown Item';
+                    let statsSnippet = `${item.category?.name || 'Tarkov Equipment'}. Base price: ${item.basePrice || 0} ₽.`;
+                    
+                    if (item.properties) {
+                        if (item.properties.__typename === 'ItemPropertiesWeapon') {
+                            statsSnippet += ` Caliber: ${item.properties.caliber || 'N/A'}, Fire Rate: ${item.properties.fireRate || 'N/A'} RPM.`;
+                        } else if (item.properties.__typename === 'ItemPropertiesArmor') {
+                            statsSnippet += ` Armor Class: ${item.properties.class || 'N/A'}, Durability: ${item.properties.durability || 'N/A'}.`;
+                        }
+                    }
+
+                    searchIndex.push({
+                        id: `tarkov-${item.id}`,
+                        title: itemName,
+                        shortName: item.shortName || itemName,
+                        type: 'tarkov',
+                        url: item.wikiLink || `https://escapefromtarkov.fandom.com/wiki/Special:Search?search=${encodeURIComponent(itemName)}`,
+                        description: `${statsSnippet} Explore item attributes, values, and barter information on the official Tarkov Wiki database.`,
+                        category: `Tarkov: ${item.category?.name || 'Item'}`,
+                        // Hover details
+                        iconLink: item.iconLink,
+                        basePrice: item.basePrice,
+                        avgPrice: item.avg24hPrice,
+                        weight: item.weight,
+                        caliber: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.caliber : null,
+                        armorClass: item.properties?.__typename === 'ItemPropertiesArmor' ? item.properties.class : null,
+                        durability: item.properties?.__typename === 'ItemPropertiesArmor' ? item.properties.durability : null,
+                        fireRate: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.fireRate : null
+                    });
+                });
+            } catch (err) {
+                console.error("Error formatting items in searchIndex:", err);
+            }
+
+            // Step 5: Add mapped traders to Search Index safely
+            try {
+                traders.filter(Boolean).forEach(trader => {
+                    const traderName = trader.name || 'Unknown Trader';
+                    const desc = trader.description ? trader.description : `Official trade coordinator in Escape from Tarkov. See item buybacks, level up trust levels, and unlock barter items.`;
+                    searchIndex.push({
+                        id: `trader-${trader.id}`,
+                        title: traderName,
+                        shortName: traderName,
+                        type: 'trader',
+                        url: trader.wikiLink || `https://escapefromtarkov.fandom.com/wiki/${encodeURIComponent(traderName)}`,
+                        description: desc,
+                        category: `Tarkov Trader`,
+                        // Hover details
+                        iconLink: trader.imageLink,
+                        traderDesc: desc
+                    });
+                });
+            } catch (err) {
+                console.error("Error formatting traders in searchIndex:", err);
+            }
+
+            // Step 6: Add mapped quests to Search Index safely
+            try {
+                tasks.filter(Boolean).forEach(task => {
+                    const questName = task.name || 'Unknown Quest';
+                    const offerer = task.trader?.name || 'offered trader';
+                    const minLevel = task.minPlayerLevel || 1;
+                    searchIndex.push({
+                        id: `task-${task.id}`,
+                        title: questName,
+                        shortName: questName,
+                        type: 'quest',
+                        url: task.wikiLink || `https://escapefromtarkov.fandom.com/wiki/${encodeURIComponent(questName)}`,
+                        description: `Official Escape from Tarkov quest assigned by ${offerer}. Requires a minimum player status of Level ${minLevel} to initiate.`,
+                        category: `Tarkov Quest`,
+                        // Hover details
+                        traderName: offerer,
+                        minPlayerLevel: minLevel
+                    });
+                });
+            } catch (err) {
+                console.error("Error formatting quests in searchIndex:", err);
+            }
+        }
+
+        // --- DASHBOARD RENDERING AGENTS ---
         function renderApps(appsToRender) {
             const grid = document.getElementById('apps-grid');
             const noResults = document.getElementById('no-results');
@@ -333,32 +584,8 @@
             });
         }
 
-        // Fetch application registry from the manually managed singular named 'app-list.json'
-        fetch('/app-list.json')
-            .then(res => {
-                if (!res.ok) throw new Error("Manifest not found.");
-                return res.json();
-            })
-            .then(apps => {
-                loadedApps = apps;
-                currentlyFilteredApps = [...loadedApps];
-                updateUIVisibility();
-                renderApps(loadedApps);
-                renderLauncherDropdown(loadedApps);
-            })
-            .catch(() => {
-                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                if (isLocalhost) {
-                    document.getElementById('setup-warning').classList.remove('hidden');
-                    loadedApps = fallbackApps;
-                } else {
-                    loadedApps = [];
-                }
-                currentlyFilteredApps = [...loadedApps];
-                updateUIVisibility();
-                renderApps(loadedApps);
-                renderLauncherDropdown(loadedApps);
-            });
+        // Initialize Core Data fetching on launch
+        initializeHubData();
 
 
         // --- 3. 9-DOT MENU INTERACTIVITY ---
@@ -398,12 +625,267 @@
         });
 
 
-        // --- 4. REAL-TIME SEARCH ENGINE & DROP-DOWN SUGGESTIONS ---
+        // --- 4. REAL-TIME SEARCH ENGINE & GOOGLE-STYLE RESULTS SYSTEM ---
         const searchInput = document.getElementById('search-input');
         const clearBtn = document.getElementById('clear-search');
         const dropdownResults = document.getElementById('search-results-dropdown');
         const resultsContainer = document.getElementById('dropdown-results-container');
+        const googleResultsView = document.getElementById('google-results-view');
+        const googleResultsContainer = document.getElementById('google-results-container');
+        const resultsMetaText = document.getElementById('results-meta-text');
+        const resultsCloseBtn = document.getElementById('results-close-btn');
+        const appsSection = document.getElementById('apps-section');
+        const bsgChannelsBar = document.getElementById('bsg-channels-bar');
 
+        let matchedResultsBuffer = [];
+
+        // --- HOVER TIMEOUT PREVIEW ENGINE ---
+        let hoverTimer = null;
+        const previewCard = document.getElementById('hover-preview-card');
+
+        function startHoverPreview(e, item) {
+            clearTimeout(hoverTimer);
+            positionPreviewCard(e);
+
+            // Open translucent overlay featuring standard CSS spinner
+            previewCard.classList.remove('hidden');
+            previewCard.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-6 space-y-3">
+                    <div class="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span class="text-xs text-zinc-500 dark:text-zinc-400 font-medium select-none">Loading details...</span>
+                </div>
+            `;
+
+            // Trigger details resolution strictly after 3000ms
+            hoverTimer = setTimeout(() => {
+                revealPreviewDetails(item);
+            }, 3000);
+        }
+
+        function cancelHoverPreview() {
+            clearTimeout(hoverTimer);
+            previewCard.classList.add('hidden');
+        }
+
+        function positionPreviewCard(e) {
+            const cardWidth = 288; // w-72 matches 288px
+            const viewportWidth = window.innerWidth;
+            let left = e.pageX + 15;
+            let top = e.pageY + 15;
+
+            if (left + cardWidth > viewportWidth) {
+                left = e.pageX - cardWidth - 15;
+            }
+
+            previewCard.style.left = `${left}px`;
+            previewCard.style.top = `${top}px`;
+        }
+
+        function revealPreviewDetails(item) {
+            if (!item) return;
+            const iconUrl = item.iconLink || 'https://via.placeholder.com/64?text=No+Image';
+            
+            if (item.type === 'tarkov') {
+                // Item Preview Rendering
+                previewCard.innerHTML = `
+                    <div class="flex flex-col space-y-3 animate-fade-in select-none">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-14 h-14 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 border border-lightBorder dark:border-darkBorder p-1 flex items-center justify-center flex-shrink-0">
+                                <img src="${iconUrl}" alt="${item.title}" class="w-full h-full object-contain rounded-lg" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=60'">
+                            </div>
+                            <div class="truncate">
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.title}</h4>
+                                <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">${item.category}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-lightBorder dark:border-darkBorder pt-3 space-y-1.5 text-xs text-zinc-600 dark:text-zinc-300">
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Base Price:</span>
+                                <span class="font-semibold text-zinc-800 dark:text-zinc-200">${item.basePrice ? item.basePrice.toLocaleString() + ' ₽' : 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Average Price:</span>
+                                <span class="font-semibold text-zinc-800 dark:text-zinc-200">${item.avgPrice ? item.avgPrice.toLocaleString() + ' ₽' : 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Weight:</span>
+                                <span class="font-semibold text-zinc-800 dark:text-zinc-200">${item.weight ? item.weight + ' kg' : 'N/A'}</span>
+                            </div>
+                            ${item.caliber ? `
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Caliber:</span>
+                                <span class="font-semibold text-indigo-500 dark:text-indigo-400">${item.caliber}</span>
+                            </div>
+                            ` : ''}
+                            ${item.armorClass ? `
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Armor Class:</span>
+                                <span class="font-semibold text-emerald-600 dark:text-emerald-400">Class ${item.armorClass}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'trader') {
+                // Trader Preview Rendering
+                previewCard.innerHTML = `
+                    <div class="flex flex-col space-y-3 animate-fade-in select-none">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-14 h-14 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 border border-lightBorder dark:border-darkBorder p-1 flex items-center justify-center flex-shrink-0">
+                                <img src="${iconUrl}" alt="${item.title}" class="w-full h-full object-contain rounded-lg" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=60'">
+                            </div>
+                            <div class="truncate">
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.title}</h4>
+                                <span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Tarkov Trader</span>
+                            </div>
+                        </div>
+                        <div class="border-t border-lightBorder dark:border-darkBorder pt-3 text-xs text-zinc-600 dark:text-zinc-300">
+                            <p class="leading-relaxed italic">"${item.traderDesc}"</p>
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'quest') {
+                // Quest Preview Rendering
+                previewCard.innerHTML = `
+                    <div class="flex flex-col space-y-3 animate-fade-in select-none">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                                Q
+                            </div>
+                            <div class="truncate">
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.title}</h4>
+                                <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Tarkov Quest</span>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t border-lightBorder dark:border-darkBorder pt-3 space-y-1.5 text-xs text-zinc-600 dark:text-zinc-300">
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Quest Provider:</span>
+                                <span class="font-semibold text-zinc-800 dark:text-zinc-200">${item.traderName}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Required Level:</span>
+                                <span class="font-semibold text-zinc-800 dark:text-zinc-200">Level ${item.minPlayerLevel}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Triggers and formats Google style search results
+        function executeSearch(queryText) {
+            dropdownResults.classList.add('hidden');
+            cancelHoverPreview();
+            
+            const normalizedQuery = queryText.toLowerCase().trim();
+            if (normalizedQuery.length === 0) {
+                dismissGoogleSearchResults();
+                return;
+            }
+
+            const startTime = performance.now();
+
+            // Query index safely for matches
+            const matches = searchIndex.filter(item => {
+                const title = (item?.title || '').toLowerCase();
+                const category = (item?.category || '').toLowerCase();
+                return title.includes(normalizedQuery) || category.includes(normalizedQuery);
+            });
+
+            const endTime = performance.now();
+            const processTime = ((endTime - startTime) / 1000).toFixed(3);
+
+            // Populate Results Dashboard meta
+            resultsMetaText.textContent = `About ${matches.length} results (${processTime} seconds)`;
+
+            // Display / Hide containers
+            appsSection.classList.add('hidden');
+            googleResultsView.classList.remove('hidden');
+
+            // Determine if search matches Tarkov-related parameters to show BSG channels
+            const hasTarkovResults = matches.some(item => 
+                item && (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest')
+            );
+
+            if (hasTarkovResults) {
+                bsgChannelsBar.classList.remove('hidden');
+            } else {
+                bsgChannelsBar.classList.add('hidden');
+            }
+
+            // Render Google-style link layouts
+            googleResultsContainer.innerHTML = '';
+            
+            if (matches.length === 0) {
+                googleResultsContainer.innerHTML = `
+                    <div class="text-left py-4 text-zinc-500 dark:text-zinc-400 text-sm">
+                        <p class="mb-2">Your search - <strong class="text-zinc-800 dark:text-zinc-100">${queryText}</strong> - did not match any documents or Tarkov items.</p>
+                        <p class="text-xs">Suggestions: Make sure all words are spelled correctly, or try different keywords.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            matches.forEach(item => {
+                if (!item) return;
+                const resultBlock = document.createElement('div');
+                resultBlock.className = "text-left max-w-2xl py-2 group";
+
+                // Generate authentic Google breadcrumb pathing
+                let breadcrumbPath = `fraagle.host › apps › ${(item.title || '').toLowerCase().replace(/\s+/g, '-')}`;
+                if (item.type === 'tarkov') {
+                    breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${item.shortName || 'Item'}`;
+                } else if (item.type === 'trader') {
+                    breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${item.title}`;
+                } else if (item.type === 'quest') {
+                    breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${(item.title || '').replace(/\s+/g, '_')}`;
+                }
+
+                resultBlock.innerHTML = `
+                    <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1 tracking-wide truncate flex items-center gap-1.5 select-none">
+                        <span>${breadcrumbPath}</span>
+                    </div>
+                    <a href="${item.url}" target="_blank" class="block mb-1 search-result-item-link">
+                        <h3 class="text-[19px] sm:text-[20px] text-blue-600 dark:text-blue-400 hover:underline font-normal leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                            ${item.title || 'Untitled'}
+                        </h3>
+                    </a>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[10px] tracking-wider px-1.5 py-0.5 rounded-md mr-1.5 select-none uppercase">
+                            ${item.category || 'General'}
+                        </span>
+                        ${item.description || ''}
+                    </p>
+                `;
+
+                // Anchor hover listeners for Tarkov items, traders, and quests in search results
+                if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest') {
+                    const hoverTarget = resultBlock.querySelector('.search-result-item-link');
+                    hoverTarget.addEventListener('mouseenter', (e) => startHoverPreview(e, item));
+                    hoverTarget.addEventListener('mousemove', (e) => positionPreviewCard(e));
+                    hoverTarget.addEventListener('mouseleave', cancelHoverPreview);
+                }
+
+                googleResultsContainer.appendChild(resultBlock);
+            });
+        }
+
+        function dismissGoogleSearchResults() {
+            searchInput.value = '';
+            clearBtn.classList.add('hidden');
+            dropdownResults.classList.add('hidden');
+            googleResultsView.classList.add('hidden');
+            bsgChannelsBar.classList.add('hidden');
+            cancelHoverPreview();
+            updateUIVisibility();
+            renderApps(localAppsRawList);
+        }
+
+        resultsCloseBtn.addEventListener('click', dismissGoogleSearchResults);
+
+        // Render Autocomplete Dropdown list directly under Search Bar
         function renderAutocompleteDropdown(matches, isSearching = false) {
             resultsContainer.innerHTML = '';
             
@@ -414,24 +896,51 @@
 
             const header = document.createElement('div');
             header.className = "text-[10px] font-bold text-zinc-400 dark:text-zinc-500 px-4 py-2 uppercase tracking-widest select-none";
-            header.textContent = isSearching ? "Search Results" : "Quick Suggestions";
+            header.textContent = isSearching ? "Found Recommendations" : "Quick Suggestions";
             resultsContainer.appendChild(header);
 
-            matches.forEach((app) => {
-                const title = getAppTitle(app);
+            matches.slice(0, 10).forEach((item) => {
+                if (!item) return;
+                const element = document.createElement('div');
+                element.className = "flex items-center justify-between px-4 py-3 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/70 transition duration-150 cursor-pointer border-l-2 border-transparent hover:border-indigo-600 dark:hover:border-indigo-400";
                 
-                const item = document.createElement('a');
-                item.href = `/apps/${app}`;
-                item.className = "flex items-center px-4 py-3 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/70 transition duration-150 cursor-pointer border-l-2 border-transparent hover:border-indigo-600 dark:hover:border-indigo-400";
-                
-                item.innerHTML = `
-                    <div class="w-2 h-2 rounded-full bg-indigo-500/40 mr-4 flex-shrink-0"></div>
-                    <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
-                        ${title}
+                // Color badges for item categories
+                let badgeColor = 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 dark:border-indigo-500/30';
+                if (item.type === 'tarkov') {
+                    badgeColor = 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/20 dark:border-amber-500/30';
+                } else if (item.type === 'trader') {
+                    badgeColor = 'bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/20 dark:border-rose-500/30';
+                } else if (item.type === 'quest') {
+                    badgeColor = 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:border-emerald-500/30';
+                }
+
+                element.innerHTML = `
+                    <div class="flex items-center space-x-3 truncate">
+                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500/40 flex-shrink-0"></div>
+                        <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">${item.title || 'Untitled'}</span>
                     </div>
+                    <span class="text-[10px] font-semibold border ${badgeColor} uppercase tracking-wider px-2 py-0.5 rounded-full select-none max-w-[120px] truncate">
+                        ${item.category || 'General'}
+                    </span>
                 `;
 
-                resultsContainer.appendChild(item);
+                // Quick launch search on item click
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    searchInput.value = item.title || '';
+                    clearBtn.classList.remove('hidden');
+                    executeSearch(item.title || '');
+                });
+
+                // Set hover preview triggers on suggestion rows
+                if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest') {
+                    element.addEventListener('mouseenter', (e) => startHoverPreview(e, item));
+                    element.addEventListener('mousemove', (e) => positionPreviewCard(e));
+                    element.addEventListener('mouseleave', cancelHoverPreview);
+                }
+
+                resultsContainer.appendChild(element);
             });
 
             dropdownResults.classList.remove('hidden');
@@ -440,12 +949,15 @@
         searchInput.addEventListener('focus', () => {
             const query = searchInput.value.toLowerCase().trim();
             if (query.length > 0) {
-                renderAutocompleteDropdown(currentlyFilteredApps, true);
+                renderAutocompleteDropdown(matchedResultsBuffer, true);
             } else {
-                renderAutocompleteDropdown(loadedApps, false);
+                // Show default loaded applications if nothing is written yet
+                const defaultSuggestions = searchIndex.filter(item => item && item.type === 'app');
+                renderAutocompleteDropdown(defaultSuggestions, false);
             }
         });
 
+        // Listen for input changes in the search input
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
 
@@ -453,35 +965,44 @@
                 clearBtn.classList.remove('hidden');
             } else {
                 clearBtn.classList.add('hidden');
-                renderAutocompleteDropdown(loadedApps, false);
-                renderApps(loadedApps);
+                dropdownResults.classList.add('hidden');
+                googleResultsView.classList.add('hidden');
+                cancelHoverPreview();
+                currentlyFilteredApps = [...localAppsRawList];
+                updateUIVisibility();
+                renderApps(localAppsRawList);
                 return;
             }
 
-            currentlyFilteredApps = loadedApps.filter(app => {
+            // Filter globally safely
+            matchedResultsBuffer = searchIndex.filter(item => {
+                const title = (item?.title || '').toLowerCase();
+                const category = (item?.category || '').toLowerCase();
+                return title.includes(query) || category.includes(query);
+            });
+
+            // Update local apps matching in parallel
+            currentlyFilteredApps = localAppsRawList.filter(app => {
                 const title = getAppTitle(app).toLowerCase();
                 return title.includes(query) || app.toLowerCase().includes(query);
             });
-
             renderApps(currentlyFilteredApps);
-            renderAutocompleteDropdown(currentlyFilteredApps, true);
+
+            // Populate autocomplete suggestions
+            renderAutocompleteDropdown(matchedResultsBuffer, true);
         });
 
-        clearBtn.addEventListener('click', () => {
-            searchInput.value = '';
-            clearBtn.classList.add('hidden');
-            currentlyFilteredApps = [...loadedApps];
-            renderAutocompleteDropdown(loadedApps, false);
-            renderApps(loadedApps);
-            searchInput.focus();
-        });
+        // Clear Search action button inside the searchbar
+        clearBtn.addEventListener('click', dismissGoogleSearchResults);
 
+        // Launch full search layout when pressing 'Enter' key
         searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && currentlyFilteredApps.length > 0) {
-                window.location.href = `/apps/${currentlyFilteredApps[0]}`;
+            if (e.key === 'Enter') {
+                executeSearch(searchInput.value);
             }
         });
 
+        // Close dropdown when clicking outside search system
         document.addEventListener('click', (e) => {
             const searchContainer = document.getElementById('search-container');
             if (!searchContainer.contains(e.target)) {
@@ -489,6 +1010,7 @@
             }
         });
 
+        // Global key shortcut commands
         window.addEventListener('keydown', (e) => {
             if (e.key === '/' && document.activeElement !== searchInput) {
                 e.preventDefault();
@@ -499,6 +1021,7 @@
                     searchInput.blur();
                 }
                 dropdownResults.classList.add('hidden');
+                cancelHoverPreview();
             }
         });
     </script>
