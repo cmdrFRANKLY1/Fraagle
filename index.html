@@ -124,7 +124,7 @@
         <!-- Fraagle Logo Placeholder -->
         <div class="mb-6 select-none text-center">
             <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm">
-                <!-- Static Fallback in case of slow file read -->
+                <!-- Static Fallback in case of slow execution -->
                 <span class="text-fraagleBlue">F</span>
                 <span class="text-fraagleRed">r</span>
                 <span class="text-fraagleYellow">a</span>
@@ -380,67 +380,97 @@
             }).join('');
         }
 
-        // Fallback arrays for Title & Subtitle in case dynamic files are not uploaded
-        const fallbackTitles = ["Fraagle", "Search", "Discover", "Tarkov Hub", "Workspace Portal"];
-        const fallbackSubtitles = [
-            "The premium clean search directory.",
-            "Find your gear, coordinate tactical quests.",
-            "Dynamic index of apps and gaming resources.",
-            "Fast, sleek, and optimized search engine."
+        // Expanded, clean, healthy general titles for search exploration
+        const generalSearchTitles = [
+            "Fraagle", 
+            "Seeker", 
+            "Nexus", 
+            "Portal", 
+            "Horizon", 
+            "Discover", 
+            "Sleek", 
+            "Explore", 
+            "Infinity", 
+            "Orbit", 
+            "Unified", 
+            "Clarity"
         ];
 
-        // Fetches a random line from indexTitles.txt and indexSubtitles.txt
-        async function loadDynamicTitleAndSubtitle() {
+        // Advanced Combinatorial Subtitle Builder
+        function generatePermutatedSubtitle() {
+            const intros = [
+                "Your clean gateway to",
+                "Instantly navigate the",
+                "Sleek and unified entry into",
+                "Your ultimate portal for",
+                "Seamlessly explore",
+                "Real-time index of",
+                "A beautifully optimized platform for",
+                "Discover endless insights from",
+                "The direct entry point for"
+            ];
+            
+            const adjectives = [
+                "premium",
+                "modern",
+                "sleek",
+                "minimalist",
+                "dynamic",
+                "unified",
+                "intelligent",
+                "optimized",
+                "limitless",
+                "pristine",
+                "high-performance"
+            ];
+            
+            const subjects = [
+                "workspace applications",
+                "interactive development tools",
+                "clean utility modules",
+                "Tarkov equipment data",
+                "general learning tools",
+                "creative assets",
+                "essential user guides",
+                "informative directories"
+            ];
+            
+            const endings = [
+                "with absolute style.",
+                "in real-time.",
+                "instantly and securely.",
+                "for all users.",
+                "without any clutter.",
+                "fluidly and gracefully.",
+                "across all of your devices."
+            ];
+
+            const intro = intros[Math.floor(Math.random() * intros.length)];
+            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const subject = subjects[Math.floor(Math.random() * subjects.length)];
+            const ending = endings[Math.floor(Math.random() * endings.length)];
+
+            return `${intro} ${adj} ${subject} ${ending}`;
+        }
+
+        // Load custom dynamic text decorations with beautiful built-in permutation rolls
+        function loadDynamicTitleAndSubtitle() {
             const logoTitle = document.getElementById('logo-title');
             const logoSubtitle = document.getElementById('logo-subtitle');
 
-            let finalTitle = "Fraagle";
-            let finalSubtitle = "The premium clean search directory.";
-
-            // 1. Fetch Dynamic Title
-            try {
-                const res = await fetch('/conf/indexTitles.txt');
-                if (res.ok) {
-                    const text = await res.text();
-                    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                    if (lines.length > 0) {
-                        finalTitle = lines[Math.floor(Math.random() * lines.length)];
-                    }
-                } else {
-                    // Fall back to a random title from the hardcoded list
-                    finalTitle = fallbackTitles[Math.floor(Math.random() * fallbackTitles.length)];
-                }
-            } catch (err) {
-                finalTitle = fallbackTitles[Math.floor(Math.random() * fallbackTitles.length)];
-            }
-
+            // Select random general Search title
+            const finalTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)];
             logoTitle.innerHTML = colorizeText(finalTitle);
             document.title = finalTitle + " Hub";
 
-            // 2. Fetch Dynamic Subtitle
-            try {
-                const res = await fetch('/conf/indexSubtitles.txt');
-                if (res.ok) {
-                    const text = await res.text();
-                    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-                    if (lines.length > 0) {
-                        finalSubtitle = lines[Math.floor(Math.random() * lines.length)];
-                    }
-                } else {
-                    // Fall back to random subtitle
-                    finalSubtitle = fallbackSubtitles[Math.floor(Math.random() * fallbackSubtitles.length)];
-                }
-            } catch (err) {
-                finalSubtitle = fallbackSubtitles[Math.floor(Math.random() * fallbackSubtitles.length)];
-            }
-
-            logoSubtitle.textContent = finalSubtitle;
+            // Generate combinatorial subtitle for maximum permutation
+            logoSubtitle.textContent = generatePermutatedSubtitle();
         }
 
         // --- LOAD CORES ---
         async function initializeHubData() {
-            // Load custom dynamic text decorations with beautiful built-in rollbacks
-            await loadDynamicTitleAndSubtitle();
+            // Load custom dynamic text decorations with high-quality local permutation builder
+            loadDynamicTitleAndSubtitle();
 
             // 1. Fetch Local Dashboard apps
             try {
