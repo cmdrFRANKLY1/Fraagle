@@ -117,7 +117,8 @@
         
         <!-- Fraagle Logo Placeholder -->
         <div class="mb-6 select-none text-center">
-            <h1 class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm">
+            <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm">
+                <!-- Static Fallback in case of slow file read -->
                 <span class="text-fraagleBlue">F</span>
                 <span class="text-fraagleRed">r</span>
                 <span class="text-fraagleYellow">a</span>
@@ -126,6 +127,8 @@
                 <span class="text-fraagleRed">l</span>
                 <span class="text-fraagleBlue">e</span>
             </h1>
+            <!-- Dynamic Subtitle Container -->
+            <p id="logo-subtitle" class="text-xs sm:text-sm font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 mt-2 min-h-[1.25rem]"></p>
         </div>
 
         <!-- Sleek Search Box Wrapper with Ambient Shadows -->
@@ -341,8 +344,58 @@
             }
         }
 
+        // Colorizes text in dynamic multicolor style
+        function colorizeText(text) {
+            const colors = ['text-fraagleBlue', 'text-fraagleRed', 'text-fraagleYellow', 'text-fraagleBlue', 'text-fraagleGreen', 'text-fraagleRed'];
+            return text.split('').map((char, index) => {
+                if (char === ' ') return ' ';
+                const colorClass = colors[index % colors.length];
+                return `<span class="${colorClass}">${char}</span>`;
+            }).join('');
+        }
+
+        // Fetches a random line from indexTitles.txt and indexSubtitles.txt
+        async function loadDynamicTitleAndSubtitle() {
+            const logoTitle = document.getElementById('logo-title');
+            const logoSubtitle = document.getElementById('logo-subtitle');
+
+            // 1. Fetch Dynamic Title
+            try {
+                const res = await fetch('/conf/indexTitles.txt');
+                if (res.ok) {
+                    const text = await res.text();
+                    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    if (lines.length > 0) {
+                        const randomTitle = lines[Math.floor(Math.random() * lines.length)];
+                        logoTitle.innerHTML = colorizeText(randomTitle);
+                        document.title = randomTitle + " Hub";
+                    }
+                }
+            } catch (err) {
+                console.warn("Using local title fallback.");
+            }
+
+            // 2. Fetch Dynamic Subtitle
+            try {
+                const res = await fetch('/conf/indexSubtitles.txt');
+                if (res.ok) {
+                    const text = await res.text();
+                    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    if (lines.length > 0) {
+                        const randomSubtitle = lines[Math.floor(Math.random() * lines.length)];
+                        logoSubtitle.textContent = randomSubtitle;
+                    }
+                }
+            } catch (err) {
+                console.warn("Dynamic subtitle skipped.");
+            }
+        }
+
         // --- LOAD CORES ---
         async function initializeHubData() {
+            // Load custom dynamic text decorations
+            loadDynamicTitleAndSubtitle();
+
             // 1. Fetch Local Dashboard apps
             try {
                 const res = await fetch('/app-list.json');
@@ -377,11 +430,28 @@
             renderApps(localAppsRawList);
             renderLauncherDropdown(localAppsRawList);
 
-            // 2. Load Tarkov Dev Cached Data (Ingested safely in isolated steps)
+            // 2. Load Tarkov Dev Cached Data (Including items, traders, tasks/quests)
             loadTarkovItems();
         }
 
         async function loadTarkovItems() {
+            // Comprehensive GraphQL query mapping items, traders, and tasks
+            const tarkovGraphQLQuery = `query {
+                pvp: items(lang: en, gameMode: regular) {
+                    id name shortName wikiLink iconLink basePrice weight avg24hPrice category { name }
+                    properties { __typename
+                        ... on ItemPropertiesWeapon { caliber fireRate }
+                        ... on ItemPropertiesArmor { class durability }
+                    }
+                }
+                traders(lang: en) {
+                    id name imageLink wikiLink description
+                }
+                tasks(lang: en) {
+                    id name wikiLink minPlayerLevel trader { name }
+                }
+            }`;
+
             let items = [];
             let traders = [];
             let tasks = [];
