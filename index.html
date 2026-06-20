@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraagle Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Inline immediate check to start in dark mode by default without flashing
+        (function() {
+            const userTheme = localStorage.getItem('theme') || 'dark';
+            if (userTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
+        // Tailwind configuration for dark mode activation via class
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        googleGray: {
+                            50: '#f8f9fa',
+                            100: '#f1f3f4',
+                            200: '#e8eaed',
+                            700: '#3c4043',
+                            800: '#303134',
+                            900: '#202124'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts (Product Sans vibe) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Google Sans', 'Roboto', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-googleGray-900 text-googleGray-900 dark:text-googleGray-100 transition-colors duration-200 min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation Bar -->
+    <header class="flex items-center justify-between p-4 relative">
+        <!-- Left Side: Empty spacer -->
+        <div></div>
+
+        <!-- Right Side: Dark Mode Toggle & "Profile" Menu -->
+        <div class="flex items-center space-x-2 sm:space-x-4 relative">
+            <!-- Theme Toggle Button -->
+            <button id="theme-toggle" class="p-2.5 rounded-full hover:bg-googleGray-100 dark:hover:bg-googleGray-800 transition-colors focus:outline-none" aria-label="Toggle Theme">
+                <!-- Sun Icon (shown in dark mode) -->
+                <svg id="theme-toggle-sun-icon" class="hidden w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 14.12l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zm0-10.606a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z"></path>
+                </svg>
+                <!-- Moon Icon (shown in light mode) -->
+                <svg id="theme-toggle-moon-icon" class="hidden w-6 h-6 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </button>
+
+            <!-- Workspace Apps Launcher Icon (9-Dot Menu) -->
+            <div class="relative">
+                <button id="app-launcher-btn" class="hidden p-2.5 rounded-full hover:bg-googleGray-100 dark:hover:bg-googleGray-800 transition-colors focus:outline-none" aria-label="Apps Menu">
+                    <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                </button>
+
+                <!-- Workspace Apps Dropdown Menu -->
+                <div id="app-launcher-dropdown" class="hidden absolute right-0 mt-2 w-80 max-h-[420px] overflow-y-auto bg-white dark:bg-googleGray-800 border border-gray-200 dark:border-googleGray-700 rounded-3xl shadow-2xl p-4 z-50 transition-all duration-150 transform scale-95 opacity-0 origin-top-right">
+                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3 px-2 uppercase tracking-wider">Quick Launcher</div>
+                    <div id="dropdown-apps-grid" class="grid grid-cols-3 gap-3">
+                        <!-- Populated dynamically with the apps -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mock Profile Button -->
+            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm select-none cursor-pointer hover:shadow-md transition-shadow">
+                A
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow flex flex-col items-center justify-center px-4 -mt-12 sm:-mt-16">
+        
+        <!-- Fraagle Logo Placeholder (Designed with custom CSS colors matching the classic vibe) -->
+        <div class="mb-10 select-none text-center">
+            <h1 class="text-6xl sm:text-7xl font-bold tracking-tight inline-flex">
+                <span class="text-blue-500">F</span>
+                <span class="text-red-500">r</span>
+                <span class="text-yellow-500">a</span>
+                <span class="text-blue-500">a</span>
+                <span class="text-green-500">g</span>
+                <span class="text-red-500">l</span>
+                <span class="text-blue-500">e</span>
+            </h1>
+        </div>
+
+        <!-- Google-style Search Box Wrapper -->
+        <div class="w-full max-w-[584px] mb-12 relative group" id="search-container">
+            <div class="flex items-center w-full h-[46px] sm:h-[48px] px-4 rounded-full border border-gray-200 dark:border-googleGray-700 bg-white dark:bg-googleGray-800 hover:shadow-md focus-within:shadow-md hover:border-transparent focus-within:border-transparent transition duration-200">
+                <!-- Search Icon -->
+                <svg class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                
+                <!-- Search Input Field -->
+                <input 
+                    type="text" 
+                    id="search-input"
+                    placeholder="Search..." 
+                    class="w-full bg-transparent border-none outline-none text-[16px] text-googleGray-900 dark:text-googleGray-100"
+                    autocomplete="off"
+                    autofocus
+                >
+
+                <!-- Clear Search Button (Visible when typing) -->
+                <button id="clear-search" class="hidden p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 focus:outline-none mr-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+
+                <!-- Voice / Mic Icon (Decorative Google Vibe) -->
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 hover:opacity-80 cursor-pointer hidden sm:block" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+                </svg>
+            </div>
+
+            <!-- Google-Style Autocomplete Search Results Dropdown -->
+            <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-googleGray-800 border border-gray-200 dark:border-googleGray-700 rounded-2xl shadow-xl overflow-hidden z-40 max-h-72 overflow-y-auto transition duration-150 transform scale-100">
+                <div id="dropdown-results-container" class="py-2">
+                    <!-- Matches appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Apps Presentation Grid (Google Shortcuts style) wrapped in a container that can be hidden -->
+        <div id="apps-section" class="hidden w-full max-w-4xl px-4">
+            <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4 text-center">Your Applications</h2>
+            
+            <!-- Dynamic Grid Target -->
+            <div id="apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-6 justify-center">
+                <!-- Apps will render dynamically here -->
+            </div>
+
+            <!-- Empty / No Results State -->
+            <div id="no-results" class="hidden text-center py-8">
+                <p class="text-gray-500 dark:text-gray-400">No matching apps found.</p>
+            </div>
+        </div>
+
+        <!-- Dynamic Registry / Setup Warning Alert (Informational) -->
+        <div id="setup-warning" class="hidden mt-12 p-4 max-w-xl rounded-lg border border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-900/50 text-xs text-yellow-800 dark:text-yellow-200">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <span class="font-bold">Displaying Local Fallback list.</span> For production, write a <code>generate-list.js</code> build script in Vercel to auto-output <code>public/apps-list.json</code> containing your HTML array!
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-googleGray-100 dark:bg-googleGray-800 text-xs sm:text-sm text-gray-600 dark:text-gray-400 w-full mt-12">
+        <div class="px-6 py-3 border-b border-gray-200 dark:border-googleGray-700">
+            <span>Germany</span>
+        </div>
+        <div class="px-6 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex space-x-6">
+                <span class="hover:underline cursor-pointer">About Vercel Host</span>
+                <span class="hover:underline cursor-pointer">Directory Config</span>
+            </div>
+            <div class="flex space-x-6">
+                <span class="hover:underline cursor-pointer">Privacy</span>
+                <span class="hover:underline cursor-pointer">Terms</span>
+                <span class="hover:underline cursor-pointer font-medium" id="quick-theme-indicator">Auto Mode</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. THEME TOGGLING ENGINE ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('theme-toggle-sun-icon');
+        const moonIcon = document.getElementById('theme-toggle-moon-icon');
+        const themeIndicator = document.getElementById('quick-theme-indicator');
+
+        // Force 'dark' mode on first install, or fetch previous user preference
+        const userTheme = localStorage.getItem('theme') || 'dark';
+
+        function applyTheme(isDark, isManual = false) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+                themeIndicator.textContent = isManual ? "Dark Mode" : "Auto (Dark)";
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+                themeIndicator.textContent = isManual ? "Light Mode" : "Auto (Light)";
+            }
+        }
+
+        // Init Theme
+        applyTheme(userTheme === 'dark');
+
+        // Listen for manual theme toggles
+        themeToggleBtn.addEventListener('click', () => {
+            const isCurrentlyDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isCurrentlyDark ? 'light' : 'dark');
+            applyTheme(!isCurrentlyDark, true);
+        });
+
+
+        // --- 2. APPS RETRIEVAL, VISIBILITY & REGISTRY ---
+        let loadedApps = [];
+        let currentlyFilteredApps = [];
+
+        // Pre-defined fallback apps if apps-list.json is missing
+        const fallbackApps = [
+            "analytics.html",
+            "dashboard.html",
+            "editor.html",
+            "notes.html",
+            "calculator.html",
+            "game.html",
+            "settings.html",
+            "tasks.html"
+        ];
+
+        // Generate a nice soft-colored background for app circular icons
+        const iconGradients = [
+            "from-blue-400 to-blue-600",
+            "from-red-400 to-red-600",
+            "from-yellow-400 to-yellow-600",
+            "from-green-400 to-green-600",
+            "from-indigo-400 to-indigo-600",
+            "from-purple-400 to-purple-600",
+            "from-pink-400 to-pink-600",
+            "from-teal-400 to-teal-600"
+        ];
+
+        function getAppTitle(fileName) {
+            // Converts "my-cool-app.html" to "My Cool App"
+            return fileName
+                .replace('.html', '')
+                .split(/[-_]/)
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        // Handles conditional visibility of launcher button and bottom directory section
+        function updateUIVisibility() {
+            const appsSection = document.getElementById('apps-section');
+            const appLauncherBtn = document.getElementById('app-launcher-btn');
+
+            if (loadedApps.length === 0) {
+                // If there's nothing found in the apps folder, completely hide directory UI
+                appsSection.classList.add('hidden');
+                appLauncherBtn.classList.add('hidden');
+            } else {
+                appsSection.classList.remove('hidden');
+                appLauncherBtn.classList.remove('hidden');
+            }
+        }
+
+        function renderApps(appsToRender) {
+            const grid = document.getElementById('apps-grid');
+            const noResults = document.getElementById('no-results');
+            grid.innerHTML = '';
+
+            if (appsToRender.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            appsToRender.forEach((app, index) => {
+                const title = getAppTitle(app);
+                const firstLetter = title.charAt(0).toUpperCase();
+                const gradient = iconGradients[index % iconGradients.length];
+
+                // Shortcut Card Bubble
+                const card = document.createElement('a');
+                card.href = `/apps/${app}`;
+                card.className = "flex flex-col items-center group/card p-3 rounded-2xl hover:bg-googleGray-100 dark:hover:bg-googleGray-800 transition duration-150 text-center";
+                
+                card.innerHTML = `
+                    <!-- Circular Icon container -->
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr ${gradient} text-white flex items-center justify-center font-bold text-lg sm:text-xl shadow-sm group-hover/card:scale-105 transition duration-150 select-none">
+                        ${firstLetter}
+                    </div>
+                    <!-- Label -->
+                    <span class="mt-3 text-xs sm:text-sm font-medium tracking-tight text-googleGray-700 dark:text-googleGray-200 group-hover/card:underline truncate max-w-full px-1">
+                        ${title}
+                    </span>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Render the 9-dot launcher workspace dropdown
+        function renderLauncherDropdown(appsToRender) {
+            const dropdownGrid = document.getElementById('dropdown-apps-grid');
+            dropdownGrid.innerHTML = '';
+
+            appsToRender.forEach((app, index) => {
+                const title = getAppTitle(app);
+                const firstLetter = title.charAt(0).toUpperCase();
+                const gradient = iconGradients[index % iconGradients.length];
+
+                const link = document.createElement('a');
+                link.href = `/apps/${app}`;
+                link.className = "flex flex-col items-center p-2 rounded-xl hover:bg-googleGray-100 dark:hover:bg-googleGray-700 transition text-center group";
+
+                link.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr ${gradient} text-white flex items-center justify-center font-bold text-sm shadow-sm group-hover:scale-105 transition">
+                        ${firstLetter}
+                    </div>
+                    <span class="mt-1.5 text-[11px] font-medium text-gray-700 dark:text-gray-200 truncate w-full px-1">
+                        ${title}
+                    </span>
+                `;
+                dropdownGrid.appendChild(link);
+            });
+        }
+
+        // Load files from JSON, hide UI if it fails/is empty
+        fetch('/apps-list.json')
+            .then(res => {
+                if (!res.ok) throw new Error("Manifest not found.");
+                return res.json();
+            })
+            .then(apps => {
+                loadedApps = apps;
+                currentlyFilteredApps = [...loadedApps];
+                updateUIVisibility();
+                renderApps(loadedApps);
+                renderLauncherDropdown(loadedApps);
+            })
+            .catch(() => {
+                // Determine if we show fallbacks locally
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                if (isLocalhost) {
+                    document.getElementById('setup-warning').classList.remove('hidden');
+                    loadedApps = fallbackApps;
+                } else {
+                    loadedApps = []; // empty on prod if JSON is absent -> keeps hub looking super clean!
+                }
+                currentlyFilteredApps = [...loadedApps];
+                updateUIVisibility();
+                renderApps(loadedApps);
+                renderLauncherDropdown(loadedApps);
+            });
+
+
+        // --- 3. 9-DOT MENU INTERACTIVITY ---
+        const launcherBtn = document.getElementById('app-launcher-btn');
+        const launcherDropdown = document.getElementById('app-launcher-dropdown');
+
+        function toggleDropdown() {
+            const isHidden = launcherDropdown.classList.contains('hidden');
+            if (isHidden) {
+                launcherDropdown.classList.remove('hidden');
+                setTimeout(() => {
+                    launcherDropdown.classList.remove('opacity-0', 'scale-95');
+                    launcherDropdown.classList.add('opacity-100', 'scale-100');
+                }, 10);
+            } else {
+                launcherDropdown.classList.remove('opacity-100', 'scale-100');
+                launcherDropdown.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    launcherDropdown.classList.add('hidden');
+                }, 150);
+            }
+        }
+
+        launcherBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleDropdown();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!launcherDropdown.contains(e.target) && e.target !== launcherBtn) {
+                launcherDropdown.classList.remove('opacity-100', 'scale-100');
+                launcherDropdown.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => {
+                    launcherDropdown.classList.add('hidden');
+                }, 150);
+            }
+        });
+
+
+        // --- 4. REAL-TIME SEARCH ENGINE & DROP-DOWN SUGGESTIONS ---
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('clear-search');
+        const dropdownResults = document.getElementById('search-results-dropdown');
+        const resultsContainer = document.getElementById('dropdown-results-container');
+
+        // Helper to render Autocomplete Results inside the dropdown box
+        function renderAutocompleteDropdown(matches, isSearching = false) {
+            resultsContainer.innerHTML = '';
+            
+            if (matches.length === 0) {
+                dropdownResults.classList.add('hidden');
+                return;
+            }
+
+            // Optional: Header section for clarity (Recommended vs Search matches)
+            const header = document.createElement('div');
+            header.className = "text-[11px] font-bold text-gray-400 dark:text-gray-500 px-4 py-1.5 uppercase tracking-wider select-none";
+            header.textContent = isSearching ? "Search Results" : "Quick Suggestions";
+            resultsContainer.appendChild(header);
+
+            matches.forEach((app) => {
+                const title = getAppTitle(app);
+                
+                const item = document.createElement('a');
+                item.href = `/apps/${app}`;
+                item.className = "flex items-center px-4 py-3 hover:bg-gray-100 dark:hover:bg-googleGray-700 transition duration-100 cursor-pointer";
+                
+                item.innerHTML = `
+                    <!-- Clock/Search mini icon -->
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <!-- Label -->
+                    <div class="text-sm font-medium text-googleGray-900 dark:text-googleGray-100 truncate">
+                        ${title}
+                    </div>
+                `;
+
+                resultsContainer.appendChild(item);
+            });
+
+            dropdownResults.classList.remove('hidden');
+        }
+
+        // Show dropdown instantly when focused
+        searchInput.addEventListener('focus', () => {
+            const query = searchInput.value.toLowerCase().trim();
+            if (query.length > 0) {
+                renderAutocompleteDropdown(currentlyFilteredApps, true);
+            } else {
+                // Show default loaded applications if nothing is written yet
+                renderAutocompleteDropdown(loadedApps, false);
+            }
+        });
+
+        // Listen for input changes in the search input
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+                // Automatically display all options again
+                renderAutocompleteDropdown(loadedApps, false);
+                renderApps(loadedApps);
+                return;
+            }
+
+            // Filter lists based on input matches
+            currentlyFilteredApps = loadedApps.filter(app => {
+                const title = getAppTitle(app).toLowerCase();
+                return title.includes(query) || app.toLowerCase().includes(query);
+            });
+
+            // Update bottom shortcuts grid
+            renderApps(currentlyFilteredApps);
+
+            // Update autocomplete drop-down list
+            renderAutocompleteDropdown(currentlyFilteredApps, true);
+        });
+
+        // Clear Search functionality
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearBtn.classList.add('hidden');
+            currentlyFilteredApps = [...loadedApps];
+            renderAutocompleteDropdown(loadedApps, false);
+            renderApps(loadedApps);
+            searchInput.focus();
+        });
+
+        // Launch first result on "Enter" key press
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && currentlyFilteredApps.length > 0) {
+                window.location.href = `/apps/${currentlyFilteredApps[0]}`;
+            }
+        });
+
+        // Close search suggestion dropdown when clicking anywhere else
+        document.addEventListener('click', (e) => {
+            const searchContainer = document.getElementById('search-container');
+            if (!searchContainer.contains(e.target)) {
+                dropdownResults.classList.add('hidden');
+            }
+        });
+
+        // Focus search box with '/' and close/unfocus with 'Escape'
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            if (e.key === 'Escape') {
+                if (document.activeElement === searchInput) {
+                    searchInput.blur();
+                }
+                dropdownResults.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
