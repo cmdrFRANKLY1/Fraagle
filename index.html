@@ -69,24 +69,32 @@
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
 
     <!-- Decorative Ambient Soft Glow Gradients (Adapts beautifully to both Light & Dark modes) -->
-    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none"></div>
+    <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+    <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
 
     <!-- Top Navigation Bar -->
-    <header class="flex items-center justify-between p-5 relative z-10">
+    <header class="flex items-center justify-between p-5 relative z-10 w-full">
         <!-- Left Side: Mini Brand Indicator -->
         <div class="flex items-center space-x-2">
             <span class="text-lg font-bold tracking-tight select-none bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">F.</span>
         </div>
 
-        <!-- Center: Modern Live Clock & Date -->
-        <div id="header-clock" class="flex flex-col items-center justify-center text-center select-none">
+        <!-- Center: Modern Live Clock & Date (Absolute Centered) -->
+        <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center select-none z-0">
             <span id="clock-time" class="text-sm font-bold tracking-wider text-zinc-700 dark:text-zinc-200">00:00:00</span>
-            <span id="clock-date" class="text-[9px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-0.5">Sunday, June 21, 2026</span>
+            <span id="clock-date" class="text-[9px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-0.5 whitespace-nowrap">Sunday, June 21, 2026</span>
         </div>
 
-        <!-- Right Side: Dark Mode Toggle and App Launcher -->
-        <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Right Side: Dark Mode Toggle, Gradient Toggle and App Launcher -->
+        <div class="flex items-center space-x-2 sm:space-x-3 relative z-10">
+            <!-- Gradient Glow Toggle Button -->
+            <button id="gradient-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Glow Gradients">
+                <!-- Sparkle/Glow Icon -->
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-300 pointer-events-none transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
+                </svg>
+            </button>
+
             <!-- Theme Toggle Button -->
             <button id="theme-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Theme">
                 <!-- Sun Icon (visible in dark mode to switch to light) -->
@@ -178,7 +186,7 @@
 
         <!-- Google-Style Search Results Dashboard (Hidden by default) -->
         <div id="google-results-view" class="hidden w-full max-w-2xl px-2 mb-12">
-            <!-- Battlestate Games Channels Bar placed at the top of the search site, right below the search bar -->
+            <!-- Battlestate Games Channels Bar placed at the top of the search site, right below the search bar (transparent & borderless) -->
             <div id="bsg-channels-bar" class="hidden mb-6 flex items-center justify-center gap-6 text-zinc-500 dark:text-zinc-400 bg-transparent py-2 select-none">
                 <!-- BSG EFT Homepage -->
                 <a href="https://www.escapefromtarkov.com/" target="_blank" title="Official EFT Homepage" class="hover:text-fraagleBlue transition-colors flex items-center justify-center p-1.5 rounded-lg">
@@ -194,7 +202,7 @@
                 </a>
                 <!-- Twitter / X -->
                 <a href="https://x.com/bstategames" target="_blank" title="BSG Twitter / X" class="hover:text-sky-500 dark:hover:text-zinc-100 transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                    <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M18.244 2.25h3.308l-7.227 7.56 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.085L1.254 2.25h6.8l4.8 6.35 5.39-6.35zM15.902 19.77h1.832L7.284 4.59H5.318L15.902 19.77z"/>
                     </svg>
                 </a>
@@ -311,7 +319,50 @@
         });
 
 
-        // --- 2. EXTENSIBLE UNIFIED SEARCH INDEX SYSTEM ---
+        // --- 1.5 AMBIENT GLOW GRADIENT TOGGLE ENGINE ---
+        const gradientToggleBtn = document.getElementById('gradient-toggle');
+        const ambientGlow1 = document.getElementById('ambient-glow-1');
+        const ambientGlow2 = document.getElementById('ambient-glow-2');
+
+        function applyGradientState(isEnabled) {
+            if (isEnabled === 'enabled') {
+                ambientGlow1.classList.remove('opacity-0', 'pointer-events-none');
+                ambientGlow2.classList.remove('opacity-0', 'pointer-events-none');
+                gradientToggleBtn.classList.remove('opacity-40');
+            } else {
+                ambientGlow1.classList.add('opacity-0', 'pointer-events-none');
+                ambientGlow2.classList.add('opacity-0', 'pointer-events-none');
+                gradientToggleBtn.classList.add('opacity-40');
+            }
+        }
+
+        // Initialize gradient setting on load
+        const savedGradient = localStorage.getItem('ambient-glow') || 'enabled';
+        applyGradientState(savedGradient);
+
+        // Listen for gradient toggle button click
+        gradientToggleBtn.addEventListener('click', () => {
+            const currentGradient = localStorage.getItem('ambient-glow') || 'enabled';
+            const nextGradient = currentGradient === 'enabled' ? 'disabled' : 'enabled';
+            localStorage.setItem('ambient-glow', nextGradient);
+            applyGradientState(nextGradient);
+        });
+
+
+        // --- 2. LIVE CLOCK & DATE ENGINE ---
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            const dateStr = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            document.getElementById('clock-time').textContent = timeStr;
+            document.getElementById('clock-date').textContent = dateStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+
+        // --- 3. EXTENSIBLE UNIFIED SEARCH INDEX SYSTEM ---
         let searchIndex = [];
         let currentlyFilteredApps = []; // For bottom grid view
         let localAppsRawList = [];      // Raw copy of dashboard apps
