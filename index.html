@@ -79,6 +79,12 @@
             <span class="text-lg font-bold tracking-tight select-none bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">F.</span>
         </div>
 
+        <!-- Center: Modern Live Clock & Date -->
+        <div id="header-clock" class="flex flex-col items-center justify-center text-center select-none">
+            <span id="clock-time" class="text-sm font-bold tracking-wider text-zinc-700 dark:text-zinc-200">00:00:00</span>
+            <span id="clock-date" class="text-[9px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-0.5">Sunday, June 21, 2026</span>
+        </div>
+
         <!-- Right Side: Dark Mode Toggle and App Launcher -->
         <div class="flex items-center space-x-2 sm:space-x-3">
             <!-- Theme Toggle Button -->
@@ -239,6 +245,13 @@
 
     </main>
 
+    <!-- Scroll to Top ("Up" Arrow) floating button -->
+    <button id="scroll-to-top" class="fixed bottom-6 right-6 p-3 rounded-full bg-white/80 dark:bg-darkCard/80 border border-lightBorder dark:border-darkBorder shadow-xl backdrop-blur-md text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center justify-center cursor-pointer" aria-label="Scroll to Top">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
+        </svg>
+    </button>
+
     <!-- Floating Hover Detail Preview Card (translucent glass design) -->
     <div id="hover-preview-card" class="hidden absolute pointer-events-none z-50 bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl p-4 shadow-2xl max-w-sm w-72 backdrop-blur-xl transition-all duration-150 transform scale-100">
         <!-- Loading spinner templates or populated content rendering -->
@@ -275,7 +288,20 @@
         });
 
 
-        // --- 2. EXTENSIBLE UNIFIED SEARCH INDEX SYSTEM ---
+        // --- 2. LIVE CLOCK & DATE ENGINE ---
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            const dateStr = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            document.getElementById('clock-time').textContent = timeStr;
+            document.getElementById('clock-date').textContent = dateStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+
+        // --- 3. EXTENSIBLE UNIFIED SEARCH INDEX SYSTEM ---
         let searchIndex = [];
         let currentlyFilteredApps = []; // For bottom grid view
         let localAppsRawList = [];      // Raw copy of dashboard apps
@@ -354,10 +380,22 @@
             }).join('');
         }
 
+        // Fallback arrays for Title & Subtitle in case dynamic files are not uploaded
+        const fallbackTitles = ["Fraagle", "Search", "Discover", "Tarkov Hub", "Workspace Portal"];
+        const fallbackSubtitles = [
+            "The premium clean search directory.",
+            "Find your gear, coordinate tactical quests.",
+            "Dynamic index of apps and gaming resources.",
+            "Fast, sleek, and optimized search engine."
+        ];
+
         // Fetches a random line from indexTitles.txt and indexSubtitles.txt
         async function loadDynamicTitleAndSubtitle() {
             const logoTitle = document.getElementById('logo-title');
             const logoSubtitle = document.getElementById('logo-subtitle');
+
+            let finalTitle = "Fraagle";
+            let finalSubtitle = "The premium clean search directory.";
 
             // 1. Fetch Dynamic Title
             try {
@@ -366,14 +404,18 @@
                     const text = await res.text();
                     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                     if (lines.length > 0) {
-                        const randomTitle = lines[Math.floor(Math.random() * lines.length)];
-                        logoTitle.innerHTML = colorizeText(randomTitle);
-                        document.title = randomTitle + " Hub";
+                        finalTitle = lines[Math.floor(Math.random() * lines.length)];
                     }
+                } else {
+                    // Fall back to a random title from the hardcoded list
+                    finalTitle = fallbackTitles[Math.floor(Math.random() * fallbackTitles.length)];
                 }
             } catch (err) {
-                console.warn("Using local title fallback.");
+                finalTitle = fallbackTitles[Math.floor(Math.random() * fallbackTitles.length)];
             }
+
+            logoTitle.innerHTML = colorizeText(finalTitle);
+            document.title = finalTitle + " Hub";
 
             // 2. Fetch Dynamic Subtitle
             try {
@@ -382,19 +424,23 @@
                     const text = await res.text();
                     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
                     if (lines.length > 0) {
-                        const randomSubtitle = lines[Math.floor(Math.random() * lines.length)];
-                        logoSubtitle.textContent = randomSubtitle;
+                        finalSubtitle = lines[Math.floor(Math.random() * lines.length)];
                     }
+                } else {
+                    // Fall back to random subtitle
+                    finalSubtitle = fallbackSubtitles[Math.floor(Math.random() * fallbackSubtitles.length)];
                 }
             } catch (err) {
-                console.warn("Dynamic subtitle skipped.");
+                finalSubtitle = fallbackSubtitles[Math.floor(Math.random() * fallbackSubtitles.length)];
             }
+
+            logoSubtitle.textContent = finalSubtitle;
         }
 
         // --- LOAD CORES ---
         async function initializeHubData() {
-            // Load custom dynamic text decorations
-            loadDynamicTitleAndSubtitle();
+            // Load custom dynamic text decorations with beautiful built-in rollbacks
+            await loadDynamicTitleAndSubtitle();
 
             // 1. Fetch Local Dashboard apps
             try {
@@ -706,6 +752,7 @@
         const resultsCloseBtn = document.getElementById('results-close-btn');
         const appsSection = document.getElementById('apps-section');
         const bsgChannelsBar = document.getElementById('bsg-channels-bar');
+        const scrollToTopBtn = document.getElementById('scroll-to-top');
 
         let matchedResultsBuffer = [];
 
@@ -1078,6 +1125,27 @@
             if (!searchContainer.contains(e.target)) {
                 dropdownResults.classList.add('hidden');
             }
+        });
+
+        // Monitor window scroll events for Up Button visibility
+        window.addEventListener('scroll', () => {
+            const searchContainer = document.getElementById('search-container');
+            if (!searchContainer) return;
+            
+            const searchBarRect = searchContainer.getBoundingClientRect();
+            // Show the scroll to top button once the search bar scrolls out of view
+            if (searchBarRect.bottom < 0) {
+                scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+                scrollToTopBtn.classList.add('opacity-100');
+            } else {
+                scrollToTopBtn.classList.remove('opacity-100');
+                scrollToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+            }
+        });
+
+        // Scroll back to page top smoothly
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
         // Global key shortcut commands
