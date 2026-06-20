@@ -192,7 +192,7 @@
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                 </svg>
                 <div>
-                    <span class="font-bold">Displaying Local Fallback list.</span> For production, write a <code>generate-list.js</code> build script in Vercel to auto-output <code>public/apps-list.json</code> containing your HTML array!
+                    <span class="font-bold">Displaying Local Fallback list.</span> For production, write a <code>generate-list.js</code> build script in Vercel to auto-output <code>public/app-list.json</code> containing your HTML array!
                 </div>
             </div>
         </div>
@@ -234,7 +234,7 @@
         let loadedApps = [];
         let currentlyFilteredApps = [];
 
-        // Pre-defined fallback apps if apps-list.json is missing
+        // Pre-defined fallback apps if app-list.json is missing
         const fallbackApps = [
             "analytics.html",
             "dashboard.html",
@@ -338,8 +338,8 @@
             });
         }
 
-        // Fetch application registry
-        fetch('/apps-list.json')
+        // Fetch application registry from the manually managed singular named 'app-list.json'
+        fetch('/app-list.json')
             .then(res => {
                 if (!res.ok) throw new Error("Manifest not found.");
                 return res.json();
