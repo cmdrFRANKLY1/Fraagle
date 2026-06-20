@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraagle Sheets - Escape from Tarkov DB</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Immediately inject correct theme class before body renders to avoid flashing
+        (function() {
+            const userTheme = localStorage.getItem('theme') || 'dark';
+            if (userTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
+        // Tailwind configuration for advanced modern styling in both modes
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        excelGreen: '#107c41',
+                        excelGreenHover: '#0b5931',
+                        darkBg: '#101010', // Deep black background
+                        darkCard: '#18181b', // Card background
+                        darkBorder: '#27272a', // Subtle dark borders
+                        lightBg: '#f3f2f1', // Classic Excel high-contrast light gray
+                        lightCard: '#ffffff', // Crisp white sheet cells
+                        lightBorder: '#cbd5e1', // Stronger gray sheet lines
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .excel-grid {
+            grid-template-columns: 40px repeat(11, minmax(130px, 1fr));
+        }
+        /* Excel style table gridlines */
+        .excel-cell {
+            border-bottom: 1px solid #cbd5e1;
+            border-right: 1px solid #cbd5e1;
+            transition: background-color 0.15s ease;
+        }
+        .dark .excel-cell {
+            border-bottom: 1px solid #27272a;
+            border-right: 1px solid #27272a;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 h-screen flex flex-col overflow-hidden">
+
+    <!-- Excel Header Bar -->
+    <header class="bg-[#107c41] text-white h-12 flex items-center justify-between px-4 shrink-0 select-none z-20">
+        <div class="flex items-center space-x-3">
+            <!-- Sheets Icon Logo -->
+            <div class="bg-white text-[#107c41] p-1 rounded font-bold text-sm tracking-tighter">
+                田
+            </div>
+            <span class="font-semibold text-sm">Fraagle Sheets</span>
+            <span class="text-xs opacity-75 border-l border-white/30 pl-2">Escape from Tarkov Items Database</span>
+        </div>
+
+        <div class="flex items-center space-x-3 text-xs">
+            <!-- Theme Toggle Button inside Excel Header -->
+            <button id="theme-toggle" class="p-1.5 rounded bg-white/10 hover:bg-white/20 transition-all focus:outline-none flex items-center justify-center cursor-pointer" aria-label="Toggle Theme">
+                <!-- Sun Icon -->
+                <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                <!-- Moon Icon -->
+                <svg id="theme-toggle-moon-icon" class="hidden w-4.5 h-4.5 text-zinc-100" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+            </button>
+            <span class="bg-white/10 px-2.5 py-1 rounded select-none">Sheet Mode: Read-Only</span>
+            <div class="w-7 h-7 rounded-full bg-emerald-700 border border-white/20 flex items-center justify-center font-bold text-xs select-none">
+                U
+            </div>
+        </div>
+    </header>
+
+    <!-- Ribbon Tabs Menu -->
+    <nav class="bg-[#f3f2f1] dark:bg-[#18181b] border-b border-[#cbd5e1] dark:border-[#27272a] h-10 flex items-center px-4 shrink-0 select-none z-10 text-xs text-zinc-600 dark:text-zinc-400">
+        <div class="flex space-x-6 h-full items-center">
+            <span class="font-semibold text-[#107c41] border-b-2 border-[#107c41] h-full flex items-center px-1 cursor-pointer">Home</span>
+            <span class="hover:text-zinc-950 dark:hover:text-white cursor-pointer h-full flex items-center px-1">Insert</span>
+            <span class="hover:text-zinc-950 dark:hover:text-white cursor-pointer h-full flex items-center px-1">Formulas</span>
+            <span class="hover:text-zinc-950 dark:hover:text-white cursor-pointer h-full flex items-center px-1">Data</span>
+            <span class="hover:text-zinc-950 dark:hover:text-white cursor-pointer h-full flex items-center px-1">View</span>
+        </div>
+    </nav>
+
+    <!-- Excel Ribbon Toolbar -->
+    <section class="bg-white dark:bg-[#1f1f23] border-b border-[#cbd5e1] dark:border-[#27272a] h-16 flex items-center px-4 space-x-6 shrink-0 select-none z-10 text-xs">
+        <!-- Quick search filter -->
+        <div class="flex flex-col space-y-1">
+            <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Search Filter</span>
+            <div class="flex items-center bg-[#f3f2f1] dark:bg-[#18181b] rounded border border-lightBorder dark:border-darkBorder px-2 py-1">
+                <input type="text" id="grid-search-input" placeholder="Search rows..." class="bg-transparent border-none outline-none w-44 text-zinc-800 dark:text-zinc-100">
+                <span class="text-zinc-400 select-none">🔍</span>
+            </div>
+        </div>
+
+        <!-- Divider line -->
+        <div class="h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
+
+        <!-- Custom Operations -->
+        <div class="flex items-center space-x-3">
+            <button id="toolbar-clear-filters" class="flex flex-col items-center justify-center p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                <span class="text-base">🧹</span>
+                <span class="text-[9px] mt-0.5">Clear Filters</span>
+            </button>
+            <button id="toolbar-compare-direct" class="flex flex-col items-center justify-center p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                <span class="text-base">⚖️</span>
+                <span class="text-[9px] mt-0.5">Load Selected</span>
+            </button>
+        </div>
+
+        <!-- Divider line -->
+        <div class="h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
+
+        <!-- Summary Stats Indicators -->
+        <div class="hidden sm:flex flex-col justify-center">
+            <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Formula Analytics</span>
+            <div class="flex space-x-4 text-[11px] font-medium text-zinc-500 dark:text-zinc-300 mt-1">
+                <div>Total Items: <span id="stat-total" class="font-bold text-[#107c41]">...</span></div>
+                <div>Avg Base Price: <span id="stat-avg-price" class="font-bold text-[#107c41]">...</span></div>
+                <div>Avg Weight: <span id="stat-avg-weight" class="font-bold text-[#107c41]">...</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Excel Formula Bar -->
+    <section class="bg-[#f3f2f1] dark:bg-[#18181b] border-b border-[#cbd5e1] dark:border-[#27272a] h-9 flex items-center px-2 shrink-0 select-none text-xs font-mono">
+        <!-- Selected Cell Box -->
+        <div id="active-cell-indicator" class="w-12 bg-white dark:bg-darkCard h-6 border border-[#cbd5e1] dark:border-darkBorder rounded text-center flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-bold select-all">
+            A1
+        </div>
+        <!-- Separator -->
+        <div class="text-zinc-400 dark:text-zinc-600 mx-2 text-sm select-none">|</div>
+        <span class="text-zinc-400 select-none mr-2 font-semibold">fx</span>
+        <!-- Formula input box -->
+        <div class="flex-grow bg-white dark:bg-darkCard h-6 border border-[#cbd5e1] dark:border-darkBorder rounded flex items-center px-2">
+            <input type="text" id="excel-formula-input" readonly value="=TarkovSpreadsheet.Index()" class="w-full bg-transparent border-none outline-none select-all text-zinc-700 dark:text-zinc-300">
+        </div>
+    </section>
+
+    <!-- Main Workspace Container (Grid + Side Compare panel) -->
+    <div class="flex-grow flex overflow-hidden w-full relative z-0">
+        
+        <!-- Excel Grid Sheet Body -->
+        <div class="flex-grow overflow-auto relative select-none">
+            <!-- Sticky Spreadsheet Header Row -->
+            <div class="sticky top-0 left-0 right-0 z-10 bg-[#f3f2f1] dark:bg-[#1e1e21] text-xs font-semibold text-zinc-500 dark:text-zinc-400 flex items-center h-8 select-none border-b border-[#cbd5e1] dark:border-[#27272a]">
+                <!-- Row Number spacer cell -->
+                <div class="w-10 flex-shrink-0 text-center border-r border-[#cbd5e1] dark:border-[#27272a] h-full flex items-center justify-center"></div>
+                <!-- Column indicators -->
+                <div class="excel-grid grid flex-grow h-full items-center text-center">
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">A (Name)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">B (Short Name)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">C (Category)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">D (Base Price)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">E (Avg 24h)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">F (Weight)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">G (Caliber)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">H (Ergonomics)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">I (Recoil)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">J (Armor Class)</div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold">K (Durability)</div>
+                </div>
+            </div>
+
+            <!-- Spreadsheet Grid Rows container -->
+            <div id="spreadsheet-grid-body" class="text-xs font-mono bg-white dark:bg-[#151515]">
+                <!-- Rows populated dynamically here -->
+                <div class="flex items-center justify-center py-20 bg-white dark:bg-[#151515]">
+                    <div class="flex flex-col items-center space-y-3">
+                        <div class="w-8 h-8 border-4 border-[#107c41] border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-zinc-400 text-sm">Fetching and caching grid elements...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Microsoft Excel Online Style Right-Side comparison Pane -->
+        <aside class="w-80 border-l border-[#cbd5e1] dark:border-darkBorder bg-[#faf9f8] dark:bg-darkCard/50 backdrop-blur-md flex flex-col shrink-0 overflow-y-auto">
+            <div class="p-4 border-b border-[#cbd5e1] dark:border-darkBorder bg-zinc-100/50 dark:bg-zinc-800/20">
+                <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2">
+                    <span>⚖️</span>
+                    <span>Item Comparison Pane</span>
+                </h3>
+                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase tracking-wider">Spreadsheet formulas comparator</p>
+            </div>
+
+            <!-- Comparison Selection Inputs -->
+            <div class="p-4 space-y-4">
+                <!-- Item A Dropdown Selection -->
+                <div class="space-y-1.5">
+                    <label for="compare-select-a" class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Item A (Baseline)</label>
+                    <select id="compare-select-a" class="w-full text-xs p-2 rounded-lg border border-[#cbd5e1] dark:border-darkBorder bg-white dark:bg-darkCard text-zinc-800 dark:text-zinc-100 outline-none focus:border-[#107c41]">
+                        <option value="">-- Choose Item A --</option>
+                    </select>
+                </div>
+
+                <!-- Item B Dropdown Selection -->
+                <div class="space-y-1.5">
+                    <label for="compare-select-b" class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Item B (Target)</label>
+                    <select id="compare-select-b" class="w-full text-xs p-2 rounded-lg border border-[#cbd5e1] dark:border-darkBorder bg-white dark:bg-darkCard text-zinc-800 dark:text-zinc-100 outline-none focus:border-[#107c41]">
+                        <option value="">-- Choose Item B --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Interactive Comparison Results Card -->
+            <div id="comparison-results-box" class="flex-grow p-4 border-t border-[#cbd5e1] dark:border-darkBorder space-y-4">
+                <!-- Default empty selection helper message -->
+                <div id="compare-empty-state" class="text-center py-12 text-zinc-400 dark:text-zinc-500 flex flex-col items-center">
+                    <span class="text-4xl mb-3">🧮</span>
+                    <h4 class="text-xs font-bold uppercase tracking-wider mb-1">Select Items to Compare</h4>
+                    <p class="text-[11px] max-w-[200px] leading-relaxed">Choose two elements from the dropdowns above or double-click grid rows to analyze differences instantly!</p>
+                </div>
+
+                <!-- Computed spreadsheet data analysis -->
+                <div id="compare-data-state" class="hidden space-y-4">
+                    <!-- Pricing comparison block -->
+                    <div class="bg-white dark:bg-zinc-900/40 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3 shadow-sm">
+                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Pricing Formula</div>
+                        <div id="pricing-compare-result" class="text-xs font-semibold leading-relaxed text-zinc-700 dark:text-zinc-300">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Weight comparison block -->
+                    <div class="bg-white dark:bg-zinc-900/40 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3 shadow-sm">
+                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Weight Formula</div>
+                        <div id="weight-compare-result" class="text-xs font-semibold leading-relaxed text-zinc-700 dark:text-zinc-300">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Tactical attribute comparison block -->
+                    <div id="tactical-compare-block" class="bg-white dark:bg-zinc-900/40 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3 shadow-sm hidden">
+                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Tactical Metrics</div>
+                        <div id="tactical-compare-result" class="text-xs font-semibold leading-relaxed space-y-2 text-zinc-700 dark:text-zinc-300">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <button id="reset-comparison-btn" class="w-full py-2 bg-[#107c41] hover:bg-emerald-600 transition-colors text-white font-semibold text-xs rounded-xl shadow-md cursor-pointer">
+                        Reset Comparator
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Excel Bottom Tabs Sheet Selection Bar -->
+    <footer class="bg-[#f3f2f1] dark:bg-[#18181b] border-t border-[#cbd5e1] dark:border-[#27272a] h-10 flex items-center justify-between px-4 shrink-0 select-none text-xs z-10">
+        <!-- Sheets Tabs buttons -->
+        <div class="flex items-center space-x-1 h-full">
+            <button id="tab-sheet-all" class="h-full px-4 border-t-2 border-[#107c41] bg-white dark:bg-[#1f1f23] font-semibold text-zinc-800 dark:text-zinc-100 flex items-center cursor-pointer">
+                Sheet1 (All Items)
+            </button>
+            <button id="tab-sheet-weapons" class="h-full px-4 border-t-2 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 flex items-center cursor-pointer">
+                Sheet2 (Weapons)
+            </button>
+            <button id="tab-sheet-armor" class="h-full px-4 border-t-2 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 flex items-center cursor-pointer">
+                Sheet3 (Armor)
+            </button>
+        </div>
+
+        <div class="text-[10px] text-zinc-400 dark:text-zinc-500 select-none">
+            Ready | Fraagle Sheets Online
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. SPREADSHEET DATABASES ---
+        let itemsIndex = [];
+        let activeSheetTab = 'all'; // 'all', 'weapons', 'armor'
+        let selectedCellReference = "A1";
+
+        // Fallbacks for offline development (100% clean & age-appropriate details)
+        const fallbackDatabase = [
+            { id: "1", name: "M4A1 5.56x45 assault rifle", shortName: "M4A1", basePrice: 55000, avg24hPrice: 59000, weight: 3.1, caliber: "5.56x45mm", ergonomics: 54, recoilVertical: 78, class: null, durability: null, category: "Weapons" },
+            { id: "2", name: "AK-74N 5.45x39 assault rifle", shortName: "AK-74N", basePrice: 38000, avg24hPrice: 39500, weight: 3.4, caliber: "5.45x39mm", ergonomics: 45, recoilVertical: 82, class: null, durability: null, category: "Weapons" },
+            { id: "3", name: "Altyn helmet (Olive)", shortName: "Altyn", basePrice: 120000, avg24hPrice: 155000, weight: 4.1, caliber: null, ergonomics: -15, recoilVertical: null, class: 5, durability: 45, category: "Armor" },
+            { id: "4", name: "6B43 Zabralo-Sh Body Armor", shortName: "Zabralo", basePrice: 280000, avg24hPrice: 340000, weight: 16.0, caliber: null, class: 6, durability: 85, category: "Armor" }
+        ];
+
+        // --- 1.5 LIGHT/DARK MODE IMPLEMENTATION ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('theme-toggle-sun-icon');
+        const moonIcon = document.getElementById('theme-toggle-moon-icon');
+
+        function applyTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+
+        // Initialize Theme from localStorage choice or default to 'dark'
+        const currentThemeSetting = localStorage.getItem('theme') || 'dark';
+        applyTheme(currentThemeSetting === 'dark');
+
+        themeToggleBtn.addEventListener('click', () => {
+            const isCurrentlyDark = document.documentElement.classList.contains('dark');
+            const nextTheme = isCurrentlyDark ? 'light' : 'dark';
+            localStorage.setItem('theme', nextTheme);
+            applyTheme(nextTheme === 'dark');
+        });
+
+        // --- 2. DATA INGESTION ENGINE ---
+        async function fetchTarkovGraphQL(query) {
+            try {
+                const response = await fetch('https://api.tarkov.dev/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                if (!response.ok) return null;
+                const json = await response.json();
+                return json.data;
+            } catch (err) {
+                console.error("Direct GraphQL request failed:", err);
+                return null;
+            }
+        }
+
+        async function loadTarkovData() {
+            // Expanded query matching the Vercel Proxy caching setup properties
+            const query = `query {
+                pvp: items(lang: en, gameMode: regular) {
+                    id name shortName wikiLink iconLink basePrice weight avg24hPrice category { name }
+                    properties { __typename
+                        ... on ItemPropertiesWeapon { caliber fireRate ergonomics recoilVertical }
+                        ... on ItemPropertiesArmor { class durability }
+                    }
+                }
+            }`;
+
+            let tarkovRawItems = [];
+
+            // Attempt 1: Fetch via the Vercel serverless proxy endpoint `/api/tarkov-data`
+            try {
+                const response = await fetch('/api/tarkov-data');
+                if (response.ok) {
+                    const json = await response.json();
+                    // Handle wrapped data schema differences gracefully
+                    tarkovRawItems = json?.data?.pvp || json?.pvp || [];
+                } else {
+                    throw new Error("Proxy offline");
+                }
+            } catch (e) {
+                console.log("Using direct fallback query...");
+                // Attempt 2: Direct public fallback
+                const liveData = await fetchTarkovGraphQL(query);
+                tarkovRawItems = liveData?.pvp || [];
+            }
+
+            // Ingest and map fields defensively with optional chaining
+            try {
+                if (tarkovRawItems.length === 0) {
+                    itemsIndex = fallbackDatabase;
+                } else {
+                    itemsIndex = tarkovRawItems.filter(Boolean).map(item => {
+                        return {
+                            id: item.id,
+                            name: item.name || 'Unknown Item',
+                            shortName: item.shortName || item.name,
+                            category: item.category?.name || 'General',
+                            basePrice: item.basePrice || 0,
+                            avg24hPrice: item.avg24hPrice || 0,
+                            weight: item.weight || 0,
+                            caliber: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.caliber : null,
+                            fireRate: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.fireRate : null,
+                            ergonomics: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.ergonomics : null,
+                            recoilVertical: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.recoilVertical : null,
+                            class: item.properties?.__typename === 'ItemPropertiesArmor' ? item.properties.class : null,
+                            durability: item.properties?.__typename === 'ItemPropertiesArmor' ? item.properties.durability : null,
+                            iconLink: item.iconLink
+                        };
+                    });
+                }
+            } catch (err) {
+                console.error("Error formatting items registry:", err);
+                itemsIndex = fallbackDatabase;
+            }
+
+            // Build the comparison dropdown selection lists
+            populateComparisonSelects();
+            
+            // Render the starting spreadsheet rows
+            filterAndRenderSheet();
+            calculateSummaryStatistics();
+        }
+
+        // --- 3. EXCEL SPREADSHEET ROW WRITERS ---
+        function filterAndRenderSheet() {
+            const gridBody = document.getElementById('spreadsheet-grid-body');
+            gridBody.innerHTML = '';
+
+            let filteredRows = [...itemsIndex];
+
+            // Tab-based spreadsheet filtering
+            if (activeSheetTab === 'weapons') {
+                filteredRows = itemsIndex.filter(item => item.caliber || item.ergonomics !== null || item.recoilVertical !== null);
+            } else if (activeSheetTab === 'armor') {
+                filteredRows = itemsIndex.filter(item => item.class !== null || item.durability !== null);
+            }
+
+            // Apply manual toolbar searches
+            const searchQuery = document.getElementById('grid-search-input').value.toLowerCase().trim();
+            if (searchQuery.length > 0) {
+                filteredRows = filteredRows.filter(row => {
+                    return row.name.toLowerCase().includes(searchQuery) ||
+                           row.shortName.toLowerCase().includes(searchQuery) ||
+                           row.category.toLowerCase().includes(searchQuery);
+                });
+            }
+
+            if (filteredRows.length === 0) {
+                gridBody.innerHTML = `
+                    <div class="flex items-center justify-center py-20 text-zinc-400 bg-white dark:bg-[#151515] h-full">
+                        <span>No records found in current Sheet.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            filteredRows.forEach((row, idx) => {
+                const rowNum = idx + 1;
+                const rowDiv = document.createElement('div');
+                rowDiv.className = "flex items-center hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 border-b border-[#cbd5e1] dark:border-[#27272a] h-8 relative select-all";
+                
+                rowDiv.innerHTML = `
+                    <!-- Row Indicator Header -->
+                    <div class="w-10 flex-shrink-0 text-center border-r border-[#cbd5e1] dark:border-[#27272a] bg-[#f3f2f1] dark:bg-[#1e1e21] text-zinc-400 font-bold select-none h-full flex items-center justify-center">
+                        ${rowNum}
+                    </div>
+                    
+                    <!-- Excel Row Columns Cells -->
+                    <div class="excel-grid grid flex-grow h-full items-center text-left">
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('A${rowNum}', '${row.name.replace(/'/g, "\\'")}')">${row.name}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('B${rowNum}', '${row.shortName.replace(/'/g, "\\'")}')">${row.shortName}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('C${rowNum}', '${row.category}')">${row.category}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('D${rowNum}', '=VAL(${row.basePrice})')">${row.basePrice > 0 ? row.basePrice.toLocaleString() + ' ₽' : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('E${rowNum}', '=VAL(${row.avg24hPrice})')">${row.avg24hPrice > 0 ? row.avg24hPrice.toLocaleString() + ' ₽' : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('F${rowNum}', '=VAL(${row.weight})')">${row.weight ? row.weight + ' kg' : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('G${rowNum}', '${row.caliber || '-'}')">${row.caliber || '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('H${rowNum}', '${row.ergonomics !== null ? row.ergonomics : '-'}')">${row.ergonomics !== null ? row.ergonomics : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('I${rowNum}', '${row.recoilVertical !== null ? row.recoilVertical : '-'}')">${row.recoilVertical !== null ? row.recoilVertical : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('J${rowNum}', '${row.class !== null ? row.class : '-'}')">${row.class !== null ? row.class : '-'}</div>
+                        <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell hover:bg-emerald-500/10 dark:hover:bg-emerald-400/5 border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelCell('K${rowNum}', '${row.durability !== null ? row.durability : '-'}')">${row.durability !== null ? row.durability : '-'}</div>
+                    </div>
+                `;
+
+                // Handle double click to directly load row items into Comparator selectors
+                rowDiv.addEventListener('dblclick', () => {
+                    loadIntoCompareDropdowns(row);
+                });
+
+                gridBody.appendChild(rowDiv);
+            });
+        }
+
+        // --- 4. EXCEL COMPILER & COMPARATOR ENGINE ---
+        function populateComparisonSelects() {
+            const selectA = document.getElementById('compare-select-a');
+            const selectB = document.getElementById('compare-select-b');
+
+            // Clear legacy choices
+            selectA.innerHTML = '<option value="">-- Choose Item A (Baseline) --</option>';
+            selectB.innerHTML = '<option value="">-- Choose Item B (Target) --</option>';
+
+            // Sort alphabetically for clean search selection
+            const sortedItems = [...itemsIndex].sort((a, b) => a.name.localeCompare(b.name));
+
+            sortedItems.forEach(item => {
+                const optA = document.createElement('option');
+                optA.value = item.id;
+                optA.textContent = `${item.shortName} (${item.category})`;
+                selectA.appendChild(optA);
+
+                const optB = document.createElement('option');
+                optB.value = item.id;
+                optB.textContent = `${item.shortName} (${item.category})`;
+                selectB.appendChild(optB);
+            });
+        }
+
+        function loadIntoCompareDropdowns(item) {
+            const selectA = document.getElementById('compare-select-a');
+            const selectB = document.getElementById('compare-select-b');
+
+            if (!selectA.value) {
+                selectA.value = item.id;
+            } else if (selectA.value !== item.id) {
+                selectB.value = item.id;
+            }
+            executeSpreadsheetComparison();
+        }
+
+        function selectExcelCell(ref, val) {
+            document.getElementById('active-cell-indicator').textContent = ref;
+            document.getElementById('excel-formula-input').value = val;
+        }
+
+        function executeSpreadsheetComparison() {
+            const idA = document.getElementById('compare-select-a').value;
+            const idB = document.getElementById('compare-select-b').value;
+
+            const emptyState = document.getElementById('compare-empty-state');
+            const dataState = document.getElementById('compare-data-state');
+
+            if (!idA || !idB) {
+                emptyState.classList.remove('hidden');
+                dataState.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            dataState.classList.remove('hidden');
+
+            // Corrected selector lookup utilizing itemsIndex list safely
+            const itemA = itemsIndex.find(i => i.id === idA);
+            const itemB = itemsIndex.find(i => i.id === idB);
+
+            renderComparisonData(itemA, itemB);
+        }
+
+        function renderComparisonData(itemA, itemB) {
+            if (!itemA || !itemB) return;
+
+            // Excel Formula Bar updates dynamically during calculation
+            document.getElementById('excel-formula-input').value = `=COMPARE("${itemA.shortName}", "${itemB.shortName}")`;
+
+            // Price Differences Calculator
+            const priceA = itemA.basePrice || 0;
+            const priceB = itemB.basePrice || 0;
+            const priceDiff = Math.abs(priceA - priceB);
+            const pricingResult = document.getElementById('pricing-compare-result');
+
+            if (priceA === 0 && priceB === 0) {
+                pricingResult.innerHTML = `No base price records recorded.`;
+            } else if (priceA === priceB) {
+                pricingResult.innerHTML = `Both items match at exactly <span class="text-[#107c41] font-bold">${priceA.toLocaleString()} ₽</span>.`;
+            } else {
+                const cheaperItem = priceA < priceB ? itemA.shortName : itemB.shortName;
+                const percentage = Math.round((priceDiff / Math.max(priceA, priceB)) * 100);
+                pricingResult.innerHTML = `
+                    <div>
+                        <span class="text-[#107c41] font-bold">${cheaperItem}</span> is <span class="text-emerald-500 dark:text-emerald-400 font-bold">${priceDiff.toLocaleString()} ₽</span> (${percentage}%) cheaper.
+                    </div>
+                `;
+            }
+
+            // Weight Differences Calculator
+            const weightA = itemA.weight || 0;
+            const weightB = itemB.weight || 0;
+            const weightDiff = Math.abs(weightA - weightB).toFixed(2);
+            const weightResult = document.getElementById('weight-compare-result');
+
+            if (weightA === weightB) {
+                weightResult.innerHTML = `Both items weigh exactly <span class="text-[#107c41] font-bold">${weightA} kg</span>.`;
+            } else {
+                const lighterItem = weightA < weightB ? itemA.shortName : itemB.shortName;
+                weightResult.innerHTML = `
+                    <div>
+                        <span class="text-[#107c41] font-bold">${lighterItem}</span> is <span class="text-emerald-500 dark:text-emerald-400 font-bold">${weightDiff} kg</span> lighter.
+                    </div>
+                `;
+            }
+
+            // Tactical Comparison Elements (Calibers, Armor protection classes, etc.)
+            const tacticalBlock = document.getElementById('tactical-compare-block');
+            const tacticalResult = document.getElementById('tactical-compare-result');
+            
+            // Check if items are Weapons or Armor category to run comparison details
+            const isWeaponA = itemA.caliber || itemA.ergonomics !== null || itemA.recoilVertical !== null;
+            const isWeaponB = itemB.caliber || itemB.ergonomics !== null || itemB.recoilVertical !== null;
+            const isArmorA = itemA.class !== null || itemA.durability !== null;
+            const isArmorB = itemB.class !== null || itemB.durability !== null;
+
+            if (isWeaponA || isWeaponB || isArmorA || isArmorB) {
+                tacticalBlock.classList.remove('hidden');
+                let html = '';
+
+                // Weapon caliber / Recoil evaluations
+                if (itemA.caliber || itemB.caliber) {
+                    html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Caliber:</strong> ${itemA.caliber || 'N/A'} vs ${itemB.caliber || 'N/A'}</div>`;
+                }
+
+                if (itemA.ergonomics !== null && itemB.ergonomics !== null) {
+                    const ergoDiff = Math.abs(itemA.ergonomics - itemB.ergonomics);
+                    if (ergoDiff === 0) {
+                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Ergonomics:</strong> Both match at ${itemA.ergonomics}.</div>`;
+                    } else {
+                        const ergoMore = itemA.ergonomics > itemB.ergonomics ? itemA.shortName : itemB.shortName;
+                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Ergonomics:</strong> <span class="text-[#107c41] font-bold">${ergoMore}</span> has <span class="text-emerald-500 dark:text-emerald-400 font-bold">+${ergoDiff}</span> more.</div>`;
+                    }
+                }
+
+                if (itemA.recoilVertical !== null && itemB.recoilVertical !== null) {
+                    const recoilDiff = Math.abs(itemA.recoilVertical - itemB.recoilVertical);
+                    if (recoilDiff === 0) {
+                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Recoil:</strong> Both match at ${itemA.recoilVertical}.</div>`;
+                    } else {
+                        const recoilLess = itemA.recoilVertical < itemB.recoilVertical ? itemA.shortName : itemB.shortName;
+                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Recoil:</strong> <span class="text-[#107c41] font-bold">${recoilLess}</span> has <span class="text-emerald-500 dark:text-emerald-400 font-bold">-${recoilDiff}</span> less vertical recoil.</div>`;
+                    }
+                }
+
+                if (itemA.fireRate !== null && itemB.fireRate !== null) {
+                    const rpmDiff = Math.abs(itemA.fireRate - itemB.fireRate);
+                    if (rpmDiff === 0) {
+                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Fire Rate:</strong> Both match at ${itemA.fireRate} RPM.</div>`;
+                    } else {
+                        const rpmMore = itemA.fireRate > itemB.fireRate ? itemA.shortName : itemB.shortName;
+                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Fire Rate:</strong> <span class="text-[#107c41] font-bold">${rpmMore}</span> fires <span class="text-emerald-500 dark:text-emerald-400 font-bold">+${rpmDiff}</span> RPM faster.</div>`;
+                    }
+                }
+
+                // Armor Class evaluations
+                if (itemA.class !== null || itemB.class !== null) {
+                    const classA = itemA.class || 0;
+                    const classB = itemB.class || 0;
+                    if (classA === classB) {
+                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Armor Class:</strong> Match (Class ${classA} protection).</div>`;
+                    } else {
+                        const armorMore = classA > classB ? itemA.shortName : itemB.shortName;
+                        const classDiff = Math.abs(classA - classB);
+                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Armor:</strong> <span class="text-[#107c41] font-bold">${armorMore}</span> has <span class="text-emerald-500 dark:text-emerald-400 font-bold">+${classDiff}</span> higher class.</div>`;
+                    }
+                }
+
+                tacticalResult.innerHTML = html || 'No specific tactical parameters match for comparison.';
+            } else {
+                tacticalBlock.classList.add('hidden');
+            }
+        }
+
+        // --- 5. SHEETS NAVIGATION TABS SYSTEM ---
+        const tabAll = document.getElementById('tab-sheet-all');
+        const tabWeapons = document.getElementById('tab-sheet-weapons');
+        const tabArmor = document.getElementById('tab-sheet-armor');
+
+        function selectSheetTab(tabId) {
+            activeSheetTab = tabId;
+
+            // Reset tab highlights
+            [tabAll, tabWeapons, tabArmor].forEach(tab => {
+                tab.className = "h-full px-4 border-t-2 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 flex items-center cursor-pointer";
+            });
+
+            // Set active highlight
+            const activeTabBtn = document.getElementById(`tab-sheet-${tabId}`);
+            activeTabBtn.className = "h-full px-4 border-t-2 border-[#107c41] bg-white dark:bg-[#1f1f23] font-semibold text-zinc-800 dark:text-zinc-100 flex items-center cursor-pointer";
+
+            // Re-render row grid filters
+            filterAndRenderSheet();
+        }
+
+        tabAll.addEventListener('click', () => selectSheetTab('all'));
+        tabWeapons.addEventListener('click', () => selectSheetTab('weapons'));
+        tabArmor.addEventListener('click', () => selectSheetTab('armor'));
+
+
+        // --- 6. CORE EVENT LISTENERS ---
+        const gridSearch = document.getElementById('grid-search-input');
+        const clearFiltersBtn = document.getElementById('toolbar-clear-filters');
+        const compareDirectBtn = document.getElementById('toolbar-compare-direct');
+        const resetComparisonBtn = document.getElementById('reset-comparison-btn');
+
+        gridSearch.addEventListener('input', () => {
+            filterAndRenderSheet();
+        });
+
+        clearFiltersBtn.addEventListener('click', () => {
+            gridSearch.value = '';
+            filterAndRenderSheet();
+        });
+
+        compareDirectBtn.addEventListener('click', () => {
+            executeSpreadsheetComparison();
+        });
+
+        resetComparisonBtn.addEventListener('click', () => {
+            document.getElementById('compare-select-a').value = '';
+            document.getElementById('compare-select-b').value = '';
+            executeSpreadsheetComparison();
+        });
+
+        document.getElementById('compare-select-a').addEventListener('change', executeSpreadsheetComparison);
+        document.getElementById('compare-select-b').addEventListener('change', executeSpreadsheetComparison);
+
+        // --- 7. FORMULA STATS CALCULATOR ---
+        function calculateSummaryStatistics() {
+            const count = itemsIndex.length;
+            const totalPrice = itemsIndex.reduce((sum, item) => sum + (item.basePrice || 0), 0);
+            const totalWeight = itemsIndex.reduce((sum, item) => sum + (item.weight || 0), 0);
+
+            const avgPrice = count > 0 ? Math.round(totalPrice / count) : 0;
+            const avgWeight = count > 0 ? (totalWeight / count).toFixed(2) : 0;
+
+            document.getElementById('stat-total').textContent = count;
+            document.getElementById('stat-avg-price').textContent = `${avgPrice.toLocaleString()} ₽`;
+            document.getElementById('stat-avg-weight').textContent = `${avgWeight} kg`;
+        }
+
+        // Run Core Loader
+        loadTarkovData();
+    </script>
+</body>
+</html>
