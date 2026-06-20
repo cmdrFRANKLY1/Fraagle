@@ -85,7 +85,7 @@
             <span id="clock-date" class="text-[9px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-0.5 whitespace-nowrap">Sunday, June 21, 2026</span>
         </div>
 
-        <!-- Right Side: Dark Mode Toggle, Gradient Toggle and App Launcher -->
+        <!-- Right Side: Dark Mode Toggle, Gradient Toggle, Launcher & Profile -->
         <div class="flex items-center space-x-2 sm:space-x-3 relative z-10">
             <!-- Gradient Glow Toggle Button -->
             <button id="gradient-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Glow Gradients">
@@ -122,6 +122,11 @@
                         <!-- Populated dynamically with the apps -->
                     </div>
                 </div>
+            </div>
+
+            <!-- Profile Avatar Button with Fallback Protection -->
+            <div class="w-10 h-10 rounded-xl overflow-hidden border border-lightBorder dark:border-darkBorder shadow-sm hover:shadow-lg hover:border-indigo-500/30 dark:hover:border-indigo-400/30 transition-all duration-200 cursor-pointer select-none">
+                <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
             </div>
         </div>
     </header>
