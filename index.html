@@ -179,34 +179,57 @@
         <!-- Google-Style Search Results Dashboard (Hidden by default) -->
         <div id="google-results-view" class="hidden w-full max-w-2xl px-2 mb-12">
             <!-- Battlestate Games Channels Bar placed at the top of the search site, right below the search bar -->
-            <div id="bsg-channels-bar" class="hidden mb-4 p-4 rounded-2xl bg-white/80 dark:bg-darkCard/40 border border-lightBorder dark:border-darkBorder shadow-sm backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span class="text-xs uppercase font-semibold tracking-wider text-zinc-500 dark:text-zinc-400 select-none">Official Battlestate Games Channels</span>
-                <div class="flex items-center space-x-5 text-zinc-500 dark:text-zinc-400">
-                    <!-- Twitch -->
-                    <a href="https://www.twitch.tv/battlestategames" target="_blank" title="BSG Twitch" class="hover:text-purple-500 transition-colors">
-                        <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
-                        </svg>
-                    </a>
-                    <!-- YouTube -->
-                    <a href="https://www.youtube.com/battlestategames" target="_blank" title="BSG YouTube" class="hover:text-red-500 transition-colors">
-                        <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5 12 3.5 12 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                    </a>
-                    <!-- Twitter / X -->
-                    <a href="https://twitter.com/bstategames" target="_blank" title="BSG Twitter" class="hover:text-sky-500 dark:hover:text-zinc-100 transition-colors">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2.25h3.308l-7.227 7.56 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.085L1.254 2.25h6.8l4.8 6.35 5.39-6.35zM15.902 19.77h1.832L7.284 4.59H5.318L15.902 19.77z"/>
-                        </svg>
-                    </a>
-                    <!-- Reddit -->
-                    <a href="https://www.reddit.com/r/escapefromtarkov/" target="_blank" title="Reddit r/escapefromtarkov" class="hover:text-orange-500 transition-colors">
-                        <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M24 11.5c0-1.65-1.35-3-3-3-.96 0-1.86.48-2.42 1.24-1.64-1-3.85-1.64-6.29-1.72l1.35-4.24 3.71.79c.04.97.86 1.75 1.86 1.75 1.02 0 1.85-.83 1.85-1.85s-.83-1.85-1.85-1.85c-.86 0-1.58.59-1.78 1.39l-4.14-.88c-.22-.05-.44.08-.51.29l-1.62 5.09c-2.47.04-4.71.69-6.39 1.71C4.41 8.99 3.5 8.5 2.5 8.5c-1.65 0-3 1.35-3 3 0 1.13.56 2.11 1.41 2.69-.06.26-.09.53-.09.81 0 3.86 4.43 7 9.88 7 5.46 0 9.88-3.14 9.88-7 0-.28-.03-.55-.09-.8.82-.57 1.38-1.55 1.38-2.69zM5.5 13.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm11.5 4.5c-1.84 1.84-5.16 1.84-7 0-.19-.19-.19-.51 0-.7.19-.19.51-.19.7 0 1.46 1.46 4.14 1.46 5.6 0 .19-.19.51-.19.7 0 .19.2.19.51 0 .7zm-1.5-6c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                        </svg>
-                    </a>
-                </div>
+            <div id="bsg-channels-bar" class="hidden mb-6 flex items-center justify-center gap-6 text-zinc-500 dark:text-zinc-400 bg-transparent py-2 select-none">
+                <!-- BSG EFT Homepage -->
+                <a href="https://www.escapefromtarkov.com/" target="_blank" title="Official EFT Homepage" class="hover:text-fraagleBlue transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zM12.5 3.042A8.967 8.967 0 0012 3c-1.196 0-2.324.288-3.354.799m6.708 0A8.967 8.967 0 0112 3a8.967 8.967 0 01-3.354.799M12 3v18m0-18c-1.84 1.84-5.16 1.84-7 0m7 0c1.84 1.84 5.16 1.84 7 0m-7 0a9 9 0 010 18M3.055 11H20.94m-20.94 2H20.94"></path>
+                    </svg>
+                </a>
+                <!-- YouTube -->
+                <a href="https://www.youtube.com/battlestategames" target="_blank" title="BSG YouTube" class="hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5 12 3.5 12 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+                <!-- Twitter / X -->
+                <a href="https://x.com/bstategames" target="_blank" title="BSG Twitter / X" class="hover:text-sky-500 dark:hover:text-zinc-100 transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                    <svg class="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 7.56 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.085L1.254 2.25h6.8l4.8 6.35 5.39-6.35zM15.902 19.77h1.832L7.284 4.59H5.318L15.902 19.77z"/>
+                    </svg>
+                </a>
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/escapefromtarkov/" target="_blank" title="Official Instagram" class="hover:text-pink-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                </a>
+                <!-- TikTok -->
+                <a href="https://www.tiktok.com/@escapefromtarkov" target="_blank" title="Official TikTok" class="hover:text-zinc-800 dark:hover:text-white transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.525.02c1.31.02 2.61.05 3.91.09.08 1.54.81 2.96 1.99 3.84.01.68.02 1.35.03 2.03-1.22-.02-2.42-.44-3.38-1.25-.03 2.93-.05 5.86-.08 8.79a6.38 6.38 0 0 1-5.11 6.27c-3.13.62-6.27-1.12-7.24-4.14A6.41 6.41 0 0 1 5.8 8.43c.12 1.99.16 3.99.18 5.98a4.42 4.42 0 0 0-2.82 4.14c.03 2.45 2.05 4.41 4.5 4.38s4.41-2.05 4.38-4.5c.03-4.8.05-9.61.08-14.41a6.44 6.41 0 0 1 .58-4z"/>
+                    </svg>
+                </a>
+                <!-- Facebook -->
+                <a href="https://www.facebook.com/escapefromtarkov/" target="_blank" title="Official Facebook" class="hover:text-blue-600 transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </a>
+                <!-- Telegram -->
+                <a href="https://t.me/escapefromtarkovEN" target="_blank" title="Official Telegram" class="hover:text-sky-400 transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.14-.26.26-.53.26l.213-3.05 5.56-5.022c.24-.213-.054-.334-.373-.12l-6.869 4.32-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.535-.203 1.006.122.858.826z"/>
+                    </svg>
+                </a>
+                <!-- Discord -->
+                <a href="https://discord.gg/escapefromtarkovofficial" target="_blank" title="Official Discord" class="hover:text-indigo-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.03c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.03A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.077 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.01-.09-.024-.124a13.194 13.194 0 0 1-1.875-1.024.084.084 0 0 1-.008-.139c.12-.09.242-.18.354-.275a.075.077 0 0 1 .075-.01c3.986 1.83 8.33 1.83 12.24 0a.075.075 0 0 1 .075.01c.12.095.24.185.354.276a.085.084 0 0 1-.008.139 12.924 12.924 0 0 1-1.875 1.024.082.082 0 0 0-.024.124c.362.7.774 1.364 1.226 1.994a.076.076 0 0 0 .084.028 19.83 19.9 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/>
+                    </svg>
+                </a>
             </div>
 
             <div class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 flex items-center justify-between">
@@ -288,20 +311,7 @@
         });
 
 
-        // --- 2. LIVE CLOCK & DATE ENGINE ---
-        function updateClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-            const dateStr = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            
-            document.getElementById('clock-time').textContent = timeStr;
-            document.getElementById('clock-date').textContent = dateStr;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-
-        // --- 3. EXTENSIBLE UNIFIED SEARCH INDEX SYSTEM ---
+        // --- 2. EXTENSIBLE UNIFIED SEARCH INDEX SYSTEM ---
         let searchIndex = [];
         let currentlyFilteredApps = []; // For bottom grid view
         let localAppsRawList = [];      // Raw copy of dashboard apps
@@ -380,7 +390,7 @@
             }).join('');
         }
 
-        // Expanded, clean, healthy general titles for search exploration
+        // Expanded list of general random titles for dynamic exploration
         const generalSearchTitles = [
             "Fraagle", 
             "Seeker", 
@@ -393,56 +403,127 @@
             "Infinity", 
             "Orbit", 
             "Unified", 
-            "Clarity"
+            "Clarity",
+            "Apex", 
+            "Vortex", 
+            "Stellar", 
+            "Cosmos", 
+            "Zenith", 
+            "Aether", 
+            "Pulse", 
+            "Catalyst", 
+            "Nova", 
+            "Beacon", 
+            "Chronos", 
+            "Elysium", 
+            "Solace", 
+            "Summit", 
+            "Enigma", 
+            "Quantum", 
+            "Prism", 
+            "Echo", 
+            "Mirage", 
+            "Aura", 
+            "Helix", 
+            "Vector", 
+            "Fable", 
+            "Spire", 
+            "Zephyr", 
+            "Rift", 
+            "Glow", 
+            "Ascent",
+            "Spectra",
+            "Stratis",
+            "Altis",
+            "Focus",
+            "Radiant"
         ];
 
-        // Advanced Combinatorial Subtitle Builder
+        // Advanced Combinatorial Subtitle Builder with rich non-sensical permutations (clean, playful and dynamic)
         function generatePermutatedSubtitle() {
             const intros = [
-                "Your clean gateway to",
-                "Instantly navigate the",
-                "Sleek and unified entry into",
-                "Your ultimate portal for",
-                "Seamlessly explore",
-                "Real-time index of",
-                "A beautifully optimized platform for",
-                "Discover endless insights from",
-                "The direct entry point for"
+                "Your friendly guide to",
+                "Instantly teleporting through",
+                "A whimsical window into",
+                "An optimized catalyst for",
+                "The premier launchpad for",
+                "Gently navigating the",
+                "A hyper-dimensional key to",
+                "A pristine, logic-free path into",
+                "Your daily dose of",
+                "A customized springboard toward",
+                "A cozy digital hammock for",
+                "A futuristic portal serving",
+                "The most reliable source for",
+                "A secret garden full of",
+                "The ultimate playground of",
+                "An astronomical orbit around",
+                "Crafting high-quality queries for",
+                "The legendary archives of"
             ];
             
             const adjectives = [
-                "premium",
-                "modern",
-                "sleek",
-                "minimalist",
-                "dynamic",
-                "unified",
-                "intelligent",
-                "optimized",
-                "limitless",
-                "pristine",
-                "high-performance"
+                "wobbly",
+                "bubbly",
+                "quantum-entangled",
+                "neomorphic",
+                "retro-futuristic",
+                "gravity-defying",
+                "fluffy",
+                "hyper-threaded",
+                "pixel-perfect",
+                "sub-atomic",
+                "cyber-organic",
+                "laser-focused",
+                "stellar",
+                "glowing",
+                "cloud-native",
+                "whimsical",
+                "magnetic",
+                "kaleidoscopic",
+                "polychromatic",
+                "giggle-powered",
+                "harmonious",
+                "space-traveling",
+                "mitten-wearing"
             ];
             
             const subjects = [
-                "workspace applications",
-                "interactive development tools",
-                "clean utility modules",
-                "Tarkov equipment data",
-                "general learning tools",
-                "creative assets",
-                "essential user guides",
-                "informative directories"
+                "bubble-tea recipes",
+                "robotic penguin blueprints",
+                "neomorphic button shadows",
+                "clandestine cookie jars",
+                "cosmic potato logic",
+                "gravity-free space socks",
+                "digital dandelion dreams",
+                "underwater firefly networks",
+                "secret hamster space programs",
+                "virtual origami instructions",
+                "sentient marshmallow algorithms",
+                "quantum pancake configurations",
+                "acoustic pizza vibrations",
+                "sub-aquatic bicycle repair guides",
+                "hovercraft cat grooming manuals",
+                "invisible ink ingredient lists",
+                "philosophical donut holes",
+                "nebulous cloud formations",
+                "digital jellyfish orchestras"
             ];
             
             const endings = [
-                "with absolute style.",
-                "in real-time.",
-                "instantly and securely.",
-                "for all users.",
-                "without any clutter.",
-                "fluidly and gracefully.",
-                "across all of your devices."
+                "using pure imagination.",
+                "while drinking warm cocoa.",
+                "powered by friendly space sloths.",
+                "at the speed of a startled turtle.",
+                "inside a comfortable pocket dimension.",
+                "approved by intergalactic wizards.",
+                "optimized for maximum coziness.",
+                "with a gentle sprinkle of stardust.",
+                "without breaking the space-time continuum.",
+                "just for the pure joy of discovery.",
+                "conceived by well-meaning calculators.",
+                "under the soft glow of friendly neon signs.",
+                "strictly for entertainment purposes."
             ];
 
             const intro = intros[Math.floor(Math.random() * intros.length)];
