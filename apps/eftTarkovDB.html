@@ -101,10 +101,34 @@
         }
         .search-input {
             transition: border-color 0.15s;
+            padding-right: 1.75rem;
         }
         .search-input:focus {
             border-color: #107c41;
             outline: none;
+        }
+        .search-clear {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #a1a1aa;
+            font-size: 14px;
+            line-height: 1;
+            padding: 0 4px;
+            border-radius: 4px;
+            transition: background 0.15s, color 0.15s;
+            background: transparent;
+            border: none;
+        }
+        .search-clear:hover {
+            background: #e4e4e7;
+            color: #3f3f46;
+        }
+        .dark .search-clear:hover {
+            background: #3f3f46;
+            color: #d4d4d8;
         }
         .row-selected {
             background: #d1fae5 !important;
@@ -112,7 +136,7 @@
         .dark .row-selected {
             background: #1a3a2a !important;
         }
-        /* Large loader for overlay */
+
         .loader-large {
             border: 4px solid rgba(255, 255, 255, 0.2);
             border-top: 4px solid #ffffff;
@@ -122,15 +146,11 @@
             animation: spin 0.9s linear infinite;
         }
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* Explorer panel – Categories with checkboxes */
+        /* Explorer panel */
         #explorer-panel {
             width: 200px;
             min-width: 140px;
@@ -264,7 +284,6 @@
             background: #107c41;
         }
 
-        /* Loading overlay */
         #loading-overlay {
             position: fixed;
             inset: 0;
@@ -281,6 +300,11 @@
         #loading-overlay.hidden {
             opacity: 0;
             pointer-events: none;
+        }
+
+        /* Hide column letters – keep only names */
+        .col-letter {
+            display: none;
         }
     </style>
 </head>
@@ -317,67 +341,14 @@
         </div>
     </header>
 
-    <!-- ===== RIBBON ===== -->
-    <nav class="bg-[#f3f2f1] dark:bg-[#18181b] border-b border-[#cbd5e1] dark:border-[#27272a] h-10 flex items-center px-4 shrink-0 z-30 text-xs text-zinc-600 dark:text-zinc-400">
-        <div class="flex space-x-6 h-full items-center relative">
-            <div class="relative h-full flex items-center">
-                <button id="menu-btn-file" class="font-semibold text-zinc-700 dark:text-zinc-300 hover:text-[#107c41] px-2 py-1 rounded transition h-full flex items-center">
-                    File <span class="ml-1 text-[8px] opacity-60">▼</span>
-                </button>
-                <div id="dropdown-menu-file" class="hidden absolute top-full left-0 mt-0.5 w-44 bg-white dark:bg-darkCard border border-[#cbd5e1] dark:border-darkBorder rounded-lg shadow-xl py-1 z-40">
-                    <button id="menu-opt-export" class="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center space-x-2">
-                        <span>📤</span> <span>Export Sheet</span>
-                    </button>
-                    <a href="../index.html" class="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center space-x-2">
-                        <span>🚪</span> <span>Exit</span>
-                    </a>
-                </div>
-            </div>
-            <div class="relative h-full flex items-center">
-                <button id="menu-btn-view" class="font-semibold text-zinc-700 dark:text-zinc-300 hover:text-[#107c41] px-2 py-1 rounded transition h-full flex items-center">
-                    View <span class="ml-1 text-[8px] opacity-60">▼</span>
-                </button>
-                <div id="dropdown-menu-view" class="hidden absolute top-full left-0 mt-0.5 w-48 bg-white dark:bg-darkCard border border-[#cbd5e1] dark:border-darkBorder rounded-lg shadow-xl py-1 z-40">
-                    <div class="px-4 py-1 text-[9px] uppercase tracking-wider text-zinc-400 font-bold">Grid Font</div>
-                    <button onclick="changeAppFont('Plus Jakarta Sans')" class="w-full text-left px-4 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-sans">Plus Jakarta Sans</button>
-                    <button onclick="changeAppFont('Inter')" class="w-full text-left px-4 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-sans">Inter</button>
-                    <button onclick="changeAppFont('Roboto Mono')" class="w-full text-left px-4 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-mono">Roboto Mono</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- ===== TOOLBAR ===== -->
-    <section class="bg-white dark:bg-[#1f1f23] border-b border-[#cbd5e1] dark:border-[#27272a] h-16 flex items-center px-4 space-x-6 shrink-0 z-10 text-xs">
-        <div class="flex flex-col space-y-1">
+    <!-- ===== TOOLBAR (simplified: only search) ===== -->
+    <section class="bg-white dark:bg-[#1f1f23] border-b border-[#cbd5e1] dark:border-[#27272a] h-14 flex items-center px-4 shrink-0 z-10 text-xs">
+        <div class="flex flex-col space-y-1 w-full max-w-xs">
             <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Search Filter</span>
-            <div class="flex items-center bg-[#f3f2f1] dark:bg-[#18181b] rounded border border-lightBorder dark:border-darkBorder px-2 py-1">
-                <input type="text" id="grid-search-input" placeholder="Search rows..." class="search-input bg-transparent border-none outline-none w-44 text-zinc-800 dark:text-zinc-100" />
-                <span class="text-zinc-400 select-none">🔍</span>
-            </div>
-        </div>
-
-        <div class="h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
-
-        <div class="flex items-center space-x-3">
-            <button id="toolbar-clear-filters" class="flex flex-col items-center justify-center p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-                <span class="text-base">🧹</span>
-                <span class="text-[9px] mt-0.5">Clear</span>
-            </button>
-            <button id="toolbar-toggle-icons" class="flex flex-col items-center justify-center p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-                <span id="icon-toggle-emoji" class="text-base">🖼️</span>
-                <span id="icon-toggle-label" class="text-[9px] mt-0.5">Hide Icons</span>
-            </button>
-        </div>
-
-        <div class="h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
-
-        <div class="hidden sm:flex flex-col justify-center">
-            <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Stats</span>
-            <div class="flex space-x-4 text-[11px] font-medium text-zinc-500 dark:text-zinc-300 mt-1">
-                <div>Items: <span id="stat-total" class="font-bold text-[#107c41]">…</span></div>
-                <div>Avg Price: <span id="stat-avg-price" class="font-bold text-[#107c41]">…</span></div>
-                <div>Avg Weight: <span id="stat-avg-weight" class="font-bold text-[#107c41]">…</span></div>
+            <div class="relative flex items-center bg-[#f3f2f1] dark:bg-[#18181b] rounded border border-lightBorder dark:border-darkBorder px-2 py-1">
+                <input type="text" id="grid-search-input" placeholder="Search rows..." class="search-input bg-transparent border-none outline-none w-full text-zinc-800 dark:text-zinc-100 pr-6" />
+                <span class="text-zinc-400 select-none absolute left-2 pointer-events-none">🔍</span>
+                <button id="search-clear-btn" class="search-clear" title="Clear search">✕</button>
             </div>
         </div>
     </section>
@@ -408,52 +379,52 @@
 
         <!-- Grid Container -->
         <div class="flex-grow overflow-auto relative select-none">
-            <!-- Sticky Header Row -->
+            <!-- Sticky Header Row – no column letters -->
             <div class="sticky top-0 left-0 right-0 z-10 bg-[#f3f2f1] dark:bg-[#1e1e21] text-xs font-semibold text-zinc-500 dark:text-zinc-400 flex items-center h-8 select-none border-b border-[#cbd5e1] dark:border-[#27272a]">
                 <div class="w-10 flex-shrink-0 text-center border-r border-[#cbd5e1] dark:border-[#27272a] h-full flex items-center justify-center bg-[#f3f2f1] dark:bg-[#1e1e21]"></div>
                 <div class="excel-grid grid flex-grow h-full items-center text-center">
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('name')">
-                        A (Name) <span id="sort-indicator-name" class="ml-1 text-[8px]"></span>
+                        Name <span id="sort-indicator-name" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-a')" ondblclick="autoSizeColumn('col-a', 260)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('shortName')">
-                        B (Short) <span id="sort-indicator-shortName" class="ml-1 text-[8px]"></span>
+                        Short <span id="sort-indicator-shortName" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-b')" ondblclick="autoSizeColumn('col-b', 150)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('category')">
-                        C (Category) <span id="sort-indicator-category" class="ml-1 text-[8px]"></span>
+                        Category <span id="sort-indicator-category" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-c')" ondblclick="autoSizeColumn('col-c', 160)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('basePrice')">
-                        D (Price) <span id="sort-indicator-basePrice" class="ml-1 text-[8px]"></span>
+                        Price <span id="sort-indicator-basePrice" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-d')" ondblclick="autoSizeColumn('col-d', 140)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('avg24hPrice')">
-                        E (Avg 24h) <span id="sort-indicator-avg24hPrice" class="ml-1 text-[8px]"></span>
+                        Avg 24h <span id="sort-indicator-avg24hPrice" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-e')" ondblclick="autoSizeColumn('col-e', 140)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('weight')">
-                        F (Weight) <span id="sort-indicator-weight" class="ml-1 text-[8px]"></span>
+                        Weight <span id="sort-indicator-weight" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-f')" ondblclick="autoSizeColumn('col-f', 120)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('caliber')">
-                        G (Caliber) <span id="sort-indicator-caliber" class="ml-1 text-[8px]"></span>
+                        Caliber <span id="sort-indicator-caliber" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-g')" ondblclick="autoSizeColumn('col-g', 150)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('ergonomics')">
-                        H (Ergo) <span id="sort-indicator-ergonomics" class="ml-1 text-[8px]"></span>
+                        Ergo <span id="sort-indicator-ergonomics" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-h')" ondblclick="autoSizeColumn('col-h', 140)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('recoilVertical')">
-                        I (Recoil) <span id="sort-indicator-recoilVertical" class="ml-1 text-[8px]"></span>
+                        Recoil <span id="sort-indicator-recoilVertical" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-i')" ondblclick="autoSizeColumn('col-i', 120)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('class')">
-                        J (Class) <span id="sort-indicator-class" class="ml-1 text-[8px]"></span>
+                        Class <span id="sort-indicator-class" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-j')" ondblclick="autoSizeColumn('col-j', 140)"></div>
                     </div>
                     <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('durability')">
-                        K (Durab.) <span id="sort-indicator-durability" class="ml-1 text-[8px]"></span>
+                        Durab. <span id="sort-indicator-durability" class="ml-1 text-[8px]"></span>
                         <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-k')" ondblclick="autoSizeColumn('col-k', 140)"></div>
                     </div>
                 </div>
@@ -552,7 +523,7 @@
     </div>
 
     <!-- ============================================================ -->
-    <!--  SCRIPT (tooltip removed)                                    -->
+    <!--  SCRIPT                                                      -->
     <!-- ============================================================ -->
     <script>
         // ============================================================
@@ -560,16 +531,13 @@
         // ============================================================
         let itemsIndex = [];
         let uniqueCategories = [];
-        let selectedCategories = new Set(); // stores category names; if empty => show all
-        let selectedCellReference = 'A1';
+        let selectedCategories = new Set();
         let selectedItemId = null;
         let rowHeights = {};
         let activeSortCol = '';
         let activeSortAsc = true;
         let searchDebounceTimer = null;
-        let showIcons = true;
 
-        // Loading overlay
         const loadingOverlay = document.getElementById('loading-overlay');
 
         function hideLoading() {
@@ -634,15 +602,7 @@
         });
 
         // ============================================================
-        //  4. FONT SWITCHER
-        // ============================================================
-        function changeAppFont(font) {
-            document.body.style.fontFamily = `"${font}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-            closeAllMenus();
-        }
-
-        // ============================================================
-        //  5. DATA FETCH
+        //  4. DATA FETCH
         // ============================================================
         async function fetchTarkovGraphQL(query) {
             try {
@@ -710,26 +670,22 @@
             itemsIndex.forEach(i => { if (i.category) catSet.add(i.category); });
             uniqueCategories = Array.from(catSet).sort();
 
-            // Initialize selectedCategories with all categories
             selectedCategories = new Set(uniqueCategories);
 
             renderExplorer();
             filterAndRender();
-            calcStats();
 
-            // Hide loading overlay now that data is ready
             hideLoading();
         }
 
         // ============================================================
-        //  6. EXPLORER WITH CHECKBOXES
+        //  5. EXPLORER
         // ============================================================
         const explorerList = document.getElementById('explorer-list');
 
         function renderExplorer() {
             explorerList.innerHTML = '';
 
-            // "All Items" master checkbox
             const allChecked = selectedCategories.size === uniqueCategories.length && uniqueCategories.length > 0;
             const allDiv = document.createElement('div');
             allDiv.className = 'explorer-item';
@@ -750,7 +706,6 @@
             });
             explorerList.appendChild(allDiv);
 
-            // Individual categories
             uniqueCategories.forEach(cat => {
                 const count = itemsIndex.filter(i => i.category === cat).length;
                 const checked = selectedCategories.has(cat);
@@ -776,7 +731,7 @@
         }
 
         // ============================================================
-        //  7. SORTING
+        //  6. SORTING
         // ============================================================
         function sortSpreadsheet(col) {
             if (activeSortCol === col) activeSortAsc = !activeSortAsc;
@@ -811,7 +766,7 @@
         }
 
         // ============================================================
-        //  8. COL / ROW RESIZE
+        //  7. COL / ROW RESIZE
         // ============================================================
         function initColDragResize(e, colVar) {
             e.preventDefault();
@@ -852,7 +807,7 @@
         }
 
         // ============================================================
-        //  9. WIKI LINK HELPERS (only used in detail panel)
+        //  8. WIKI LINK
         // ============================================================
         function buildWikiUrl(item) {
             if (item.wikiLink) return item.wikiLink;
@@ -861,7 +816,7 @@
         }
 
         // ============================================================
-        //  10. DETAIL PANEL UPDATE
+        //  9. DETAIL PANEL
         // ============================================================
         function updateDetailPanel(item) {
             const empty = document.getElementById('detail-empty');
@@ -908,7 +863,7 @@
         }
 
         // ============================================================
-        //  11. RENDER GRID (no tooltip events)
+        //  10. RENDER GRID
         // ============================================================
         function filterAndRender() {
             const grid = document.getElementById('spreadsheet-grid-body');
@@ -916,7 +871,6 @@
 
             let rows = [...itemsIndex];
 
-            // Apply category filter: if selectedCategories is empty, show all; else filter by selected
             if (selectedCategories.size > 0) {
                 rows = rows.filter(i => selectedCategories.has(i.category));
             }
@@ -957,7 +911,7 @@
                 const cells = document.createElement('div');
                 cells.className = 'excel-grid grid flex-grow h-full items-center text-left';
 
-                // Column A: Name
+                // Name
                 const cellA = document.createElement('div');
                 cellA.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -969,7 +923,7 @@
                 };
                 cells.appendChild(cellA);
 
-                // Column B: Short Name
+                // Short Name
                 const cellB = document.createElement('div');
                 cellB.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -981,7 +935,7 @@
                 };
                 cells.appendChild(cellB);
 
-                // Column C: Category
+                // Category
                 const cellC = document.createElement('div');
                 cellC.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -993,7 +947,7 @@
                 };
                 cells.appendChild(cellC);
 
-                // Column D: Base Price
+                // Price
                 const cellD = document.createElement('div');
                 cellD.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1005,7 +959,7 @@
                 };
                 cells.appendChild(cellD);
 
-                // Column E: Avg 24h
+                // Avg 24h
                 const cellE = document.createElement('div');
                 cellE.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1017,7 +971,7 @@
                 };
                 cells.appendChild(cellE);
 
-                // Column F: Weight
+                // Weight
                 const cellF = document.createElement('div');
                 cellF.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1029,7 +983,7 @@
                 };
                 cells.appendChild(cellF);
 
-                // Column G: Caliber
+                // Caliber
                 const cellG = document.createElement('div');
                 cellG.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1041,7 +995,7 @@
                 };
                 cells.appendChild(cellG);
 
-                // Column H: Ergonomics
+                // Ergonomics
                 const cellH = document.createElement('div');
                 cellH.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1053,7 +1007,7 @@
                 };
                 cells.appendChild(cellH);
 
-                // Column I: Recoil
+                // Recoil
                 const cellI = document.createElement('div');
                 cellI.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1065,7 +1019,7 @@
                 };
                 cells.appendChild(cellI);
 
-                // Column J: Class
+                // Class
                 const cellJ = document.createElement('div');
                 cellJ.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1077,7 +1031,7 @@
                 };
                 cells.appendChild(cellJ);
 
-                // Column K: Durability
+                // Durability
                 const cellK = document.createElement('div');
                 cellK.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1101,14 +1055,11 @@
                     });
                 }
 
-                // Double-click to select
                 div.addEventListener('dblclick', () => {
                     selectedItemId = row.id;
                     updateDetailPanel(row);
                     filterAndRender();
                 });
-
-                // No tooltip events anymore
 
                 frag.appendChild(div);
             });
@@ -1118,68 +1069,42 @@
         }
 
         // ============================================================
-        //  12. STATS
-        // ============================================================
-        function calcStats() {
-            const count = itemsIndex.length;
-            const totalP = itemsIndex.reduce((s, i) => s + (i.basePrice || 0), 0);
-            const totalW = itemsIndex.reduce((s, i) => s + (i.weight || 0), 0);
-            document.getElementById('stat-total').textContent = count;
-            document.getElementById('stat-avg-price').textContent = count > 0 ? `${Math.round(totalP / count).toLocaleString()} ₽` :
-                '0 ₽';
-            document.getElementById('stat-avg-weight').textContent = count > 0 ? `${(totalW / count).toFixed(2)} kg` : '0 kg';
-        }
-
-        // ============================================================
-        //  13. SEARCH (DEBOUNCED)
+        //  11. SEARCH CLEAR
         // ============================================================
         const searchInput = document.getElementById('grid-search-input');
+        const searchClearBtn = document.getElementById('search-clear-btn');
+
         searchInput.addEventListener('input', () => {
             clearTimeout(searchDebounceTimer);
             searchDebounceTimer = setTimeout(() => filterAndRender(), 100);
+            // Show/hide clear button
+            searchClearBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none';
         });
 
-        // ============================================================
-        //  14. CLEAR FILTERS
-        // ============================================================
-        document.getElementById('toolbar-clear-filters').addEventListener('click', () => {
+        searchClearBtn.addEventListener('click', () => {
             searchInput.value = '';
+            searchClearBtn.style.display = 'none';
             filterAndRender();
+            searchInput.focus();
         });
+        // Initially hide clear button
+        searchClearBtn.style.display = 'none';
 
         // ============================================================
-        //  15. TOGGLE ICONS (placeholder)
-        // ============================================================
-        document.getElementById('toolbar-toggle-icons').addEventListener('click', function() {
-            showIcons = !showIcons;
-            document.getElementById('icon-toggle-emoji').textContent = showIcons ? '🖼️' : '🚫';
-            document.getElementById('icon-toggle-label').textContent = showIcons ? 'Hide Icons' : 'Show Icons';
-        });
-
-        // ============================================================
-        //  16. MENUS
-        // ============================================================
-        const fileMenuBtn = document.getElementById('menu-btn-file');
-        const fileDropdown = document.getElementById('dropdown-menu-file');
-        const viewMenuBtn = document.getElementById('menu-btn-view');
-        const viewDropdown = document.getElementById('dropdown-menu-view');
-
-        function closeAllMenus() { fileDropdown.classList.add('hidden');
-            viewDropdown.classList.add('hidden'); }
-        fileMenuBtn.addEventListener('click', (e) => { e.stopPropagation();
-            closeAllMenus();
-            fileDropdown.classList.toggle('hidden'); });
-        viewMenuBtn.addEventListener('click', (e) => { e.stopPropagation();
-            closeAllMenus();
-            viewDropdown.classList.toggle('hidden'); });
-        document.addEventListener('click', closeAllMenus);
-
-        // ============================================================
-        //  17. EXPORT
+        //  12. EXPORT
         // ============================================================
         const exportModal = document.getElementById('export-modal');
-        document.getElementById('menu-opt-export').addEventListener('click', () => { exportModal.classList.remove('hidden');
-            closeAllMenus(); });
+        // We'll keep a simple export trigger – we removed the File menu, so we add a small export button in footer
+        // Instead, let's add an export button to the toolbar? We'll add a small export icon in the header next to theme toggle.
+        // Let's inject a small export button into the header.
+        const headerRight = document.querySelector('header .flex.items-center.space-x-3');
+        const exportBtn = document.createElement('button');
+        exportBtn.innerHTML = '📤';
+        exportBtn.className = 'p-2 rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 transition-all flex items-center justify-center cursor-pointer text-white text-sm';
+        exportBtn.title = 'Export Data';
+        exportBtn.addEventListener('click', () => { exportModal.classList.remove('hidden'); });
+        headerRight.insertBefore(exportBtn, headerRight.querySelector('#theme-toggle'));
+
         document.getElementById('export-modal-cancel').addEventListener('click', () => { exportModal.classList.add('hidden'); });
         document.getElementById('export-modal-confirm').addEventListener('click', () => {
             const scope = document.getElementById('export-scope').value;
@@ -1239,17 +1164,16 @@
         });
 
         // ============================================================
-        //  18. KEYBOARD SHORTCUTS
+        //  13. KEYBOARD SHORTCUTS
         // ============================================================
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { exportModal.classList.add('hidden');
-                closeAllMenus(); }
+            if (e.key === 'Escape') { exportModal.classList.add('hidden'); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault();
                 searchInput.focus(); }
         });
 
         // ============================================================
-        //  19. PANE DIVIDERS RESIZE
+        //  14. PANE DIVIDERS
         // ============================================================
         function setupDivider(dividerId, targetPanelId, minWidth, maxWidth, reverse = false) {
             const divider = document.getElementById(dividerId);
@@ -1281,7 +1205,7 @@
         setupDivider('detail-divider', 'detail-panel', 200, 500, false);
 
         // ============================================================
-        //  20. BOOT
+        //  15. BOOT
         // ============================================================
         loadTarkovData();
     </script>
