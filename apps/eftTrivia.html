@@ -89,6 +89,23 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden p-6 select-none">
 
+    <!-- Premium Full-Screen Loading Screen Overlay -->
+    <div id="app-loading-screen" class="fixed inset-0 bg-lightBg dark:bg-darkBg z-50 flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out">
+        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col items-center space-y-4 text-center">
+            <!-- Spinner Ring -->
+            <div class="relative w-16 h-16 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-4 border-zinc-200 dark:border-zinc-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+            <div>
+                <h2 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 uppercase tracking-widest font-mono">Synchronizing Data</h2>
+                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase font-semibold tracking-wider">Retrieving live caches from Tarkov.dev...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Decorative Ambient Soft Glow Gradients -->
     <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
     <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
@@ -161,49 +178,134 @@
                 <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Lives</span>
                 <span class="text-base tracking-wider mt-1 select-none flex items-center justify-center gap-1 min-h-[28px]" id="livesDisplay"></span>
             </div>
-            <!-- Streak Card (Replaced debug mode toggle) -->
+            <!-- Streak Card -->
             <div class="flex flex-col items-center justify-center p-3 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-lg backdrop-blur-md text-center">
                 <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Streak</span>
                 <span class="text-xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-100 mt-0.5" id="streakDisplay">0</span>
             </div>
         </section>
 
-        <!-- Quiz Central Area -->
-        <main class="bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md min-h-[440px] flex flex-col items-center justify-center transition-all duration-300 relative overflow-hidden" id="quizArea">
+        <!-- Workspace layout supporting Left Side Helper Manual + Right Side Game Box -->
+        <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start w-full relative z-10">
             
-            <!-- Shuffle / Pre-Start Screen -->
-            <div class="flex flex-col items-center justify-center gap-4 text-center py-8 w-full max-w-sm animate-fade-in" id="shuffleStart">
-                <div class="text-5xl filter drop-shadow-md select-none animate-bounce" id="startIcon" style="animation-duration: 3s">🎲</div>
-                <h2 class="text-xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100 uppercase" id="startTitle">Ready To Play</h2>
-                <p class="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed font-medium" id="startSub">5 question types · 10 points each</p>
-                <button class="hidden mt-4 py-3 px-8 font-bold text-xs uppercase tracking-widest bg-[#107c41] hover:bg-emerald-600 text-white rounded-xl shadow-lg transition duration-200 cursor-pointer" id="shuffleBtn">[ SHUFFLE ]</button>
-            </div>
-
-            <!-- Question Display -->
-            <div class="hidden flex-col items-center gap-6 w-full max-w-2xl animate-fade-in" id="questionDisplay">
-                <h2 class="text-lg font-bold text-zinc-950 dark:text-zinc-100 text-center tracking-tight px-4" id="questionTitle">What is this item?</h2>
-
-                <!-- Centered Interactive Item Icon Frame -->
-                <div class="flex flex-col items-center gap-3">
-                    <div class="w-36 h-36 bg-zinc-50/80 dark:bg-zinc-950/20 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-inner flex items-center justify-center overflow-hidden transition-all duration-300" id="iconBox">
-                        <span class="placeholder text-zinc-400 dark:text-zinc-600">␣</span>
+            <!-- Left Side Panel: How to Play manual (Collapsible outside-focus blur toggle) -->
+            <aside id="how-to-play-panel" class="bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4 text-xs transition-all duration-300 w-full">
+                <!-- Collapsible Header Button -->
+                <button id="how-to-play-toggle" class="w-full flex items-center justify-between font-bold text-sm text-[#107c41] uppercase tracking-wider focus:outline-none cursor-pointer select-none">
+                    <span class="flex items-center gap-2">
+                        <span>📋</span>
+                        <span>How to Play</span>
+                    </span>
+                    <span id="how-to-play-arrow" class="transition-transform duration-200">▼</span>
+                </button>
+                
+                <!-- Collapsible content wrapper (Starts hidden) -->
+                <div id="how-to-play-content" class="hidden flex flex-col gap-4 animate-fade-in">
+                    <!-- Trivia Rules Introduction -->
+                    <div class="space-y-2 border-b border-lightBorder dark:border-darkBorder pb-3">
+                        <h4 class="font-bold text-[9px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest select-none">Trivia Rules</h4>
+                        <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                            Test your Escape from Tarkov knowledge! Identify items, weapons, pricing, and traders correctly to score points.
+                        </p>
+                        <ul class="list-disc pl-4 space-y-1.5 text-zinc-500 dark:text-zinc-400 font-medium">
+                            <li>Identify items by Name, Caliber, or Price.</li>
+                            <li>Traders offer a flat 10 points.</li>
+                            <li>Incorrect answers lose 1 Life. Losing all 3 lives collapses your operational pipeline.</li>
+                        </ul>
                     </div>
-                    <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest min-h-[14px]" id="iconLabel"></div>
+
+                    <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                        Build correct answer streaks to earn lives back and load up on helpful power-ups.
+                    </p>
+                    
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-[9px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest select-none">Streak Rewards</h4>
+                        
+                        <!-- 5 Wins Reward -->
+                        <div class="flex items-start gap-3 p-2.5 rounded-xl bg-white/50 dark:bg-zinc-900/40 border border-lightBorder dark:border-darkBorder/40 shadow-sm transition">
+                            <span class="text-xl select-none">💖</span>
+                            <div>
+                                <div class="font-bold text-zinc-900 dark:text-zinc-100">5 Wins Streak</div>
+                                <div class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5 leading-snug">Regain 1 missing Live heart (up to 3 max) AND gain +1 Free Hint (up to 3 max).</div>
+                            </div>
+                        </div>
+
+                        <!-- 15 Wins Reward -->
+                        <div class="flex items-start gap-3 p-2.5 rounded-xl bg-white/50 dark:bg-zinc-900/40 border border-lightBorder dark:border-darkBorder/40 shadow-sm transition">
+                            <span class="text-xl select-none">⚖️</span>
+                            <div>
+                                <div class="font-bold text-zinc-900 dark:text-zinc-100">15 Wins Streak</div>
+                                <div class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5 leading-snug">Gain +1 out of 2 "50/50s" to cross out two incorrect answers.</div>
+                            </div>
+                        </div>
+
+                        <!-- 20 Wins Reward -->
+                        <div class="flex items-start gap-3 p-2.5 rounded-xl bg-white/50 dark:bg-zinc-900/40 border border-lightBorder dark:border-darkBorder/40 shadow-sm transition">
+                            <span class="text-xl select-none">🔓</span>
+                            <div>
+                                <div class="font-bold text-zinc-900 dark:text-zinc-100">20 Wins Streak</div>
+                                <div class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5 leading-snug">Gain +1 out of 2 "Free Reveals" to instantly bypass and answer the question correctly (3-round cooldown).</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-lightBorder dark:border-darkBorder pt-3 text-[10px] text-zinc-400 dark:text-zinc-500 italic flex items-start gap-1.5 leading-relaxed">
+                        <span>⚠️ Note: Failures immediately reset your active streak count back to zero!</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Side: Main Game Area Box -->
+            <main class="bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md min-h-[440px] flex flex-col items-center justify-center transition-all duration-300 relative overflow-hidden" id="gameArea">
+                
+                <!-- SHUFFLE / PRE-START SCREEN -->
+                <div class="flex flex-col items-center justify-center gap-4 text-center py-8 w-full max-w-sm animate-fade-in" id="shuffleStart">
+                    <div class="text-5xl filter drop-shadow-md select-none animate-bounce" id="startIcon" style="animation-duration: 3s">🎲</div>
+                    <h2 class="text-xl font-bold tracking-tight text-zinc-950 dark:text-zinc-100 uppercase" id="startTitle">Ready To Play</h2>
+                    <p class="text-xs text-zinc-400 dark:text-zinc-500 leading-relaxed font-medium" id="startSub">5 question types · 10 points each</p>
+                    <button class="hidden mt-4 py-3 px-8 font-bold text-xs uppercase tracking-widest bg-[#107c41] hover:bg-emerald-600 text-white rounded-xl shadow-lg transition duration-200 cursor-pointer" id="shuffleBtn">[ SHUFFLE ]</button>
                 </div>
 
-                <!-- Category selection badge selectors (when item needs targeting) -->
-                <div class="hidden flex-wrap justify-center gap-3 w-full" id="categorySelection"></div>
+                <!-- Question Display -->
+                <div class="hidden flex-col items-center gap-6 w-full max-w-2xl animate-fade-in" id="questionDisplay">
+                    <h2 class="text-lg font-bold text-zinc-950 dark:text-zinc-100 text-center tracking-tight px-4" id="questionTitle">What is this item?</h2>
 
-                <!-- Multiple Choice Options Grid -->
-                <div class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 w-full" id="optionsGrid">
-                    <!-- Loaded dynamically -->
+                    <!-- Centered Interactive Item Icon Frame -->
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="w-36 h-36 bg-zinc-50/80 dark:bg-zinc-950/20 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-inner flex items-center justify-center overflow-hidden transition-all duration-300" id="iconBox">
+                            <span class="placeholder text-zinc-400 dark:text-zinc-600">␣</span>
+                        </div>
+                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest min-h-[14px]" id="iconLabel"></div>
+                    </div>
+
+                    <!-- Category selection badge selectors (when item needs targeting) -->
+                    <div class="hidden flex-wrap justify-center gap-3 w-full" id="categorySelection"></div>
+
+                    <!-- Multiple Choice Options Grid -->
+                    <div class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 w-full" id="optionsGrid">
+                        <!-- Loaded dynamically -->
+                    </div>
+
+                    <!-- POWER-UPS INVENTORY BAR -->
+                    <div id="powerups-container" class="hidden justify-center gap-3 w-full max-w-xl mx-auto select-none mt-4 animate-fade-in flex-wrap">
+                        <button id="use-hint-btn" class="flex-1 min-w-[100px] py-2 px-3 border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/40 hover:bg-zinc-50 dark:hover:bg-darkCard rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center space-x-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer select-none" title="Eliminate 1 wrong answer (Max 3, only 1 usable per guess)">
+                            <span>💡 Hint (<span id="hint-count-display">0</span>/3)</span>
+                        </button>
+                        <button id="use-fiftyfifty-btn" class="flex-1 min-w-[100px] py-2 px-3 border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/40 hover:bg-zinc-50 dark:hover:bg-darkCard rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center space-x-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer select-none" title="Eliminate 2 wrong answers (Max 2)">
+                            <span>⚖️ 50/50 (<span id="fiftyfifty-count-display">0</span>/2)</span>
+                        </button>
+                        <button id="use-reveal-btn" class="flex-1 min-w-[100px] py-2 px-3 border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/40 hover:bg-zinc-50 dark:hover:bg-darkCard rounded-xl transition-all duration-300 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center space-x-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm cursor-pointer select-none" title="Instantly bypass and answer correctly (Max 2, 3-round cooldown)">
+                            <span>🔓 Reveal (<span id="reveal-count-display">0</span>/2)</span>
+                        </button>
+                    </div>
+
+                    <!-- Correct/Incorrect Feedbacks Alert area -->
+                    <div class="min-h-[32px] flex items-center justify-center text-sm font-semibold tracking-wide text-center" id="feedbackArea"></div>
                 </div>
 
-                <!-- Correct/Incorrect Feedbacks Alert area -->
-                <div class="min-h-[32px] flex items-center justify-center text-sm font-semibold tracking-wide text-center" id="feedbackArea"></div>
-            </div>
+            </main>
 
-        </main>
+        </div>
 
     </div>
 
@@ -236,6 +338,13 @@
             advanceTimeout: null,
             countdownTimeout: null,
 
+            // Powerups State variables (Persistent across active games)
+            hintsCount: 0,
+            fiftyFiftysCount: 0,
+            revealsCount: 0,
+            revealCooldown: 0, // Track Free Reveal cooldown in rounds
+            hintUsedOnCurrentQuestion: false,
+
             // ---- DOM refs ----
             el: {
                 shuffleStart: document.getElementById('shuffleStart'),
@@ -249,6 +358,7 @@
                 iconLabel: document.getElementById('iconLabel'),
                 categorySelection: document.getElementById('categorySelection'),
                 optionsGrid: document.getElementById('optionsGrid'),
+                powerupsContainer: document.getElementById('powerups-container'),
                 feedbackArea: document.getElementById('feedbackArea'),
                 scoreDisplay: document.getElementById('scoreDisplay'),
                 livesDisplay: document.getElementById('livesDisplay'),
@@ -469,7 +579,7 @@
                 let iconHtml = '';
                 if (imgUrl) {
                     iconHtml =
-                        `<img src="${imgUrl}" alt="" class="w-full h-full object-contain filter dark:brightness-110" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=80'" />`;
+                        `<img src="${imgUrl}" alt="" class="w-full h-full object-contain filter dark:brightness-110" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=60'" />`;
                 } else {
                     iconHtml = `<span class="placeholder text-zinc-400 dark:text-zinc-600">∅</span>`;
                 }
@@ -583,6 +693,9 @@
                 }
 
                 this.renderOptions(question, options, correctIndex);
+                this.el.powerupsContainer.classList.remove('hidden');
+                this.el.powerupsContainer.classList.add('flex');
+                this.updatePowerupButtons();
             },
 
             renderOptions: function(question, options, correctIndex) {
@@ -596,11 +709,11 @@
                 options.forEach((item, index) => {
                     const btn = document.createElement('button');
                     // Premium light/dark choice cards
-                    btn.className = 'w-full p-4 border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/40 rounded-2xl hover:border-indigo-500/30 dark:hover:border-indigo-400/30 hover:bg-zinc-50 dark:hover:bg-darkCard transition-all duration-300 text-left flex items-center justify-between font-semibold text-xs tracking-wide cursor-pointer shadow-sm relative overflow-hidden';
+                    btn.className = 'w-full p-4 border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/40 rounded-2xl hover:border-indigo-500/30 dark:hover:border-indigo-400/30 hover:bg-zinc-50 dark:hover:bg-darkCard transition-all duration-300 text-left flex items-center justify-between font-semibold text-xs tracking-wide cursor-pointer shadow-sm relative overflow-hidden option-btn';
                     btn.dataset.index = index;
 
                     const nameSpan = document.createElement('span');
-                    nameSpan.className = 'option-text text-zinc-900 dark:text-zinc-100 font-bold truncate pr-3';
+                    nameSpan.className = 'option-text text-zinc-900 dark:text-zinc-100 font-bold truncate pr-3 pointer-events-none';
                     nameSpan.textContent = item.text;
 
                     const wikiLink = document.createElement('a');
@@ -646,6 +759,8 @@
                 this.el.optionsGrid.classList.remove('grid');
                 this.el.categorySelection.classList.remove('flex');
                 this.el.categorySelection.classList.add('hidden');
+                this.el.powerupsContainer.classList.add('hidden');
+                this.el.powerupsContainer.classList.remove('flex');
 
                 let phase = 'fast';
                 const shuffleStep = () => {
@@ -709,7 +824,7 @@
 
                 for (let i = 1; i <= 3; i++) {
                     const heartSpan = document.createElement('span');
-                    heartSpan.className = 'inline-block select-none';
+                    heartSpan.className = 'inline-block select-none text-base';
                     if (i <= this.lives) {
                         heartSpan.textContent = '❤️';
                         // Apply bouncy animation class to the newly restored heart index specifically
@@ -720,6 +835,101 @@
                         heartSpan.textContent = '🖤';
                     }
                     container.appendChild(heartSpan);
+                }
+            },
+
+            // --- DEPLOY FREE HINT (Crosses out 1 wrong answer) ---
+            useHint: function() {
+                if (this.hintsCount === 0 || this.isAnswered || this.isShuffling || this.isLoading || this.isGameOver || !this.isPlaying || this.hintUsedOnCurrentQuestion) return;
+
+                const btns = Array.from(this.el.optionsGrid.querySelectorAll('.option-btn'));
+                const correctIndex = this.currentQuestion.correctIndex;
+                if (correctIndex === undefined) return;
+
+                const activeWrongBtns = btns.filter((btn, idx) => idx !== correctIndex && !btn.disabled && btn.style.opacity !== '0.25');
+
+                if (activeWrongBtns.length > 0) {
+                    const targetBtn = this.pickRandom(activeWrongBtns);
+                    targetBtn.disabled = true;
+                    targetBtn.style.opacity = '0.25';
+                    targetBtn.style.cursor = 'not-allowed';
+
+                    this.hintsCount--;
+                    this.hintUsedOnCurrentQuestion = true;
+                    this.updatePowerupButtons();
+                    this.el.feedbackArea.innerHTML = `<span class="text-xs font-bold text-amber-500 tracking-wider">💡 HINT DEPLOYED! crossed out 1 incorrect option.</span>`;
+                }
+            },
+
+            // --- DEPLOY 50/50 (Crosses out 2 wrong answers) ---
+            useFiftyFifty: function() {
+                if (this.fiftyFiftysCount === 0 || this.isAnswered || this.isShuffling || this.isLoading || this.isGameOver || !this.isPlaying) return;
+
+                const btns = Array.from(this.el.optionsGrid.querySelectorAll('.option-btn'));
+                const correctIndex = this.currentQuestion.correctIndex;
+                if (correctIndex === undefined) return;
+
+                const activeWrongBtns = btns.filter((btn, idx) => idx !== correctIndex && !btn.disabled && btn.style.opacity !== '0.25');
+
+                if (activeWrongBtns.length > 0) {
+                    const shuffledWrong = this.shuffle(activeWrongBtns);
+                    const targets = shuffledWrong.slice(0, 2);
+                    targets.forEach(btn => {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.25';
+                        btn.style.cursor = 'not-allowed';
+                    });
+
+                    this.fiftyFiftysCount--;
+                    this.updatePowerupButtons();
+                    this.el.feedbackArea.innerHTML = `<span class="text-xs font-bold text-indigo-500 tracking-wider">⚖️ 50/50 DEPLOYED! crossed out 2 incorrect options.</span>`;
+                }
+            },
+
+            // --- DEPLOY FREE REVEAL (Instantly answers correctly) ---
+            useReveal: function() {
+                if (this.revealsCount === 0 || this.revealCooldown > 0 || this.isAnswered || this.isShuffling || this.isLoading || this.isGameOver || !this.isPlaying) return;
+
+                const correctIndex = this.currentQuestion.correctIndex;
+                if (correctIndex === undefined) return;
+
+                this.revealsCount--;
+                this.revealCooldown = 3; // Trigger 3-round cooldown
+                this.updatePowerupButtons();
+                this.el.feedbackArea.innerHTML = `<span class="text-xs font-bold text-emerald-500 tracking-wider">🔓 FREE REVEAL DEPLOYED! instant bypass.</span>`;
+                this.handleAnswer(correctIndex, correctIndex);
+            },
+
+            updatePowerupButtons: function() {
+                const hintBtn = document.getElementById('use-hint-btn');
+                const fiftyFiftyBtn = document.getElementById('use-fiftyfifty-btn');
+                const revealBtn = document.getElementById('use-reveal-btn');
+                
+                const hintCount = document.getElementById('hint-count-display');
+                const fiftyFiftyCount = document.getElementById('fiftyfifty-count-display');
+                const revealCount = document.getElementById('reveal-count-display');
+
+                if (hintCount) hintCount.textContent = this.hintsCount;
+                if (fiftyFiftyCount) fiftyFiftyCount.textContent = this.fiftyFiftysCount;
+                
+                if (revealCount) {
+                    let label = `${this.revealsCount}/2`;
+                    if (this.revealCooldown > 0) {
+                        label += ` (CD: ${this.revealCooldown})`;
+                    }
+                    revealCount.textContent = label;
+                }
+
+                const isLocked = this.isAnswered || this.isShuffling || this.isLoading || this.isGameOver || !this.isPlaying;
+                
+                if (hintBtn) {
+                    hintBtn.disabled = this.hintsCount === 0 || this.hintUsedOnCurrentQuestion || isLocked || !this.currentQuestion || this.currentQuestion.correctIndex === undefined;
+                }
+                if (fiftyFiftyBtn) {
+                    fiftyFiftyBtn.disabled = this.fiftyFiftysCount === 0 || isLocked || !this.currentQuestion || this.currentQuestion.correctIndex === undefined;
+                }
+                if (revealBtn) {
+                    revealBtn.disabled = this.revealsCount === 0 || this.revealCooldown > 0 || isLocked || !this.currentQuestion || this.currentQuestion.correctIndex === undefined;
                 }
             },
 
@@ -743,6 +953,13 @@
                 this.el.shuffleBtn.style.display = 'block';
                 this.el.shuffleBtn.onclick = () => this.startGame();
 
+                // Clear powerups completely upon game over
+                this.hintsCount = 0;
+                this.fiftyFiftysCount = 0;
+                this.revealsCount = 0;
+                this.revealCooldown = 0;
+                this.updatePowerupButtons();
+
                 this.setStatus('game over', '');
             },
 
@@ -751,6 +968,7 @@
 
                 this.currentQuestion = question;
                 this.isAnswered = false;
+                this.hintUsedOnCurrentQuestion = false;
 
                 this.el.shuffleStart.style.display = 'none';
                 this.el.questionDisplay.classList.remove('hidden');
@@ -765,6 +983,8 @@
                 this.el.optionsGrid.classList.remove('grid');
                 this.el.categorySelection.classList.remove('flex');
                 this.el.categorySelection.classList.add('hidden');
+                this.el.powerupsContainer.classList.add('hidden');
+                this.el.powerupsContainer.classList.remove('flex');
                 this.el.feedbackArea.innerHTML = '';
 
                 this.performShuffle(question.displayIcon, () => {
@@ -780,6 +1000,9 @@
                         });
                         this.renderOptions(question, options, correctIndex);
                         this.el.feedbackArea.innerHTML = '';
+                        this.el.powerupsContainer.classList.remove('hidden');
+                        this.el.powerupsContainer.classList.add('flex');
+                        this.updatePowerupButtons();
                     } else if (question.type === 'item') {
                         this.el.iconLabel.textContent = '🎯 choose a category';
                         this.renderCategorySelection(question);
@@ -798,6 +1021,9 @@
                 const btns = this.el.optionsGrid.querySelectorAll('.option-btn');
                 btns.forEach((btn, i) => {
                     btn.disabled = true;
+                    // Reset opacity for crossed out hints
+                    btn.style.opacity = '1';
+                    btn.style.cursor = '';
                     if (i === correctIndex) {
                         btn.className = 'w-full p-4 border border-emerald-500/60 bg-emerald-500/10 rounded-2xl text-left flex items-center justify-between font-bold text-xs tracking-wide text-emerald-600 dark:text-emerald-400 shadow-sm relative overflow-hidden';
                     }
@@ -821,12 +1047,36 @@
                     this.streak += 1;
                     this.el.streakDisplay.textContent = this.streak;
 
-                    // STREAK RESTORATION RULES: Every streak of 5 awards 1 Live back (up to max 3)
                     let lifeRestored = false;
+                    let hintAwarded = false;
+                    let fiftyFiftyAwarded = false;
+                    let revealAwarded = false;
+
+                    // Streak of 5: Regain 1 missing health Live AND gain +1 Free Hint (up to 3 max)
                     if (this.streak > 0 && this.streak % 5 === 0) {
                         if (this.lives < 3) {
                             this.lives += 1;
                             lifeRestored = true;
+                        }
+                        if (this.hintsCount < 3) {
+                            this.hintsCount++;
+                            hintAwarded = true;
+                        }
+                    }
+
+                    // Streak of 15: Gain +1 fiftyfifty (up to 2 max)
+                    if (this.streak > 0 && this.streak % 15 === 0) {
+                        if (this.fiftyFiftysCount < 2) {
+                            this.fiftyFiftysCount++;
+                            fiftyFiftyAwarded = true;
+                        }
+                    }
+
+                    // Streak of 20: Gain +1 Reveal (up to 2 max)
+                    if (this.streak > 0 && this.streak % 20 === 0) {
+                        if (this.revealsCount < 2) {
+                            this.revealsCount++;
+                            revealAwarded = true;
                         }
                     }
 
@@ -834,10 +1084,18 @@
                     this.el.scoreDisplay.textContent = this.score;
 
                     this.updateLivesDisplay(lifeRestored);
+                    this.updatePowerupButtons();
 
                     let feedbackHTML = `<span class="text-emerald-500 dark:text-emerald-400 font-bold uppercase tracking-wide">✓ CORRECT!</span> <span class="text-[11px] text-zinc-400 dark:text-zinc-500 ml-1.5 font-normal">(+${points} pts)</span>`;
-                    if (lifeRestored) {
-                        feedbackHTML += ` <span class="text-[11px] text-emerald-500 dark:text-emerald-400 font-extrabold ml-2 bg-emerald-500/10 px-2 py-0.5 rounded-md uppercase tracking-wider animate-bounce">💖 +1 Live! (Streak ${this.streak})</span>`;
+                    
+                    let bonuses = [];
+                    if (lifeRestored) bonuses.push("💖 +1 Live");
+                    if (hintAwarded) bonuses.push("💡 +1 Hint");
+                    if (fiftyFiftyAwarded) bonuses.push("⚖️ +1 50/50");
+                    if (revealAwarded) bonuses.push("🔓 +1 Reveal");
+
+                    if (bonuses.length > 0) {
+                        feedbackHTML += ` <span class="text-[11px] text-emerald-500 dark:text-emerald-400 font-extrabold ml-2 bg-emerald-500/10 px-2.5 py-1 rounded-lg uppercase tracking-wider animate-bounce">${bonuses.join(" | ")}!</span>`;
                     }
                     fb.innerHTML = feedbackHTML;
 
@@ -850,6 +1108,7 @@
 
                     this.lives -= 1;
                     this.updateLivesDisplay(false);
+                    this.updatePowerupButtons();
 
                     if (this.lives === 0) {
                         this.gameOver(); 
@@ -869,6 +1128,11 @@
             },
 
             nextQuestion: function() {
+                // Decrement Reveal Cooldown at start of next round
+                if (this.revealCooldown > 0) {
+                    this.revealCooldown--;
+                }
+                
                 try {
                     const q = this.generateQuestion();
                     if (q) {
@@ -897,10 +1161,15 @@
                 this.lives = 3;
                 this.score = 0;
                 this.streak = 0; // Reset streak tracker
+                this.hintsCount = 0;
+                this.fiftyFiftysCount = 0;
+                this.revealsCount = 0;
+                this.revealCooldown = 0;
                 this.isGameOver = false; 
                 this.updateLivesDisplay(false);
                 this.el.scoreDisplay.textContent = '0';
                 this.el.streakDisplay.textContent = '0';
+                this.updatePowerupButtons();
 
                 this.el.startIcon.textContent = '🎲';
                 this.el.startTitle.textContent = 'READY TO PLAY';
@@ -981,9 +1250,24 @@
                     this.startCountdown();
                     this.setStatus('READY', 'ready');
 
+                    // Hide full screen loader
+                    const loader = document.getElementById('app-loading-screen');
+                    if (loader) {
+                        loader.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => loader.remove(), 500);
+                    }
+
                 } catch (err) {
                     console.error('Init error:', err);
                     this.setStatus('API ERROR', '');
+
+                    // Hide loader on error too
+                    const loader = document.getElementById('app-loading-screen');
+                    if (loader) {
+                        loader.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => loader.remove(), 500);
+                    }
+
                     document.querySelector('.quiz-area').innerHTML = `
                         <div class="col-span-full text-center py-16 text-zinc-400 dark:text-zinc-500 flex flex-col items-center">
                             <span class="text-4xl mb-3">✖</span>
@@ -993,6 +1277,43 @@
                         </div>
                     `;
                 }
+
+                // --- HOW TO PLAY COLLAPSIBLE PANEL ---
+                const howToPlayToggle = document.getElementById('how-to-play-toggle');
+                const howToPlayContent = document.getElementById('how-to-play-content');
+                const howToPlayArrow = document.getElementById('how-to-play-arrow');
+                const howToPlayPanel = document.getElementById('how-to-play-panel');
+
+                function expandHowToPlay() {
+                    howToPlayContent.classList.remove('hidden');
+                    howToPlayArrow.classList.add('rotate-180');
+                }
+
+                function collapseHowToPlay() {
+                    howToPlayContent.classList.add('hidden');
+                    howToPlayArrow.classList.remove('rotate-180');
+                }
+
+                howToPlayToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isHidden = howToPlayContent.classList.contains('hidden');
+                    if (isHidden) {
+                        expandHowToPlay();
+                    } else {
+                        collapseHowToPlay();
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!howToPlayPanel.contains(e.target)) {
+                        collapseHowToPlay();
+                    }
+                });
+
+                // Attach powerup button triggers
+                document.getElementById('use-hint-btn').addEventListener('click', () => this.useHint());
+                document.getElementById('use-fiftyfifty-btn').addEventListener('click', () => this.useFiftyFifty());
+                document.getElementById('use-reveal-btn').addEventListener('click', () => this.useReveal());
 
                 // --- CLOCK CONTROLLER ---
                 const updateClock = () => {
