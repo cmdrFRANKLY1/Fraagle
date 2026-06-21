@@ -297,7 +297,7 @@
 
         <!-- Footer -->
         <footer class="text-center text-[8px] font-medium text-zinc-400 dark:text-zinc-500 tracking-wide select-none py-1.5 border-t border-lightBorder dark:border-darkBorder/30 mt-1">
-            <span>Fraagle Apps ? Twitch Live Check ? <span id="footerVersion">v2.2</span></span>
+            <span>Fraagle Apps ? Twitch Live Check ? <span id="footerVersion">v2.3</span></span>
         </footer>
 
     </div>
@@ -306,7 +306,7 @@
         // ================================================================
         //  TWITCH LIVE CHECK ? Dynamically loads twitchStreamerList.txt
         //  Groups by categories (# Category) and displays live status.
-        //  FIX: Single fetch, cache-busting, loading screen hides on error.
+        //  v2.3 ¨C fixed stats labels (no more "??")
         // ================================================================
 
         const LiveDashboard = {
@@ -316,7 +316,7 @@
             statusData: [],
             lastChecked: null,
             refreshInterval: null,
-            isLoading: false, // prevent concurrent fetches
+            isLoading: false,
 
             el: {
                 grid: document.getElementById('streamerGrid'),
@@ -333,7 +333,6 @@
 
             init: function() {
                 this.el.refreshBtn.addEventListener('click', () => {
-                    // Refresh statuses only (don't reload the list)
                     this.fetchAllStatuses();
                 });
 
@@ -345,10 +344,8 @@
                     }
                 });
 
-                // Load list once on init
                 this.loadStreamerListAndFetch();
 
-                // Start auto-refresh if checked
                 if (this.el.autoRefreshCheck.checked) {
                     this.startAutoRefresh();
                 }
@@ -358,7 +355,6 @@
                 this.setupClock();
             },
 
-            // --- Hide loading screen ---
             hideLoadingScreen: function() {
                 const loader = this.el.loadingScreen;
                 if (loader && !loader.classList.contains('loading-hidden')) {
@@ -369,7 +365,6 @@
                 }
             },
 
-            // --- Load twitchStreamerList.txt (ONCE) ---
             loadStreamerListAndFetch: async function() {
                 if (this.isLoading) return;
                 this.isLoading = true;
@@ -378,7 +373,6 @@
                 this.el.refreshBtn.disabled = true;
 
                 try {
-                    // Add cache-busting timestamp
                     const url = `${this.LIST_URL}?t=${Date.now()}`;
                     const response = await fetch(url, { cache: 'no-store' });
                     if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
@@ -387,10 +381,7 @@
                     const parsed = this.parseStreamerList(text);
                     this.streamers = parsed;
 
-                    // Hide loading screen on success
                     this.hideLoadingScreen();
-
-                    // Now fetch statuses for these streamers
                     await this.fetchAllStatuses();
 
                 } catch (err) {
@@ -415,7 +406,6 @@
                 }
             },
 
-            // --- Retry function (exposed globally) ---
             retryLoadList: function() {
                 this.loadStreamerListAndFetch();
             },
@@ -448,7 +438,6 @@
                 return result;
             },
 
-            // --- FETCH ALL STATUSES (re?fetch only, no list reload) ---
             fetchAllStatuses: async function() {
                 if (this.streamers.length === 0) {
                     this.el.grid.innerHTML =
@@ -496,7 +485,6 @@
                 }
             },
 
-            // --- RENDER GRID ---
             renderGrid: function(data) {
                 const grid = this.el.grid;
                 if (!grid) return;
@@ -594,7 +582,6 @@
                 }
             },
 
-            // --- THEME TOGGLE ---
             setupThemeToggle: function() {
                 const btn = document.getElementById('theme-toggle');
                 const sun = document.getElementById('theme-toggle-sun-icon');
@@ -622,7 +609,6 @@
                 });
             },
 
-            // --- GRADIENT TOGGLE ---
             setupGradientToggle: function() {
                 const btn = document.getElementById('gradient-toggle');
                 const g1 = document.getElementById('ambient-glow-1');
@@ -651,7 +637,6 @@
                 });
             },
 
-            // --- CLOCK ---
             setupClock: function() {
                 const update = () => {
                     const now = new Date();
@@ -669,7 +654,6 @@
             }
         };
 
-        // Expose retry function globally
         LiveDashboard.retryLoadList = LiveDashboard.retryLoadList.bind(LiveDashboard);
 
         document.addEventListener('DOMContentLoaded', () => LiveDashboard.init());
