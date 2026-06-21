@@ -79,7 +79,7 @@
         <header class="flex items-center justify-between p-4 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md relative select-none z-20">
             <!-- Left Side: Back Arrow and Brand Label -->
             <div class="flex items-center space-x-3">
-                <a href="../index.html" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard transition-all duration-200 text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer shadow-sm" title="Back to Index">
+                <a href="../index.html" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white hover:bg-zinc-50 dark:bg-darkCard/50 dark:hover:bg-darkCard transition-all duration-200 text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer shadow-sm" title="Back to Index">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
                     </svg>
@@ -114,11 +114,11 @@
                 <!-- Theme Toggle Button -->
                 <button id="theme-toggle" class="p-2 rounded-lg border border-white/30 bg-white/10 dark:bg-white/5 hover:bg-white/20 transition-all focus:outline-none flex items-center justify-center cursor-pointer shadow-sm" aria-label="Toggle Theme">
                     <!-- Sun Icon -->
-                    <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-300 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-300 pointer-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                     <!-- Moon Icon -->
-                    <svg id="theme-toggle-moon-icon" class="hidden w-4.5 h-4.5 text-zinc-100 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg id="theme-toggle-moon-icon" class="hidden w-4.5 h-4.5 text-zinc-100 pointer-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                     </svg>
                 </button>
@@ -133,26 +133,26 @@
         <!-- Dynamic Value Indicators Card Row -->
         <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- PvP cost bar Card -->
-            <div class="flex items-center justify-between p-5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md">
+            <div class="flex items-center justify-between p-5 bg-white dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md">
                 <div>
                     <span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Total PvP Value</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 mt-1 select-all transition-all duration-300" id="pvpTotal">₽0</h2>
+                    <h2 class="text-3xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-100 mt-1 select-all transition-all duration-300" id="pvpTotal">₽0</h2>
                 </div>
                 <span class="text-[9px] font-bold text-zinc-600 dark:text-zinc-300 border border-lightBorder dark:border-darkBorder bg-white dark:bg-darkCard px-3 py-1 rounded-full uppercase tracking-wider select-none shadow-sm">PvP Market</span>
             </div>
 
             <!-- PvE cost bar Card -->
-            <div class="flex items-center justify-between p-5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md">
+            <div class="flex items-center justify-between p-5 bg-white dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md">
                 <div>
                     <span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Total PvE Value</span>
-                    <h2 class="text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 mt-1 select-all transition-all duration-300" id="pveTotal">₽0</h2>
+                    <h2 class="text-3xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-100 mt-1 select-all transition-all duration-300" id="pveTotal">₽0</h2>
                 </div>
                 <span class="text-[9px] font-bold text-zinc-600 dark:text-zinc-300 border border-lightBorder dark:border-darkBorder bg-white dark:bg-darkCard px-3 py-1 rounded-full uppercase tracking-wider select-none shadow-sm">PvE Market</span>
             </div>
         </section>
 
         <!-- Reels Slot Spinners container -->
-        <section class="hidden grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300" id="reelsContainer">
+        <section class="hidden grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-white dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300" id="reelsContainer">
             <!-- Populated dynamically -->
         </section>
 
@@ -162,20 +162,28 @@
                 <span class="btn-text">[ RANDOMIZE ]</span>
                 <span class="spinner" id="spinSpinner"></span>
             </button>
-            <button class="flex-grow py-4 px-6 font-semibold text-xs uppercase tracking-wider border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard text-zinc-700 dark:text-zinc-200 rounded-xl transition cursor-pointer flex items-center justify-center space-x-2" id="saveBtn" disabled>
-                <span class="btn-text">SAVE REPORT</span>
+            <button class="flex-grow py-4 px-6 font-semibold text-xs uppercase tracking-wider border border-lightBorder dark:border-darkBorder bg-white dark:bg-darkCard hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-200 rounded-xl transition cursor-pointer flex items-center justify-center space-x-2" id="saveBtn" disabled>
+                <span class="btn-text">SAVE LOADOUT</span>
                 <span class="spinner"></span>
             </button>
-            <button class="flex-grow py-4 px-6 font-semibold text-xs uppercase tracking-wider border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard text-zinc-700 dark:text-zinc-200 rounded-xl transition cursor-pointer flex items-center justify-center space-x-2" id="clearBtn" disabled>
+            <button class="flex-grow py-4 px-6 font-semibold text-xs uppercase tracking-wider border border-lightBorder dark:border-darkBorder bg-white dark:bg-darkCard hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-200 rounded-xl transition cursor-pointer flex items-center justify-center space-x-2" id="clearBtn" disabled>
                 <span class="btn-text">CLEAR</span>
                 <span class="spinner"></span>
             </button>
         </section>
 
         <!-- Details Breakdown Panel -->
-        <section class="hidden p-6 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300" id="detailsPanel">
-            <div class="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest border-b border-lightBorder dark:border-darkBorder pb-3.5 mb-5 flex items-center space-x-2">
-                <span>▸ Selected Loadout Breakdown</span>
+        <section class="hidden p-6 bg-white dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300" id="detailsPanel">
+            <!-- Section Header - Dynamic name and funny alias populate here -->
+            <div class="border-b border-lightBorder dark:border-darkBorder pb-3.5 mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex flex-col">
+                    <span class="text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">▸ Loadout Details</span>
+                </div>
+                <!-- Dynamic Title Block: Tagline sits beautifully stacked directly below the Name Title -->
+                <div class="flex flex-col items-start md:items-end gap-1.5 max-w-xl">
+                    <span id="loadout-name-title" class="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shadow-sm animate-pulse hidden self-start md:self-auto"></span>
+                    <span id="loadout-aka-title" class="text-xs text-zinc-400 dark:text-zinc-500 font-normal italic block normal-case hidden md:text-right"></span>
+                </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="loadoutGrid">
                 <!-- Detailed item rows populate here -->
@@ -405,8 +413,8 @@
                         });
                     }
                     if (p.fireRate) lines.push({ label: 'RPM', value: p.fireRate });
-                    if (p.ergonomics) lines.push({ label: 'Ergo', value: p.ergonomics });
-                    if (p.recoilVertical) lines.push({ label: 'V.Rec', value: p.recoilVertical });
+                    if (p.ergonomics !== null) lines.push({ label: 'Ergo', value: p.ergonomics });
+                    if (p.recoilVertical !== null) lines.push({ label: 'V.Rec', value: p.recoilVertical });
                     if (p.class) lines.push({ label: 'Class', value: p.class });
                     if (p.durability) lines.push({ label: 'Dur', value: p.durability });
                 }
@@ -447,7 +455,7 @@
                 requestAnimationFrame(update);
             },
 
-            // High-quality, safe category "template" icons used strictly when cleared/initial
+            // High-quality, safe category "template" icons used strictly when cleared/initial (No checkboxes, no indexes)
             getPlaceholderIconHtml: function(cat) {
                 const icons = {
                     'PrimaryWeapon': 'fa-gun text-blue-500/60 dark:text-blue-400/40',
@@ -463,13 +471,13 @@
                 };
                 const iconClass = icons[cat] || 'fa-box text-zinc-400 dark:text-zinc-600';
                 return `
-                    <div class="flex flex-col items-center justify-center p-3 rounded-xl border border-dashed border-lightBorder/60 dark:border-darkBorder/40 bg-zinc-50/50 dark:bg-zinc-900/10 w-20 h-20 shadow-inner">
-                        <i class="fa-solid ${iconClass} text-2xl"></i>
+                    <div class="flex flex-col items-center justify-center p-3 rounded-xl border border-dashed border-lightBorder/60 dark:border-darkBorder/40 bg-zinc-100 dark:bg-zinc-950/20 w-20 h-20 shadow-inner">
+                        <i class="fa-solid ${iconClass} text-2xl animate-fade-in"></i>
                     </div>
                 `;
             },
 
-            // --- DEFENSIVE COMPARATIVE REEL SELECTORS CREATION (Clean categories only, NO names inside slots) ---
+            // --- DEFENSIVE COMPARATIVE REEL SELECTORS CREATION (No checkmarkboxes, no index numbers) ---
             renderReels: function() {
                 const container = document.getElementById('reelsContainer');
                 container.innerHTML = '';
@@ -479,26 +487,14 @@
                     reel.dataset.category = cat;
 
                     const label = this.CAT_LABELS[cat] || cat;
-                    const checked = this.enabledCategories[cat];
 
                     reel.innerHTML = `
-                        <!-- Toggle check selection badge -->
-                        <div class="reel-toggle absolute top-2.5 left-2.5 text-xs font-bold text-zinc-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer select-none transition-colors duration-150 ${checked ? 'text-indigo-500 dark:text-indigo-400' : ''}" data-category="${cat}">${checked ? '☑' : '☐'}</div>
-                        
                         <!-- Category name header -->
-                        <div class="cat-label text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest border border-lightBorder dark:border-darkBorder px-2 py-0.5 rounded bg-white/50 dark:bg-darkCard/50 w-full text-center truncate z-10 select-none">${label}</div>
+                        <div class="cat-label text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest border border-lightBorder dark:border-darkBorder px-2 py-1 rounded bg-white dark:bg-darkCard/50 w-full text-center truncate z-10 select-none">${label}</div>
                         
-                        <!-- Premium CS:GO Slide Viewport (Strictly NO item names visible inside) -->
-                        <div class="relative w-full h-28 overflow-hidden rounded-xl border border-lightBorder/40 dark:border-darkBorder/40 bg-white/20 dark:bg-zinc-950/20 flex items-center justify-center mt-1">
-                            <!-- Center Indicator Tick Mark (Sleek CSS CS:GO line) -->
-                            <div class="absolute inset-y-0 left-0 w-1 bg-indigo-500 dark:bg-indigo-400 z-10"></div>
-                            
-                            <!-- Sliding track -->
-                            <div class="reel-track absolute left-0 right-0 flex flex-col items-center" id="reelIcon-${cat}">
-                                <div class="w-full h-28 flex items-center justify-center flex-shrink-0 select-none">
-                                    <span class="placeholder text-zinc-400 dark:text-zinc-600">∅</span>
-                                </div>
-                            </div>
+                        <!-- Simple In-Place Viewport (No complex laggy layouts, high-contrast light mode background) -->
+                        <div class="relative w-full h-28 overflow-hidden rounded-xl border border-lightBorder/40 dark:border-darkBorder/40 bg-zinc-100/50 dark:bg-zinc-950/20 flex items-center justify-center mt-2" id="reelIcon-${cat}">
+                            <span class="placeholder text-zinc-400 dark:text-zinc-600">∅</span>
                         </div>
 
                         <div class="reel-index absolute top-2.5 right-2.5 text-[9px] font-bold text-zinc-300 dark:text-zinc-600 select-none">#${this.REEL_CATS.indexOf(cat)+1}</div>
@@ -510,42 +506,17 @@
                         const target = document.querySelector(`.loadout-item[data-category="${cat}"]`);
                         if (target) {
                             target.classList.add('bg-emerald-50/70', 'dark:bg-emerald-950/20', 'border-emerald-500/40', 'dark:border-emerald-500/50');
-                            target.classList.remove('bg-white/40', 'dark:bg-zinc-900/40');
+                            target.classList.remove('bg-white', 'dark:bg-zinc-900/40');
                         }
                     });
                     reel.addEventListener('mouseleave', () => {
                         const target = document.querySelector(`.loadout-item[data-category="${cat}"]`);
                         if (target) {
                             target.classList.remove('bg-emerald-50/70', 'dark:bg-emerald-950/20', 'border-emerald-500/40', 'dark:border-emerald-500/50');
-                            target.classList.add('bg-white/40', 'dark:bg-zinc-900/40');
+                            target.classList.add('bg-white', 'dark:bg-zinc-900/40');
                         }
                     });
                 }
-
-                // Checkbox toggle logic
-                container.querySelectorAll('.reel-toggle').forEach(el => {
-                    el.addEventListener('click', (e) => {
-                        e.stopPropagation(); 
-                        const cat = el.dataset.category;
-                        if (!cat) return;
-                        this.enabledCategories[cat] = !this.enabledCategories[cat];
-                        const isChecked = this.enabledCategories[cat];
-                        
-                        el.textContent = isChecked ? '☑' : '☐';
-                        el.classList.toggle('text-indigo-500', isChecked);
-                        
-                        const reel = el.closest('[data-category]');
-                        if (reel) {
-                            if (!isChecked) {
-                                reel.classList.add('opacity-40');
-                            } else {
-                                reel.classList.remove('opacity-40');
-                            }
-                        }
-                        
-                        this.updateSpinButton();
-                    });
-                });
                 
                 container.classList.remove('hidden');
                 container.classList.add('grid');
@@ -554,12 +525,11 @@
             // Lightweight track item node factory - only real icons while shuffling, template if cleared/null
             createTrackItemNode: function(item, cat) {
                 const container = document.createElement('div');
-                container.className = 'w-full h-28 flex items-center justify-center flex-shrink-0 select-none';
+                container.className = 'w-full h-28 flex items-center justify-center flex-shrink-0 select-none transition-transform duration-100 ease-out';
                 
                 if (item) {
                     container.innerHTML = this.getIconHtml(item);
                 } else {
-                    // Reintroduced category template icon on clear / initial state instead of "∅"
                     container.innerHTML = this.getPlaceholderIconHtml(cat);
                 }
                 return container;
@@ -570,12 +540,10 @@
             },
 
             updateReel: function(cat, item) {
-                const track = document.getElementById('reelIcon-' + cat);
-                if (track) {
-                    track.innerHTML = '';
-                    track.style.transition = 'none';
-                    track.style.transform = 'translateY(0px)';
-                    track.appendChild(this.createTrackItemNode(item, cat));
+                const container = document.getElementById('reelIcon-' + cat);
+                if (container) {
+                    container.innerHTML = '';
+                    container.appendChild(this.createTrackItemNode(item, cat));
                 }
             },
 
@@ -597,11 +565,11 @@
                     const statsHtml = stats.map(s => {
                         let valueDisplay = s.value;
                         if (s.link) valueDisplay = `<a href="${s.link}" target="_blank" class="text-blue-500 dark:text-blue-400 hover:underline">${s.value}</a>`;
-                        return `<span class="flex items-center space-x-1"><span class="text-[9px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">${s.label}:</span> <span class="font-bold text-zinc-700 dark:text-zinc-200">${valueDisplay}</span></span>`;
+                        return `<span class="flex items-center space-x-1"><span class="text-[9px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">${s.label}:</span> <span class="font-bold text-zinc-800 dark:text-zinc-200">${valueDisplay}</span></span>`;
                     }).join('');
 
                     html += `
-                        <div class="loadout-item flex items-start gap-4 p-4 border border-lightBorder dark:border-darkBorder bg-white/40 dark:bg-zinc-900/40 rounded-2xl hover:border-indigo-500/30 dark:hover:border-indigo-400/30 hover:bg-white dark:hover:bg-darkCard transition-all duration-300 shadow-sm" data-category="${cat}">
+                        <div class="loadout-item flex items-start gap-4 p-4 border border-lightBorder dark:border-darkBorder bg-white dark:bg-zinc-900/40 rounded-2xl hover:border-indigo-500/30 dark:hover:border-indigo-400/30 hover:bg-zinc-50 dark:hover:bg-darkCard transition-all duration-300 shadow-sm" data-category="${cat}">
                             <div class="w-14 h-14 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 p-1 flex items-center justify-center border border-lightBorder dark:border-darkBorder flex-shrink-0">${this.getIconHtml(item)}</div>
                             <div class="flex-grow min-w-0">
                                 <div class="flex items-baseline justify-between gap-3">
@@ -614,7 +582,8 @@
                     `;
                 }
 
-                const showDetails = hasItems && !(this.isSpinning && this.stoppedCount === 0);
+                // Strictly wait for the entire loadout to be selected/finalized (not spinning) before displaying items, names, or values
+                const showDetails = hasItems && !this.isSpinning;
 
                 if (showDetails) {
                     detailsPanel.style.display = 'block';
@@ -656,7 +625,51 @@
                 this.updateButtons();
             },
 
-            // --- CS:GO CAROUSEL SPIN METHOD (Smooth hardware vertical animation with extreme suspense) ---
+            // --- SERIOUS & SILLY LOADOUT NAME GENERATOR (MAX 3 WORDS) ---
+            generateRandomLoadoutName: function() {
+                const prefixes = ["The Eternal", "The Silent", "The Sleepy", "Slick", "Tactical", "Giga", "Golden", "Rusty", "Crouching", "Dynamic", "Spicy", "Alpha", "Lone", "Swift", "The Absolute", "Prime", "Stellar", "Cosmic", "The Wandering", "The Legendary", "The Mythic", "The Brave", "Furious", "Unstoppable", "Savage", "Ghostly", "Shadowy", "The Speedy", "Budget", "Chadly", "The Sleepwalking", "Hyperactive", "The Fluffy", "Unarmored", "The Naked", "Chunky", "Frugal", "The Clumsy", "Salty", "Eco-Friendly", "Iron", "Cyber", "Wobbly", "Bubbly", "Marshmallow"];
+                const nouns = ["Slayer", "Operator", "Scavenger", "Chad", "Warrior", "Legend", "Ghost", "Ninja", "Mercenary", "Beast", "Shadow", "Ranger", "Falcon", "Gladiator", "Hunter", "Stalker", "Samurai", "Outlaw", "Bandit", "Vanguard", "Sentry", "Knight", "Squire", "Gremlin", "Badger", "Weasel", "Goose", "Raccoon", "Hamster", "Octopus", "Sloth", "Koala", "Panda", "Penguin", "Wombat", "Gopher"];
+                
+                const p = this.pick(prefixes);
+                const n = this.pick(nouns);
+                return `${p} ${n}`;
+            },
+
+            // --- SHUFFLED ALIAS TAGLINE GENERATOR (aka generatedLoadoutShortName2-5 by moreNames) ---
+            generateAkaTagline: function() {
+                const aliasTypes = ["aka", "also known as", "alias", "codenamed", "commonly called", "classified as"];
+                const groupNouns = ["nerds", "geeks", "trolls", "goblins", "dwarfs", "scoundrels", "thieves", "vagabonds", "scavs", "paralegals", "hobbits", "wanderers", "loot-goblins", "code-monkeys", "tech-support", "pixel-chasers", "space-sloths", "keyboard-warriors", "wizard-apprentices", "chatterboxes", "hooligans"];
+                
+                const shortNames = [];
+                for (const cat of this.ALL_CATEGORIES) {
+                    const item = this.currentLoadout[cat];
+                    if (item && item.shortName) {
+                        shortNames.push(item.shortName);
+                    }
+                }
+
+                if (shortNames.length < 2) return null;
+
+                // Pick 2 to 5 shortnames randomly and shuffle them
+                const shuffledPool = [...shortNames].sort(() => 0.5 - Math.random());
+                const count = Math.min(shuffledPool.length, 2 + Math.floor(Math.random() * 4)); // 2 to 5 items
+                const selectedNames = shuffledPool.slice(0, count);
+
+                // Join together into a single phrase, limiting to 5 words max
+                const combinedText = selectedNames.join(" ");
+                let words = combinedText.split(/\s+/).filter(w => w.length > 0);
+                if (words.length > 5) {
+                    words = words.slice(0, 5);
+                }
+                const finalShortNameCombined = words.join(" ");
+
+                const alias = this.pick(aliasTypes);
+                const group = this.pick(groupNouns);
+
+                return `${alias} <span class="text-zinc-600 dark:text-zinc-300 font-semibold font-mono">${finalShortNameCombined}</span> by <span class="text-indigo-600 dark:text-indigo-400 font-semibold">${group}</span>`;
+            },
+
+            // --- HIGH PERFORMANCE IN-PLACE SHUFFLE METHOD (Zero Layout Lag, Pure Dynamic Swap) ---
             performSpin: function() {
                 if (this.isSpinning) return;
                 
@@ -674,11 +687,24 @@
                 document.getElementById('pveTotal').innerHTML = '<span class="price-spinner"></span>';
                 document.getElementById('detailsPanel').style.display = 'none';
 
+                // Hide generated title badge upon re-spin
+                const nameEl = document.getElementById('loadout-name-title');
+                if (nameEl) {
+                    nameEl.textContent = '';
+                    nameEl.classList.add('hidden');
+                }
+
+                // Hide tagline upon re-spin
+                const taglineEl = document.getElementById('loadout-aka-title');
+                if (taglineEl) {
+                    taglineEl.textContent = '';
+                    taglineEl.classList.add('hidden');
+                }
+
                 const reels = document.querySelectorAll('[data-category]');
                 reels.forEach(r => {
                     if (activeCats.includes(r.dataset.category)) {
-                        r.classList.add('border-indigo-500/60', 'bg-indigo-500/5');
-                        r.classList.remove('opacity-40');
+                        r.classList.add('border-indigo-500/60', 'bg-indigo-500/5', 'scale-[1.02]');
                     }
                 });
 
@@ -688,70 +714,84 @@
                     targetLoadout[c] = this.pick(this.byCategory[c]);
                 });
 
-                // Animate rolling track strips - strictly with item icons inside shuffling, NO templates during rotation
+                // Spin each active reel in-place with progressive delay deceleration
                 activeCats.forEach(cat => {
-                    const track = document.getElementById('reelIcon-' + cat);
-                    if (!track) return;
-
-                    const pool = this.byCategory[cat];
-                    const stripCount = 26 + Math.floor(Math.random() * 8); // 26 to 34 items for variable stopping alignments
+                    const duration = 1200 + Math.random() * 1000; // Variable duration for high-suspense offset stops
+                    const stopAt = Date.now() + duration;
                     
-                    track.innerHTML = '';
-
-                    // Item 1 is the currently selected item or a random item
-                    const currentItem = this.currentLoadout[cat] || this.pick(pool);
-                    track.appendChild(this.createTrackItemNode(currentItem, cat));
-
-                    // Items 2 through N-1 are randomized item icons in shuffling instead of template placeholders
-                    for (let i = 1; i < stripCount - 1; i++) {
-                        const randomItem = this.pick(pool);
-                        track.appendChild(this.createTrackItemNode(randomItem, cat));
-                    }
-
-                    // Item N is the winning item
-                    const finalItem = targetLoadout[cat];
-                    track.appendChild(this.createTrackItemNode(finalItem, cat));
-
-                    // Instantly reset track back to start
-                    track.style.transition = 'none';
-                    track.style.transform = 'translateY(0px)';
-                    
-                    // Force DOM reflow
-                    track.offsetHeight;
-
-                    // Apply cinematic slows slowing ease transition
-                    const duration = 2800 + Math.random() * 1200; // Suspend variable alignment times
-                    track.style.transition = `transform ${duration}ms cubic-bezier(0.12, 0.88, 0.22, 1)`;
-
-                    // Slide vertical track up so the final winning item centers perfectly in the view port
-                    const itemHeight = 112; // 112px matches h-28
-                    const targetOffset = -((stripCount - 1) * itemHeight);
-                    track.style.transform = `translateY(${targetOffset}px)`;
-
-                    // Finalize individual slots on timeout end
-                    setTimeout(() => {
+                    this._spinReelInPlace(cat, 50, stopAt, targetLoadout[cat], () => {
                         this.stoppedCount++;
-                        this.currentLoadout[cat] = finalItem;
+                        this.currentLoadout[cat] = targetLoadout[cat];
                         
-                        // Cleanup track and render final item
-                        track.innerHTML = '';
-                        track.style.transition = 'none';
-                        track.style.transform = 'translateY(0px)';
-                        track.appendChild(this.createTrackItemNode(finalItem, cat));
-
-                        // Render items incrementally
-                        this.renderLoadout();
+                        // Bounce/Scale pop burst effect when landing on a winner
+                        const reel = document.querySelector(`[data-category="${cat}"]`);
+                        if (reel) {
+                            reel.classList.remove('scale-[1.02]', 'border-indigo-500/60', 'bg-indigo-500/5');
+                            reel.classList.add('border-emerald-500/60', 'bg-emerald-500/5', 'scale-[1.04]');
+                            setTimeout(() => {
+                                reel.classList.remove('scale-[1.04]', 'border-emerald-500/60', 'bg-emerald-500/5');
+                            }, 300);
+                        }
 
                         if (this.stoppedCount === this.totalCats) {
                             this.finishSpin();
                         }
-                    }, duration);
+                    });
                 });
+            },
+
+            // --- Recursive in-place progressive delay decelerator ---
+            _spinReelInPlace: function(cat, delay, stopAt, finalItem, onDone) {
+                const now = Date.now();
+                if (now >= stopAt) {
+                    this.updateReel(cat, finalItem);
+                    onDone();
+                    return;
+                }
+
+                const pool = this.byCategory[cat] || [];
+                if (pool.length) {
+                    const randomItem = this.pick(pool);
+                    this.updateReel(cat, randomItem);
+                }
+
+                let next = delay;
+                const remaining = stopAt - now;
+                if (remaining < 800) {
+                    // Smooth quadratic deceleration curve
+                    const p = 1 - (remaining / 800);
+                    next = 50 + (Math.pow(p, 2) * 200); // 50ms up to 250ms delay
+                }
+
+                setTimeout(() => this._spinReelInPlace(cat, next, stopAt, finalItem, onDone), next);
             },
 
             finishSpin: function() {
                 this.isSpinning = false;
                 this.setStatus('READY', 'ready');
+
+                // Generate loadout name
+                const loadoutName = this.generateRandomLoadoutName();
+                const nameEl = document.getElementById('loadout-name-title');
+                if (nameEl) {
+                    nameEl.textContent = `"${loadoutName}"`;
+                    nameEl.classList.remove('hidden');
+                }
+
+                // Generate AKA / Tagline from item shortNames
+                const taglineEl = document.getElementById('loadout-aka-title');
+                if (taglineEl) {
+                    const taglineText = this.generateAkaTagline();
+                    if (taglineText) {
+                        taglineEl.innerHTML = taglineText;
+                        taglineEl.classList.remove('hidden');
+                    } else {
+                        taglineEl.classList.add('hidden');
+                    }
+                }
+
+                // Render finalized items list and title badge at the exact same moment
+                this.renderLoadout();
                 this.updateButtons();
             },
 
@@ -761,6 +801,21 @@
                     this.currentLoadout[c] = null;
                     this.updateReel(c, null); // Null triggers rendering of the custom category template icon!
                 }
+
+                // Hide and clear loadout name
+                const nameEl = document.getElementById('loadout-name-title');
+                if (nameEl) {
+                    nameEl.textContent = '';
+                    nameEl.classList.add('hidden');
+                }
+
+                // Hide and clear tagline
+                const taglineEl = document.getElementById('loadout-aka-title');
+                if (taglineEl) {
+                    taglineEl.textContent = '';
+                    taglineEl.classList.add('hidden');
+                }
+
                 this.renderLoadout();
             },
 
