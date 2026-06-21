@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fraagle Sheets - Escape from Tarkov DB</title>
+    <title>Fraagle Sheets by Seeker - Escape from Tarkov DB</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -101,7 +101,7 @@
             <div class="bg-white text-[#107c41] p-1 rounded font-bold text-sm tracking-tighter">
                 田
             </div>
-            <span class="font-semibold text-sm">Fraagle Sheets</span>
+            <span class="font-semibold text-sm">Fraagle Sheets by Seeker</span>
             <span class="text-xs opacity-75 border-l border-white/30 pl-2">Escape from Tarkov Items Database</span>
         </div>
 
@@ -173,6 +173,16 @@
             <div class="flex items-center bg-[#f3f2f1] dark:bg-[#18181b] rounded border border-lightBorder dark:border-darkBorder px-2 py-1">
                 <input type="text" id="grid-search-input" placeholder="Search rows..." class="bg-transparent border-none outline-none w-44 text-zinc-800 dark:text-zinc-100">
                 <span class="text-zinc-400 select-none">🔍</span>
+            </div>
+        </div>
+
+        <!-- Top Category Filter Dropdown -->
+        <div class="flex flex-col space-y-1">
+            <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Category Filter</span>
+            <div class="flex items-center bg-[#f3f2f1] dark:bg-[#18181b] rounded border border-lightBorder dark:border-darkBorder px-2 py-1">
+                <select id="category-filter-select" class="bg-transparent border-none outline-none w-40 text-zinc-800 dark:text-zinc-100 font-semibold cursor-pointer">
+                    <option value="all" class="bg-white dark:bg-darkCard">All Categories</option>
+                </select>
             </div>
         </div>
 
@@ -294,7 +304,7 @@
         <div id="pane-divider" class="w-1.5 hover:w-2 bg-[#cbd5e1] dark:bg-darkBorder hover:bg-[#107c41] dark:hover:bg-[#107c41] cursor-col-resize h-full select-none z-10 shrink-0 transition-all"></div>
 
         <!-- Microsoft Excel Online Style Right-Side comparison & Inspector Pane (Adjustable width) -->
-        <aside id="side-pane" class="w-80 border-l border-[#cbd5e1] dark:border-darkBorder bg-[#faf9f8] dark:bg-darkCard/50 backdrop-blur-md flex flex-col shrink-0 overflow-y-auto min-w-[200px] max-w-[500px]">
+        <aside id="side-pane" class="w-80 border-l border-[#cbd5e1] dark:border-[#27272a] bg-[#faf9f8] dark:bg-darkCard/50 backdrop-blur-md flex flex-col shrink-0 overflow-y-auto min-w-[200px] max-w-[500px]">
             
             <!-- Item Inspector Section (Dynamic selection showcase) -->
             <div class="p-4 border-b border-[#cbd5e1] dark:border-[#27272a] bg-zinc-100/50 dark:bg-zinc-800/20">
@@ -341,7 +351,7 @@
             </div>
 
             <!-- Comparison Header & Slots Displays -->
-            <div class="p-4 border-b border-[#cbd5e1] dark:border-[#27272a] bg-zinc-100/30 dark:bg-zinc-800/10">
+            <div class="p-4 border-b border-[#cbd5e1] dark:border-darkBorder bg-zinc-100/30 dark:bg-zinc-800/10">
                 <h3 class="text-sm font-bold text-zinc-700 dark:text-zinc-300 flex items-center space-x-2">
                     <span>⚖️</span>
                     <span>Active Comparison Slots</span>
@@ -406,15 +416,8 @@
     <footer class="bg-[#f3f2f1] dark:bg-[#18181b] border-t border-[#cbd5e1] dark:border-[#27272a] h-10 flex items-center justify-between px-4 shrink-0 select-none text-xs z-10">
         <!-- Sheets Tabs buttons - Sheets numbers removed dynamically -->
         <div class="flex items-center space-x-2 h-full max-w-[70%] overflow-hidden">
-            <!-- Scroll tabs left/right buttons -->
-            <button id="scroll-tabs-left" class="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-950 dark:hover:text-white" title="Scroll Tabs Left">
-                &lt;
-            </button>
-            <div id="tabs-container" class="flex items-center space-x-1 h-full overflow-x-auto no-scrollbar scroll-smooth">
-                <!-- Dynamically populated sheets appear here -->
-            </div>
-            <button id="scroll-tabs-right" class="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-950 dark:hover:text-white" title="Scroll Tabs Right">
-                &gt;
+            <button class="h-full px-4 border-t-2 border-[#107c41] bg-white dark:bg-[#1f1f23] font-semibold text-zinc-800 dark:text-zinc-100 flex items-center cursor-pointer text-xs">
+                Sheet1
             </button>
         </div>
 
@@ -487,6 +490,9 @@
         // Sorting state indicators
         let activeSortCol = '';
         let activeSortAsc = true;
+
+        // Toggle state for icons
+        let showIconsInGrid = true;
 
         // Fallbacks for offline development (100% clean & age-appropriate details)
         const fallbackDatabase = [
@@ -637,56 +643,30 @@
             });
             uniqueCategories = Array.from(categorySet).sort();
 
-            renderExcelTabButtons();
+            populateCategoryFilterSelect();
+            populateComparisonSelects();
             filterAndRenderSheet();
             calculateSummaryStatistics();
         }
 
-        // --- 4. EXCEL SHEETS TAB SCROLL & POPULATOR ENGINE (No "SheetX-X") ---
-        const tabsContainer = document.getElementById('tabs-container');
-
-        function renderExcelTabButtons() {
-            tabsContainer.innerHTML = '';
-
-            // Main sheet: "All Items"
-            const allBtn = document.createElement('button');
-            allBtn.id = 'tab-btn-all';
-            allBtn.textContent = 'All Items';
-            allBtn.className = getTabClass(activeSheetTab === 'all');
-            allBtn.onclick = () => selectExcelSheet('all');
-            tabsContainer.appendChild(allBtn);
-
-            // Dynamically populated clean category sheets
-            uniqueCategories.forEach((cat) => {
-                const tabBtn = document.createElement('button');
-                tabBtn.id = `tab-btn-${cat.replace(/\s+/g, '')}`;
-                tabBtn.textContent = cat;
-                tabBtn.className = getTabClass(activeSheetTab === cat);
-                tabBtn.onclick = () => selectExcelSheet(cat);
-                tabsContainer.appendChild(tabBtn);
+        // Populates top category select filter dropdown
+        function populateCategoryFilterSelect() {
+            const select = document.getElementById('category-filter-select');
+            select.innerHTML = '<option value="all" class="bg-white dark:bg-darkCard">All Categories</option>';
+            uniqueCategories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                opt.className = "bg-white dark:bg-darkCard";
+                select.appendChild(opt);
             });
         }
 
-        function getTabClass(isActive) {
-            if (isActive) {
-                return "px-4 py-1 border-t-2 border-[#107c41] bg-white dark:bg-[#1f1f23] font-semibold text-zinc-800 dark:text-zinc-100 flex items-center h-full flex-shrink-0 cursor-pointer text-xs";
-            }
-            return "px-4 py-1 border-t-2 border-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 flex items-center h-full flex-shrink-0 cursor-pointer text-xs";
-        }
-
-        function selectExcelSheet(sheetId) {
-            activeSheetTab = sheetId;
-            renderExcelTabButtons();
+        // Listen for top category filter select changes
+        document.getElementById('category-filter-select').addEventListener('change', (e) => {
+            activeSheetTab = e.target.value;
             filterAndRenderSheet();
-        }
-
-        document.getElementById('scroll-tabs-left').addEventListener('click', () => {
-            tabsContainer.scrollBy({ left: -150, behavior: 'smooth' });
         });
-        document.getElementById('scroll-tabs-right').addEventListener('click', () => {
-            tabsContainer.scrollBy({ left: 150, behavior: 'smooth' });
-        });
-
 
         // --- 5. SORTING MECHANISM ---
         function sortSpreadsheet(columnName) {
@@ -787,6 +767,9 @@
                 return;
             }
 
+            // High-performance fragment renderer
+            const fragment = document.createDocumentFragment();
+
             filteredRows.forEach((row, idx) => {
                 const rowNum = idx + 1;
                 const rowDiv = document.createElement('div');
@@ -800,6 +783,18 @@
 
                 rowDiv.style.height = customHeight;
                 rowDiv.className = `flex items-center h-8 relative select-all transition-colors duration-100 ${highlightClass}`;
+                rowDiv.dataset.id = row.id;
+                rowDiv.dataset.rownum = rowNum;
+                rowDiv.dataset.name = row.name;
+                rowDiv.dataset.shortname = row.shortName;
+                rowDiv.dataset.category = row.category;
+                rowDiv.dataset.baseprice = row.basePrice;
+                rowDiv.dataset.avgprice = row.avg24hPrice;
+                rowDiv.dataset.weight = row.weight;
+
+                const iconHtml = showIconsInGrid && row.iconLink 
+                    ? `<img src="${row.iconLink}" alt="icon" class="w-5 h-5 object-contain mr-1.5 flex-shrink-0 select-none hover-trigger" onerror="this.style.display='none'">` 
+                    : '';
                 
                 // Added high-contrast, clean [A] and [B] shortcut triggers inside Name Column (A)
                 rowDiv.innerHTML = `
@@ -817,7 +812,10 @@
                                 <button onclick="setDirectCompareItem('A', '${row.id}', event)" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500 hover:bg-blue-600 text-white cursor-pointer select-none" title="Compare as Baseline Item A">A</button>
                                 <button onclick="setDirectCompareItem('B', '${row.id}', event)" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500 hover:bg-purple-600 text-white cursor-pointer select-none" title="Compare as Target Item B">B</button>
                             </div>
-                            <span class="truncate" onclick="selectExcelRow('${row.id}', 'A${rowNum}', '${row.name.replace(/'/g, "\\'")}')">${row.name}</span>
+                            <div class="flex items-center truncate h-full w-full">
+                                ${iconHtml}
+                                <span class="truncate hover-trigger" onclick="selectExcelRow('${row.id}', 'A${rowNum}', '${row.name.replace(/'/g, "\\'")}')">${row.name}</span>
+                            </div>
                         </div>
                         <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'B${rowNum}', '${row.shortName.replace(/'/g, "\\'")}')">${row.shortName}</div>
                         <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a]" onclick="selectExcelRow('${row.id}', 'C${rowNum}', '${row.category}')">${row.category}</div>
@@ -837,10 +835,13 @@
                     loadIntoCompareDropdowns(row);
                 });
 
-                // Attach mouse-over popup handlers (Instant preview)
-                rowDiv.addEventListener('mouseenter', (e) => startHoverTooltip(e, row));
-                rowDiv.addEventListener('mousemove', positionHoverTooltip);
-                rowDiv.addEventListener('mouseleave', cancelHoverTooltip);
+                // Attach mouse-over popup handlers (Instant preview restricted ONLY to names or icons)
+                const hoverTriggers = rowDiv.querySelectorAll('.hover-trigger');
+                hoverTriggers.forEach(el => {
+                    el.addEventListener('mouseenter', (e) => startHoverTooltip(e, row));
+                    el.addEventListener('mousemove', positionHoverTooltip);
+                    el.addEventListener('mouseleave', cancelHoverTooltip);
+                });
 
                 // Attach drag resizing listeners
                 const resizeHandle = rowDiv.querySelector('.row-resize-handle');
@@ -858,8 +859,10 @@
                     rowDiv.style.height = '32px';
                 });
 
-                gridBody.appendChild(rowDiv);
+                fragment.appendChild(rowDiv);
             });
+
+            gridBody.appendChild(fragment);
         }
 
         // --- 8. MOUSE DRAG HEIGHT RESIZER ALGORITHM ---
@@ -885,13 +888,19 @@
         }
 
         // --- 9. EXCEL COMPILER & COMPARATOR ENGINE ---
+        // Populates comparison side selection items defensively
+        function populateComparisonSelects() {
+            // Keep the underlying elements aligned with selection slots
+            compareItemIdA = null;
+            compareItemIdB = null;
+        }
+
         // Dynamic [A] / [B] slot picker
         function setDirectCompareItem(slot, itemId, e) {
             if (e) {
                 e.stopPropagation();
                 e.preventDefault();
             }
-            const selectorId = slot === 'A' ? 'compare-select-a' : 'compare-select-b';
             
             // Under-the-hood global tracking update
             if (slot === 'A') {
@@ -964,6 +973,7 @@
         // --- 10. INTERACTIVE MOUSE HOVER PREVIEW ---
         const tooltip = document.getElementById('hover-tooltip');
 
+        // Target hover parser helpers
         function startHoverTooltip(e, item) {
             positionHoverTooltip(e);
             tooltip.classList.remove('opacity-0');
@@ -1309,6 +1319,9 @@
         const clearFiltersBtn = document.getElementById('toolbar-clear-filters');
         const compareDirectBtn = document.getElementById('toolbar-compare-direct');
         const resetComparisonBtn = document.getElementById('reset-comparison-btn');
+        const toggleIconsBtn = document.getElementById('toolbar-toggle-icons');
+        const iconToggleEmoji = document.getElementById('icon-toggle-emoji');
+        const iconToggleLabel = document.getElementById('icon-toggle-label');
 
         gridSearch.addEventListener('input', () => {
             filterAndRenderSheet();
@@ -1316,6 +1329,8 @@
 
         clearFiltersBtn.addEventListener('click', () => {
             gridSearch.value = '';
+            document.getElementById('category-filter-select').value = 'all';
+            activeSheetTab = 'all';
             filterAndRenderSheet();
         });
 
@@ -1327,6 +1342,18 @@
             compareItemIdA = null;
             compareItemIdB = null;
             executeSpreadsheetComparison();
+        });
+
+        toggleIconsBtn.addEventListener('click', () => {
+            showIconsInGrid = !showIconsInGrid;
+            if (showIconsInGrid) {
+                iconToggleEmoji.textContent = '🖼️';
+                iconToggleLabel.textContent = 'Hide Icons';
+            } else {
+                iconToggleEmoji.textContent = '🙈';
+                iconToggleLabel.textContent = 'Show Icons';
+            }
+            filterAndRenderSheet();
         });
 
         loadTarkovData();
