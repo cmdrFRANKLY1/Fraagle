@@ -99,29 +99,6 @@
             background: #107c41;
             height: 3px;
         }
-        .wiki-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            background: transparent;
-            color: #3b82f6;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background 0.15s, color 0.15s;
-            flex-shrink: 0;
-            text-decoration: none;
-        }
-        .wiki-btn:hover {
-            background: #3b82f620;
-            color: #2563eb;
-        }
-        .dark .wiki-btn:hover {
-            background: #3b82f630;
-            color: #60a5fa;
-        }
         .search-input {
             transition: border-color 0.15s;
         }
@@ -135,6 +112,7 @@
         .dark .row-selected {
             background: #1a3a2a !important;
         }
+        /* Spinner */
         .loader {
             border: 2px solid #e4e4e7;
             border-top: 2px solid #107c41;
@@ -155,6 +133,15 @@
             100% {
                 transform: rotate(360deg);
             }
+        }
+        /* Large loader for overlay */
+        .loader-large {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            animation: spin 0.9s linear infinite;
         }
 
         /* Explorer panel – Categories with checkboxes */
@@ -228,18 +215,6 @@
             background: #3f3f46;
             color: #d4d4d8;
         }
-        .explorer-item.active {
-            background: #107c41;
-            color: white;
-        }
-        .dark .explorer-item.active {
-            background: #107c41;
-            color: white;
-        }
-        .explorer-item.active .badge {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
 
         #detail-panel {
             width: 320px;
@@ -302,9 +277,34 @@
         .dark .pane-divider:hover {
             background: #107c41;
         }
+
+        /* Loading overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            transition: opacity 0.3s ease;
+        }
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 h-screen flex flex-col overflow-hidden select-none">
+
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div id="loading-overlay">
+        <div class="loader-large"></div>
+        <p class="mt-4 text-sm font-medium">Loading Tarkov Database…</p>
+    </div>
 
     <!-- ===== HEADER ===== -->
     <header class="bg-[#107c41] text-white h-12 flex items-center justify-between px-4 shrink-0 z-20">
@@ -586,6 +586,14 @@
         let hoverTimeout = null;
         let hoveredItem = null;
 
+        // Loading overlay
+        const loadingOverlay = document.getElementById('loading-overlay');
+
+        function hideLoading() {
+            loadingOverlay.classList.add('hidden');
+            // After transition, we could remove it from DOM, but keeping hidden is fine.
+        }
+
         // ============================================================
         //  2. FALLBACK DATABASE
         // ============================================================
@@ -726,6 +734,9 @@
             renderExplorer();
             filterAndRender();
             calcStats();
+
+            // Hide loading overlay now that data is ready
+            hideLoading();
         }
 
         // ============================================================
@@ -861,18 +872,12 @@
         }
 
         // ============================================================
-        //  9. WIKI LINK HELPERS
+        //  9. WIKI LINK HELPERS (only used in detail panel now)
         // ============================================================
         function buildWikiUrl(item) {
             if (item.wikiLink) return item.wikiLink;
             const slug = item.name.replace(/ /g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
             return `https://escapefromtarkov.fandom.com/wiki/${encodeURIComponent(slug)}`;
-        }
-
-        function wikiIconHtml(item, small = true) {
-            const url = buildWikiUrl(item);
-            const size = small ? 'text-sm' : 'text-base';
-            return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="wiki-btn ${size}" title="Open Tarkov Wiki" onclick="event.stopPropagation();">📖</a>`;
         }
 
         // ============================================================
@@ -923,7 +928,7 @@
         }
 
         // ============================================================
-        //  11. RENDER GRID (with category filter)
+        //  11. RENDER GRID (without wiki icons)
         // ============================================================
         function filterAndRender() {
             const grid = document.getElementById('spreadsheet-grid-body');
@@ -972,22 +977,16 @@
                 const cells = document.createElement('div');
                 cells.className = 'excel-grid grid flex-grow h-full items-center text-left';
 
-                // Column A: Name + Wiki link
+                // Column A: Name (no wiki icon)
                 const cellA = document.createElement('div');
                 cellA.className =
-                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a] gap-1';
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellA.textContent = row.name;
                 cellA.onclick = () => {
                     selectedItemId = row.id;
                     updateDetailPanel(row);
                     filterAndRender();
                 };
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'truncate flex-grow';
-                nameSpan.textContent = row.name;
-                cellA.appendChild(nameSpan);
-                const wikiA = document.createElement('span');
-                wikiA.innerHTML = wikiIconHtml(row, true);
-                cellA.appendChild(wikiA);
                 cells.appendChild(cellA);
 
                 // Column B: Short Name
