@@ -115,11 +115,21 @@
                     </svg>
                 </button>
 
-                <!-- Workspace Apps Dropdown Menu -->
-                <div id="app-launcher-dropdown" class="hidden absolute right-0 mt-3 w-80 max-h-[420px] overflow-y-auto bg-white/95 dark:bg-darkCard/90 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl p-4 z-50 transition-all duration-200 transform scale-95 opacity-0 origin-top-right backdrop-blur-xl">
-                    <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">Quick Launcher</div>
-                    <div id="dropdown-apps-grid" class="grid grid-cols-3 gap-2">
-                        <!-- Populated dynamically with the apps -->
+                <!-- Workspace Apps Dropdown Menu (Overhauled with dynamic sections) -->
+                <div id="app-launcher-dropdown" class="hidden absolute right-0 mt-3 w-80 max-h-[420px] overflow-y-auto bg-white/95 dark:bg-darkCard/90 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl p-4 z-50 transition-all duration-200 transform scale-95 opacity-0 origin-top-right backdrop-blur-xl space-y-4">
+                    <!-- General Workspace Apps -->
+                    <div id="dropdown-general-section" class="hidden">
+                        <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">General Apps</div>
+                        <div id="dropdown-apps-grid" class="grid grid-cols-3 gap-2">
+                            <!-- Populated dynamically with the apps -->
+                        </div>
+                    </div>
+                    <!-- Escape from Tarkov Apps -->
+                    <div id="dropdown-tarkov-section" class="hidden border-t border-lightBorder dark:border-darkBorder pt-3">
+                        <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">Escape from Tarkov</div>
+                        <div id="dropdown-tarkov-apps-grid" class="grid grid-cols-3 gap-2">
+                            <!-- Populated dynamically with EFT apps -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -885,7 +895,15 @@
 
     function renderLauncherDropdown(appsToRender) {
         const dropdownGrid = document.getElementById('dropdown-apps-grid');
+        const dropdownTarkovGrid = document.getElementById('dropdown-tarkov-apps-grid');
+        const dropdownTarkovSection = document.getElementById('dropdown-tarkov-section');
+        const dropdownGeneralSection = document.getElementById('dropdown-general-section');
+
         dropdownGrid.innerHTML = '';
+        dropdownTarkovGrid.innerHTML = '';
+
+        let hasTarkov = false;
+        let hasGeneral = false;
 
         appsToRender.forEach((app, index) => {
             const title = getAppTitle(app);
@@ -904,8 +922,27 @@
                     ${title}
                 </span>
             `;
-            dropdownGrid.appendChild(link);
+
+            if (app.toLowerCase().startsWith('eft')) {
+                dropdownTarkovGrid.appendChild(link);
+                hasTarkov = true;
+            } else {
+                dropdownGrid.appendChild(link);
+                hasGeneral = true;
+            }
         });
+
+        if (hasTarkov) {
+            dropdownTarkovSection.classList.remove('hidden');
+        } else {
+            dropdownTarkovSection.classList.add('hidden');
+        }
+
+        if (hasGeneral) {
+            dropdownGeneralSection.classList.remove('hidden');
+        } else {
+            dropdownGeneralSection.classList.add('hidden');
+        }
     }
 
     // Initialize Core Data fetching on launch
@@ -991,6 +1028,37 @@
         clearTimeout(hoverTimer);
         previewCard.classList.add('hidden');
     }
+
+    // Collapse click handlers
+    const tarkovCollapseBtn = document.getElementById('tarkov-collapse-btn');
+    const tarkovAppsGrid = document.getElementById('tarkov-apps-grid');
+    const tarkovArrow = document.getElementById('tarkov-arrow');
+
+    tarkovCollapseBtn.addEventListener('click', () => {
+        const isHidden = tarkovAppsGrid.classList.contains('hidden');
+        if (isHidden) {
+            tarkovAppsGrid.classList.remove('hidden');
+            tarkovArrow.classList.add('rotate-180');
+        } else {
+            tarkovAppsGrid.classList.add('hidden');
+            tarkovArrow.classList.remove('rotate-180');
+        }
+    });
+
+    const generalCollapseBtn = document.getElementById('general-collapse-btn');
+    const appsGrid = document.getElementById('apps-grid');
+    const generalArrow = document.getElementById('general-arrow');
+
+    generalCollapseBtn.addEventListener('click', () => {
+        const isHidden = appsGrid.classList.contains('hidden');
+        if (isHidden) {
+            appsGrid.classList.remove('hidden');
+            generalArrow.classList.add('rotate-180');
+        } else {
+            appsGrid.classList.add('hidden');
+            generalArrow.classList.remove('rotate-180');
+        }
+    });
 
     function positionPreviewCard(e) {
         const cardWidth = 288; // w-72 matches 288px
