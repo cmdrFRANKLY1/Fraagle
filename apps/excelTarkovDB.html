@@ -28,9 +28,13 @@
                         darkBg: '#101010', // Deep black background
                         darkCard: '#18181b', // Dark card
                         darkBorder: '#27272a', // Subtle dark borders
-                        lightBg: '#f3f2f1', // Classic Excel high-contrast light gray
-                        lightCard: '#ffffff', // Crisp white sheet cells
-                        lightBorder: '#cbd5e1', // Stronger gray sheet lines
+                        lightBg: '#f8f9fa', // Pristine soft off-white background
+                        lightCard: '#ffffff', // Clean white card
+                        lightBorder: '#e2e8f0', // Crisp slate border
+                        fraagleBlue: '#3b82f6',
+                        fraagleRed: '#ef4444',
+                        fraagleYellow: '#f59e0b',
+                        fraagleGreen: '#10b981'
                     }
                 }
             }
@@ -43,7 +47,7 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         /* CSS Variable columns for dynamic sizing/auto-fitting */
@@ -331,30 +335,23 @@
                 </div>
             </div>
 
-            <!-- Comparison Header -->
+            <!-- Comparison Header & Slots Displays -->
             <div class="p-4 border-b border-[#cbd5e1] dark:border-darkBorder bg-zinc-100/30 dark:bg-zinc-800/10">
                 <h3 class="text-sm font-bold text-zinc-700 dark:text-zinc-300 flex items-center space-x-2">
                     <span>⚖️</span>
-                    <span>Compare Selector</span>
+                    <span>Active Comparison Slots</span>
                 </h3>
-            </div>
-
-            <!-- Comparison Selection Inputs -->
-            <div class="p-4 space-y-4">
-                <!-- Item A Dropdown Selection -->
-                <div class="space-y-1.5">
-                    <label for="compare-select-a" class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Item A (Baseline)</label>
-                    <select id="compare-select-a" class="w-full text-xs p-2 rounded-lg border border-[#cbd5e1] dark:border-darkBorder bg-white dark:bg-darkCard text-zinc-800 dark:text-zinc-100 outline-none focus:border-[#107c41]">
-                        <option value="">-- Choose Item A --</option>
-                    </select>
-                </div>
-
-                <!-- Item B Dropdown Selection -->
-                <div class="space-y-1.5">
-                    <label for="compare-select-b" class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Item B (Target)</label>
-                    <select id="compare-select-b" class="w-full text-xs p-2 rounded-lg border border-[#cbd5e1] dark:border-darkBorder bg-white dark:bg-darkCard text-zinc-800 dark:text-zinc-100 outline-none focus:border-[#107c41]">
-                        <option value="">-- Choose Item B --</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-2 mt-3 select-none">
+                    <!-- Slot A Card -->
+                    <div id="slot-card-a" class="p-2 border border-dashed border-[#cbd5e1] dark:border-darkBorder rounded-xl bg-white dark:bg-zinc-900 text-center flex flex-col items-center justify-center min-h-[70px]">
+                        <span class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mb-1">[Slot A]</span>
+                        <span id="slot-a-name" class="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 italic truncate w-full px-1">Empty</span>
+                    </div>
+                    <!-- Slot B Card -->
+                    <div id="slot-card-b" class="p-2 border border-dashed border-[#cbd5e1] dark:border-darkBorder rounded-xl bg-white dark:bg-zinc-900 text-center flex flex-col items-center justify-center min-h-[70px]">
+                        <span class="text-[9px] font-bold text-purple-500 uppercase tracking-widest mb-1">[Slot B]</span>
+                        <span id="slot-b-name" class="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 italic truncate w-full px-1">Empty</span>
+                    </div>
                 </div>
             </div>
 
@@ -364,14 +361,14 @@
                 <div id="compare-empty-state" class="text-center py-6 text-zinc-400 dark:text-zinc-500 flex flex-col items-center">
                     <span class="text-4xl mb-3">🧮</span>
                     <h4 class="text-xs font-bold uppercase tracking-wider mb-1">Spreadsheet formulas comparator</h4>
-                    <p class="text-[11px] max-w-[200px] leading-relaxed">Choose two elements from the dropdowns above, use row A/B slot selectors, or double-click rows to compare!</p>
+                    <p class="text-[11px] max-w-[200px] leading-relaxed">Choose two elements using the A/B row buttons or double-click grid rows to compare details!</p>
                 </div>
 
                 <!-- Computed spreadsheet data analysis -->
                 <div id="compare-data-state" class="hidden space-y-4">
                     <!-- Pricing comparison block -->
                     <div class="bg-white dark:bg-zinc-900/40 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3 shadow-sm">
-                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Pricing Formula</div>
+                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2 border-b border-zinc-100 dark:border-zinc-800/80 pb-1">Pricing Formulas</div>
                         <div id="pricing-compare-result" class="text-xs font-semibold leading-relaxed text-zinc-700 dark:text-zinc-300">
                             <!-- Populated dynamically -->
                         </div>
@@ -379,7 +376,6 @@
 
                     <!-- Weight comparison block -->
                     <div class="bg-white dark:bg-zinc-900/40 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3 shadow-sm">
-                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Weight Formula</div>
                         <div id="weight-compare-result" class="text-xs font-semibold leading-relaxed text-zinc-700 dark:text-zinc-300">
                             <!-- Populated dynamically -->
                         </div>
@@ -387,7 +383,7 @@
 
                     <!-- Tactical attribute comparison block -->
                     <div id="tactical-compare-block" class="bg-white dark:bg-zinc-900/40 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3 shadow-sm hidden">
-                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1.5">Tactical Metrics</div>
+                        <div class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2 border-b border-zinc-100 dark:border-zinc-800/80 pb-1">Tactical Metrics</div>
                         <div id="tactical-compare-result" class="text-xs font-semibold leading-relaxed space-y-2 text-zinc-700 dark:text-zinc-300">
                             <!-- Populated dynamically -->
                         </div>
@@ -475,6 +471,10 @@
         let activeSheetTab = 'all'; // 'all', or unique categories
         let selectedCellReference = "A1";
         let selectedItemId = null; // Highlighting logic row reference ID
+
+        // Active Comparison Items state (Removed Select Dropdowns)
+        let compareItemIdA = null;
+        let compareItemIdB = null;
 
         // Dynamic Drag Height Tracking state
         let rowHeights = {}; // rowNum: heightPx
@@ -633,7 +633,6 @@
             uniqueCategories = Array.from(categorySet).sort();
 
             renderExcelTabButtons();
-            populateComparisonSelects();
             filterAndRenderSheet();
             calculateSummaryStatistics();
         }
@@ -810,8 +809,8 @@
                         <div class="excel-cell h-full flex items-center px-2 truncate cursor-cell border-[#cbd5e1] dark:border-[#27272a] relative">
                             <!-- Integrated A/B Slot buttons -->
                             <div class="flex items-center space-x-1 mr-2 flex-shrink-0 select-none">
-                                <button onclick="setDirectCompareItem('A', '${row.id}', event)" class="text-[9px] font-bold px-1 py-0.5 rounded bg-blue-500 hover:bg-blue-600 text-white cursor-pointer select-none" title="Compare as Baseline Item A">A</button>
-                                <button onclick="setDirectCompareItem('B', '${row.id}', event)" class="text-[9px] font-bold px-1 py-0.5 rounded bg-purple-500 hover:bg-purple-600 text-white cursor-pointer select-none" title="Compare as Target Item B">B</button>
+                                <button onclick="setDirectCompareItem('A', '${row.id}', event)" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500 hover:bg-blue-600 text-white cursor-pointer select-none" title="Compare as Baseline Item A">A</button>
+                                <button onclick="setDirectCompareItem('B', '${row.id}', event)" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500 hover:bg-purple-600 text-white cursor-pointer select-none" title="Compare as Target Item B">B</button>
                             </div>
                             <span class="truncate" onclick="selectExcelRow('${row.id}', 'A${rowNum}', '${row.name.replace(/'/g, "\\'")}')">${row.name}</span>
                         </div>
@@ -881,28 +880,6 @@
         }
 
         // --- 9. EXCEL COMPILER & COMPARATOR ENGINE ---
-        function populateComparisonSelects() {
-            const selectA = document.getElementById('compare-select-a');
-            const selectB = document.getElementById('compare-select-b');
-
-            selectA.innerHTML = '<option value="">-- Choose Item A (Baseline) --</option>';
-            selectB.innerHTML = '<option value="">-- Choose Item B (Target) --</option>';
-
-            const sortedItems = [...itemsIndex].sort((a, b) => a.name.localeCompare(b.name));
-
-            sortedItems.forEach(item => {
-                const optA = document.createElement('option');
-                optA.value = item.id;
-                optA.textContent = `${item.shortName} (${item.category})`;
-                selectA.appendChild(optA);
-
-                const optB = document.createElement('option');
-                optB.value = item.id;
-                optB.textContent = `${item.shortName} (${item.category})`;
-                selectB.appendChild(optB);
-            });
-        }
-
         // Dynamic [A] / [B] slot picker
         function setDirectCompareItem(slot, itemId, e) {
             if (e) {
@@ -910,18 +887,22 @@
                 e.preventDefault();
             }
             const selectorId = slot === 'A' ? 'compare-select-a' : 'compare-select-b';
-            document.getElementById(selectorId).value = itemId;
+            
+            // Under-the-hood global tracking update
+            if (slot === 'A') {
+                compareItemIdA = itemId;
+            } else {
+                compareItemIdB = itemId;
+            }
+            
             executeSpreadsheetComparison();
         }
 
         function loadIntoCompareDropdowns(item) {
-            const selectA = document.getElementById('compare-select-a');
-            const selectB = document.getElementById('compare-select-b');
-
-            if (!selectA.value) {
-                selectA.value = item.id;
-            } else if (selectA.value !== item.id) {
-                selectB.value = item.id;
+            if (!compareItemIdA) {
+                compareItemIdA = item.id;
+            } else if (compareItemIdA !== item.id) {
+                compareItemIdB = item.id;
             }
             executeSpreadsheetComparison();
         }
@@ -1023,13 +1004,39 @@
 
         // Definitive function declaration for row comparator math resolving the undefined script error
         function executeSpreadsheetComparison() {
-            const idA = document.getElementById('compare-select-a').value;
-            const idB = document.getElementById('compare-select-b').value;
-
             const emptyState = document.getElementById('compare-empty-state');
             const dataState = document.getElementById('compare-data-state');
 
-            if (!idA || !idB) {
+            const itemA = itemsIndex.find(i => i.id === compareItemIdA);
+            const itemB = itemsIndex.find(i => i.id === compareItemIdB);
+
+            // Update slot cards UI
+            const slotAName = document.getElementById('slot-a-name');
+            const slotBName = document.getElementById('slot-b-name');
+            const slotCardA = document.getElementById('slot-card-a');
+            const slotCardB = document.getElementById('slot-card-b');
+
+            if (itemA) {
+                slotAName.textContent = itemA.shortName;
+                slotAName.className = "text-[11px] font-bold text-zinc-800 dark:text-zinc-100 truncate w-full px-1";
+                slotCardA.className = "p-2 border border-solid border-blue-500/30 rounded-xl bg-blue-500/5 text-center flex flex-col items-center justify-center min-h-[70px]";
+            } else {
+                slotAName.textContent = "Empty";
+                slotAName.className = "text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 italic";
+                slotCardA.className = "p-2 border border-dashed border-[#cbd5e1] dark:border-darkBorder rounded-xl bg-white dark:bg-zinc-900 text-center flex flex-col items-center justify-center min-h-[70px]";
+            }
+
+            if (itemB) {
+                slotBName.textContent = itemB.shortName;
+                slotBName.className = "text-[11px] font-bold text-zinc-800 dark:text-zinc-100 truncate w-full px-1";
+                slotCardB.className = "p-2 border border-solid border-purple-500/30 rounded-xl bg-purple-500/5 text-center flex flex-col items-center justify-center min-h-[70px]";
+            } else {
+                slotBName.textContent = "Empty";
+                slotBName.className = "text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 italic";
+                slotCardB.className = "p-2 border border-dashed border-[#cbd5e1] dark:border-darkBorder rounded-xl bg-white dark:bg-zinc-900 text-center flex flex-col items-center justify-center min-h-[70px]";
+            }
+
+            if (!itemA || !itemB) {
                 emptyState.classList.remove('hidden');
                 dataState.classList.add('hidden');
                 return;
@@ -1038,10 +1045,61 @@
             emptyState.classList.add('hidden');
             dataState.classList.remove('hidden');
 
-            const itemA = itemsIndex.find(i => i.id === idA);
-            const itemB = itemsIndex.find(i => i.id === idB);
-
             renderComparisonData(itemA, itemB);
+        }
+
+        // Clean formula builder featuring high contrast evaluation badges & detailed symbols
+        function getComparisonRow(label, valA, valB, unit = "", lowerIsBetter = false) {
+            if (valA === null || valB === null || valA === undefined || valB === undefined) return "";
+            const numA = parseFloat(valA);
+            const numB = parseFloat(valB);
+            
+            if (isNaN(numA) || isNaN(numB)) {
+                // String attribute comparisons
+                return `
+                    <div class="border-b border-zinc-100 dark:border-zinc-800/80 pb-2 mb-2 last:border-0 last:pb-0 last:mb-0">
+                        <div class="flex justify-between text-[11px] font-bold text-zinc-400 dark:text-zinc-500 mb-0.5">${label}</div>
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-blue-500 truncate max-w-[100px]">${valA}</span>
+                            <span class="text-zinc-400 dark:text-zinc-500 select-none">vs</span>
+                            <span class="text-purple-500 truncate max-w-[100px]">${valB}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const diff = Math.abs(numA - numB);
+            const isBetter = lowerIsBetter ? (numB < numA) : (numB > numA);
+            const isEqual = numA === numB;
+            
+            let symbol = "=";
+            let badgeClass = "bg-zinc-100 dark:bg-zinc-800 text-zinc-500";
+            
+            if (!isEqual) {
+                if (isBetter) {
+                    symbol = "▲";
+                    badgeClass = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20";
+                } else {
+                    symbol = "▼";
+                    badgeClass = "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20";
+                }
+            }
+
+            const displayDiff = diff % 1 === 0 ? diff : diff.toFixed(1);
+
+            return `
+                <div class="border-b border-zinc-100 dark:border-zinc-800/80 pb-2.5 mb-2.5 last:border-0 last:pb-0 last:mb-0">
+                    <div class="flex justify-between text-[11px] font-bold text-zinc-400 dark:text-zinc-500 mb-1">${label}</div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-blue-500 font-bold">${numA.toLocaleString()}${unit}</span>
+                        <div class="flex items-center space-x-1 ${badgeClass} text-[10px] font-bold px-2 py-0.5 rounded-full select-none">
+                            <span>${isEqual ? '' : (isBetter ? '+' : '-')}${displayDiff}${unit}</span>
+                            <span>${symbol}</span>
+                        </div>
+                        <span class="text-purple-500 font-bold">${numB.toLocaleString()}${unit}</span>
+                    </div>
+                </div>
+            `;
         }
 
         function renderComparisonData(itemA, itemB) {
@@ -1049,44 +1107,22 @@
 
             document.getElementById('excel-formula-input').value = `=COMPARE("${itemA.shortName}", "${itemB.shortName}")`;
 
-            const priceA = itemA.basePrice || 0;
-            const priceB = itemB.basePrice || 0;
-            const priceDiff = Math.abs(priceA - priceB);
             const pricingResult = document.getElementById('pricing-compare-result');
-
-            if (priceA === 0 && priceB === 0) {
-                pricingResult.innerHTML = `No base price records recorded.`;
-            } else if (priceA === priceB) {
-                pricingResult.innerHTML = `Both items match at exactly <span class="text-[#107c41] font-bold">${priceA.toLocaleString()} ₽</span>.`;
-            } else {
-                const cheaperItem = priceA < priceB ? itemA.shortName : itemB.shortName;
-                const percentage = Math.round((priceDiff / Math.max(priceA, priceB)) * 100);
-                pricingResult.innerHTML = `
-                    <div>
-                        <span class="text-[#107c41] font-bold">${cheaperItem}</span> is <span class="text-emerald-500 dark:text-emerald-400 font-bold">${priceDiff.toLocaleString()} ₽</span> (${percentage}%) cheaper.
-                    </div>
-                `;
-            }
-
-            const weightA = itemA.weight || 0;
-            const weightB = itemB.weight || 0;
-            const weightDiff = Math.abs(weightA - weightB).toFixed(2);
             const weightResult = document.getElementById('weight-compare-result');
-
-            if (weightA === weightB) {
-                weightResult.innerHTML = `Both items weigh exactly <span class="text-[#107c41] font-bold">${weightA} kg</span>.`;
-            } else {
-                const lighterItem = weightA < weightB ? itemA.shortName : itemB.shortName;
-                weightResult.innerHTML = `
-                    <div>
-                        <span class="text-[#107c41] font-bold">${lighterItem}</span> is <span class="text-emerald-500 dark:text-emerald-400 font-bold">${weightDiff} kg</span> lighter.
-                    </div>
-                `;
-            }
-
             const tacticalBlock = document.getElementById('tactical-compare-block');
             const tacticalResult = document.getElementById('tactical-compare-result');
-            
+
+            // Prices block
+            pricingResult.innerHTML = `
+                ${getComparisonRow("Base Price", itemA.basePrice, itemB.basePrice, " ₽", true)}
+                ${getComparisonRow("Avg Market 24h", itemA.avg24hPrice, itemB.avg24hPrice, " ₽", true)}
+            `;
+
+            // Weight block
+            weightResult.innerHTML = `
+                ${getComparisonRow("Weight", itemA.weight, itemB.weight, " kg", true)}
+            `;
+
             const isWeaponA = itemA.caliber || itemA.ergonomics !== null || itemA.recoilVertical !== null;
             const isWeaponB = itemB.caliber || itemB.ergonomics !== null || itemB.recoilVertical !== null;
             const isArmorA = itemA.class !== null || itemA.durability !== null;
@@ -1097,49 +1133,22 @@
                 let html = '';
 
                 if (itemA.caliber || itemB.caliber) {
-                    html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Caliber:</strong> ${itemA.caliber || 'N/A'} vs ${itemB.caliber || 'N/A'}</div>`;
+                    html += getComparisonRow("Caliber", itemA.caliber, itemB.caliber);
                 }
-
-                if (itemA.ergonomics !== null && itemB.ergonomics !== null) {
-                    const ergoDiff = Math.abs(itemA.ergonomics - itemB.ergonomics);
-                    if (ergoDiff === 0) {
-                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Ergonomics:</strong> Both match at ${itemA.ergonomics}.</div>`;
-                    } else {
-                        const ergoMore = itemA.ergonomics > itemB.ergonomics ? itemA.shortName : itemB.shortName;
-                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Ergonomics:</strong> <span class="text-[#107c41] font-bold">${ergoMore}</span> has <span class="text-emerald-500 dark:text-emerald-400 font-bold">+${ergoDiff}</span> more.</div>`;
-                    }
+                if (itemA.fireRate !== null || itemB.fireRate !== null) {
+                    html += getComparisonRow("Fire Rate", itemA.fireRate, itemB.fireRate, " RPM");
                 }
-
-                if (itemA.recoilVertical !== null && itemB.recoilVertical !== null) {
-                    const recoilDiff = Math.abs(itemA.recoilVertical - itemB.recoilVertical);
-                    if (recoilDiff === 0) {
-                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Recoil:</strong> Both match at ${itemA.recoilVertical}.</div>`;
-                    } else {
-                        const recoilLess = itemA.recoilVertical < itemB.recoilVertical ? itemA.shortName : itemB.shortName;
-                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Recoil:</strong> <span class="text-[#107c41] font-bold">${recoilLess}</span> has <span class="text-emerald-500 dark:text-emerald-400 font-bold">-${recoilDiff}</span> less vertical recoil.</div>`;
-                    }
+                if (itemA.ergonomics !== null || itemB.ergonomics !== null) {
+                    html += getComparisonRow("Ergonomics", itemA.ergonomics, itemB.ergonomics);
                 }
-
-                if (itemA.fireRate !== null && itemB.fireRate !== null) {
-                    const rpmDiff = Math.abs(itemA.fireRate - itemB.fireRate);
-                    if (rpmDiff === 0) {
-                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Fire Rate:</strong> Both match at ${itemA.fireRate} RPM.</div>`;
-                    } else {
-                        const rpmMore = itemA.fireRate > itemB.fireRate ? itemA.shortName : itemB.shortName;
-                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Fire Rate:</strong> <span class="text-[#107c41] font-bold">${rpmMore}</span> fires <span class="text-emerald-500 dark:text-emerald-400 font-bold">+${rpmDiff}</span> RPM faster.</div>`;
-                    }
+                if (itemA.recoilVertical !== null || itemB.recoilVertical !== null) {
+                    html += getComparisonRow("Vertical Recoil", itemA.recoilVertical, itemB.recoilVertical, "", true);
                 }
-
                 if (itemA.class !== null || itemB.class !== null) {
-                    const classA = itemA.class || 0;
-                    const classB = itemB.class || 0;
-                    if (classA === classB) {
-                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Armor Class:</strong> Match (Class ${classA} protection).</div>`;
-                    } else {
-                        const armorMore = classA > classB ? itemA.shortName : itemB.shortName;
-                        const classDiff = Math.abs(classA - classB);
-                        html += `<div class="border-b border-zinc-100 dark:border-zinc-800 pb-1.5"><strong>Armor:</strong> <span class="text-[#107c41] font-bold">${armorMore}</span> has <span class="text-emerald-500 dark:text-emerald-400 font-bold">+${classDiff}</span> higher class.</div>`;
-                    }
+                    html += getComparisonRow("Armor Class", itemA.class, itemB.class);
+                }
+                if (itemA.durability !== null || itemB.durability !== null) {
+                    html += getComparisonRow("Durability", itemA.durability, itemB.durability);
                 }
 
                 tacticalResult.innerHTML = html || 'No specific tactical parameters match for comparison.';
@@ -1310,13 +1319,10 @@
         });
 
         resetComparisonBtn.addEventListener('click', () => {
-            document.getElementById('compare-select-a').value = '';
-            document.getElementById('compare-select-b').value = '';
+            compareItemIdA = null;
+            compareItemIdB = null;
             executeSpreadsheetComparison();
         });
-
-        document.getElementById('compare-select-a').addEventListener('change', executeSpreadsheetComparison);
-        document.getElementById('compare-select-b').addEventListener('change', executeSpreadsheetComparison);
 
         loadTarkovData();
     </script>
