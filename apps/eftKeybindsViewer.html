@@ -94,7 +94,7 @@
                     <button id="copy-path-btn" class="py-1 px-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] rounded-lg transition uppercase tracking-wider cursor-pointer">Copy</button>
                 </div>
                 <span class="text-[9px] text-zinc-400 dark:text-zinc-500 block mt-2 select-none leading-relaxed">
-                    Pasting this path into your <b>Windows Explorer</b> or <b>File Dialog</b> opens the folder instantly.
+                    Paste this path into your <b>Windows Explorer</b> or <b>File Dialog</b> opens the folder instantly.
                 </span>
             </div>
 
@@ -238,12 +238,12 @@
                 <div class="bg-white/70 dark:bg-darkCard/50 border border-[#cbd5e1] dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
                     <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2 border-b border-[#cbd5e1] dark:border-darkBorder pb-3 uppercase tracking-wider">
                         <span>🔍</span>
-                        <span>Keybinding Inspector</span>
+                        <span>Selected Key & Action</span>
                     </h3>
                     
                     <div id="inspector-empty-state" class="text-center py-12 text-zinc-400 dark:text-zinc-500 text-xs leading-relaxed flex flex-col items-center">
                         <span class="text-3xl mb-2">⌨️</span>
-                        <span>Hover or click any key on the visualizer board to inspect bound triggers.</span>
+                        <span>Hover or click any key on the visualizer board to inspect bound triggers. Click to lock selection.</span>
                     </div>
 
                     <div id="inspector-active-state" class="hidden flex flex-col space-y-4">
@@ -296,7 +296,7 @@
         // ================================================================
         const App = {
             activeKeybinds: {}, // Maps raw Key character to Action objects
-            selectedKey: null,
+            selectedKey: null, // Tracks locked selection
             isCustomFileLoaded: false, // Track if a custom Control.ini was imported
 
             // Default Tarkov Keybind sets (100% clean, ready-to-inspect demo database)
@@ -422,16 +422,17 @@
                     row.forEach(key => {
                         const widthClass = this.KEY_WIDTHS[key] || "w-8.5 sm:w-10";
                         const isBound = this.activeKeybinds[key] !== undefined;
+                        const isSelected = this.selectedKey === key;
 
                         const btn = document.createElement('div');
-                        // Translucent glass keyboard keys
-                        btn.className = `keyboard-key ${widthClass} h-10 border border-lightBorder dark:border-darkBorder rounded-lg flex items-center justify-center font-bold text-[10px] uppercase shadow-sm relative cursor-pointer select-none `;
+                        btn.className = `keyboard-key ${widthClass} h-10 border rounded-lg flex items-center justify-center font-bold text-[10px] uppercase shadow-sm relative cursor-pointer select-none `;
                         
-                        if (isBound) {
-                            // Highlights bound triggers
-                            btn.className += 'bg-indigo-500/10 dark:bg-indigo-500/15 border-indigo-500/30 dark:border-indigo-400/40 text-indigo-600 dark:text-indigo-400 shadow-md scale-[1.01]';
+                        if (isSelected) {
+                            btn.className += 'border-indigo-600 dark:border-indigo-400 bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-500/50 scale-[1.05] z-10';
+                        } else if (isBound) {
+                            btn.className += 'bg-indigo-500/10 dark:bg-indigo-500/15 border-indigo-500/30 dark:border-indigo-400/40 text-indigo-600 dark:text-indigo-400 hover:border-indigo-500/60 shadow-md scale-[1.01]';
                         } else {
-                            btn.className += 'bg-white/60 dark:bg-[#202024]/40 text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700';
+                            btn.className += 'bg-white/60 dark:bg-[#202024]/40 border-lightBorder dark:border-darkBorder text-zinc-500 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700';
                         }
 
                         btn.textContent = key === 'backspace' ? '⌫' : (key === 'enter' ? '↵' : key);
@@ -442,7 +443,7 @@
                             this.inspectKey(key);
                             // Highlight corresponding bottom action list card
                             const rowElement = document.querySelector(`[data-bind-key="${key}"]`);
-                            if (rowElement) {
+                            if (rowElement && !rowElement.dataset.isSelectedRow) {
                                 rowElement.className = 'flex items-center justify-between p-3 border border-indigo-500 bg-white dark:bg-darkCard scale-[1.01] shadow-md rounded-xl transition-all';
                             }
                         });
@@ -450,9 +451,15 @@
                             this.inspectKey(null);
                             // Remove highlight from corresponding bottom action list card
                             const rowElement = document.querySelector(`[data-bind-key="${key}"]`);
-                            if (rowElement) {
+                            if (rowElement && !rowElement.dataset.isSelectedRow) {
                                 rowElement.className = 'flex items-center justify-between p-3 border border-lightBorder dark:border-darkBorder bg-white/40 dark:bg-zinc-900/40 rounded-xl hover:border-indigo-500/20 hover:bg-white dark:hover:bg-darkCard transition-all shadow-sm';
                             }
+                        });
+
+                        // Permanent click selector trigger
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.toggleKeySelection(key);
                         });
 
                         rowDiv.appendChild(btn);
@@ -462,26 +469,46 @@
                 });
             },
 
+            // --- TOGGLE KEY PERMANENT SELECTION ---
+            toggleKeySelection: function(key) {
+                if (this.selectedKey === key) {
+                    this.selectedKey = null; // Deselect
+                } else {
+                    this.selectedKey = key; // Select
+                }
+                this.renderKeyboard();
+                this.renderBindingsList();
+                this.inspectKey(null); // Refreshes to show the permanently selected key details or empty state
+            },
+
             // --- DETAILED KEY INPSECTOR ---
             inspectKey: function(key) {
+                // Prioritize active hovered key, fallback to permanently selected key
+                const targetKey = key || this.selectedKey;
                 const empty = document.getElementById('inspector-empty-state');
                 const active = document.getElementById('inspector-active-state');
                 const label = document.getElementById('active-key-label');
 
-                if (!key || !this.activeKeybinds[key]) {
+                if (!targetKey || !this.activeKeybinds[targetKey]) {
                     empty.classList.remove('hidden');
                     active.classList.add('hidden');
-                    if (label) label.textContent = 'Hover keys to inspect';
+                    if (label) label.textContent = 'Hover or click keys to inspect';
                     return;
                 }
 
-                const bind = this.activeKeybinds[key];
+                const bind = this.activeKeybinds[targetKey];
                 empty.classList.add('hidden');
                 active.classList.remove('hidden');
 
-                if (label) label.textContent = `Inspecting trigger: [${key.toUpperCase()}]`;
+                if (label) {
+                    if (this.selectedKey === targetKey) {
+                        label.textContent = `Selected Trigger Locked: [${targetKey.toUpperCase()}]`;
+                    } else {
+                        label.textContent = `Inspecting trigger: [${targetKey.toUpperCase()}]`;
+                    }
+                }
 
-                document.getElementById('inspector-key-badge').textContent = key;
+                document.getElementById('inspector-key-badge').textContent = targetKey;
                 document.getElementById('inspector-action-name').textContent = bind.action;
                 document.getElementById('inspector-action-category').textContent = bind.category;
                 document.getElementById('inspector-press-type').textContent = bind.pressType;
@@ -491,7 +518,6 @@
                 // Detect conflicts (keys bound to multiple actions)
                 const isConflict = Object.values(this.activeKeybinds).filter(b => b.action === bind.action).length > 1;
                 if (isConflict) {
-                    numberConflict = isConflict;
                     conflictEl.textContent = 'Potential Conflict';
                     conflictEl.className = 'font-bold text-rose-500 animate-pulse';
                 } else {
@@ -531,14 +557,22 @@
 
                 entries.forEach(([key, bind]) => {
                     const row = document.createElement('div');
-                    row.className = 'flex items-center justify-between p-3 border border-lightBorder dark:border-darkBorder bg-white/40 dark:bg-zinc-900/40 rounded-xl hover:border-indigo-500/20 hover:bg-white dark:hover:bg-darkCard transition-all shadow-sm';
+                    const isSelected = this.selectedKey === key;
+
+                    if (isSelected) {
+                        row.className = 'flex items-center justify-between p-3 border-2 border-indigo-600 dark:border-indigo-400 bg-indigo-50/10 dark:bg-indigo-950/20 scale-[1.01] shadow-lg rounded-xl transition-all';
+                        row.dataset.isSelectedRow = "true";
+                    } else {
+                        row.className = 'flex items-center justify-between p-3 border border-lightBorder dark:border-darkBorder bg-white/40 dark:bg-zinc-900/40 rounded-xl hover:border-indigo-500/20 hover:bg-white dark:hover:bg-darkCard transition-all shadow-sm';
+                    }
+
                     row.dataset.bindKey = key; // Attach key bind identifier for reverse highlighting
                     row.innerHTML = `
-                        <div>
+                        <div class="truncate pr-2">
                             <div class="font-bold text-xs text-zinc-900 dark:text-zinc-100">${bind.action}</div>
                             <div class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase mt-0.5 tracking-wider">${bind.category}</div>
                         </div>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-2 flex-shrink-0">
                             <span class="text-[10px] text-zinc-400 dark:text-zinc-500 italic font-mono">${bind.pressType}</span>
                             <span class="py-1 px-2.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-bold font-mono text-[10px] uppercase shadow-sm">${key}</span>
                         </div>
@@ -546,17 +580,23 @@
 
                     row.addEventListener('mouseenter', () => {
                         const virtualKey = document.querySelector(`[data-key="${key}"]`);
-                        if (virtualKey) {
+                        if (virtualKey && !isSelected) {
                             virtualKey.classList.add('scale-110', 'border-indigo-500', 'bg-indigo-500/20', 'text-indigo-600', 'dark:text-indigo-400');
                         }
                         this.inspectKey(key);
                     });
                     row.addEventListener('mouseleave', () => {
                         const virtualKey = document.querySelector(`[data-key="${key}"]`);
-                        if (virtualKey) {
+                        if (virtualKey && !isSelected) {
                             virtualKey.classList.remove('scale-110', 'border-indigo-500', 'bg-indigo-500/20', 'text-indigo-600', 'dark:text-indigo-400');
                         }
                         this.inspectKey(null);
+                    });
+
+                    // Direct list row click permanent selector
+                    row.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleKeySelection(key);
                     });
 
                     container.appendChild(row);
