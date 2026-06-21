@@ -112,28 +112,6 @@
         .dark .row-selected {
             background: #1a3a2a !important;
         }
-        /* Spinner */
-        .loader {
-            border: 2px solid #e4e4e7;
-            border-top: 2px solid #107c41;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            animation: spin 0.8s linear infinite;
-            margin: 6px auto;
-        }
-        .dark .loader {
-            border-color: #27272a;
-            border-top-color: #107c41;
-        }
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
         /* Large loader for overlay */
         .loader-large {
             border: 4px solid rgba(255, 255, 255, 0.2);
@@ -142,6 +120,14 @@
             width: 56px;
             height: 56px;
             animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Explorer panel – Categories with checkboxes */
@@ -565,9 +551,9 @@
         </div>
     </div>
 
-    <!-- ===== TOOLTIP ===== -->
-    <div id="hover-tooltip" class="absolute pointer-events-none z-50 bg-white/95 dark:bg-darkCard/95 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3.5 shadow-2xl max-w-xs transition-opacity duration-200 opacity-0 text-xs flex flex-col space-y-1.5 backdrop-blur-md min-w-[200px] min-h-[90px]"></div>
-
+    <!-- ============================================================ -->
+    <!--  SCRIPT (tooltip removed)                                    -->
+    <!-- ============================================================ -->
     <script>
         // ============================================================
         //  1. DATA & STATE
@@ -583,15 +569,11 @@
         let searchDebounceTimer = null;
         let showIcons = true;
 
-        let hoverTimeout = null;
-        let hoveredItem = null;
-
         // Loading overlay
         const loadingOverlay = document.getElementById('loading-overlay');
 
         function hideLoading() {
             loadingOverlay.classList.add('hidden');
-            // After transition, we could remove it from DOM, but keeping hidden is fine.
         }
 
         // ============================================================
@@ -759,10 +741,8 @@
             const allCheckbox = allDiv.querySelector('input');
             allCheckbox.addEventListener('change', (e) => {
                 if (e.target.checked) {
-                    // Select all categories
                     selectedCategories = new Set(uniqueCategories);
                 } else {
-                    // Deselect all (empty set = show all)
                     selectedCategories = new Set();
                 }
                 renderExplorer();
@@ -872,7 +852,7 @@
         }
 
         // ============================================================
-        //  9. WIKI LINK HELPERS (only used in detail panel now)
+        //  9. WIKI LINK HELPERS (only used in detail panel)
         // ============================================================
         function buildWikiUrl(item) {
             if (item.wikiLink) return item.wikiLink;
@@ -928,7 +908,7 @@
         }
 
         // ============================================================
-        //  11. RENDER GRID (without wiki icons)
+        //  11. RENDER GRID (no tooltip events)
         // ============================================================
         function filterAndRender() {
             const grid = document.getElementById('spreadsheet-grid-body');
@@ -977,7 +957,7 @@
                 const cells = document.createElement('div');
                 cells.className = 'excel-grid grid flex-grow h-full items-center text-left';
 
-                // Column A: Name (no wiki icon)
+                // Column A: Name
                 const cellA = document.createElement('div');
                 cellA.className =
                     'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
@@ -1121,15 +1101,14 @@
                     });
                 }
 
+                // Double-click to select
                 div.addEventListener('dblclick', () => {
                     selectedItemId = row.id;
                     updateDetailPanel(row);
                     filterAndRender();
                 });
 
-                div.addEventListener('mouseenter', (e) => startTooltip(e, row));
-                div.addEventListener('mousemove', posTooltip);
-                div.addEventListener('mouseleave', hideTooltip);
+                // No tooltip events anymore
 
                 frag.appendChild(div);
             });
@@ -1139,68 +1118,7 @@
         }
 
         // ============================================================
-        //  12. TOOLTIP WITH 3s DELAY
-        // ============================================================
-        const tooltip = document.getElementById('hover-tooltip');
-
-        function startTooltip(e, item) {
-            posTooltip(e);
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = null;
-            }
-            hoveredItem = item;
-
-            tooltip.classList.remove('opacity-0');
-            tooltip.classList.add('opacity-100');
-            tooltip.innerHTML = `
-                <div class="flex flex-col items-center py-2">
-                    <div class="loader"></div>
-                    <span class="text-[10px] text-zinc-400 mt-1">Loading item…</span>
-                </div>
-            `;
-
-            hoverTimeout = setTimeout(() => {
-                if (hoveredItem === item) {
-                    const icon = item.iconLink || 'https://via.placeholder.com/48x48?text=No+Icon';
-                    tooltip.innerHTML = `
-                        <div class="flex items-center gap-2 pb-2 border-b border-lightBorder dark:border-darkBorder">
-                            <img src="${icon}" class="w-8 h-8 object-contain rounded" onerror="this.src='https://via.placeholder.com/48x48?text=No+Icon'">
-                            <div class="truncate"><h4 class="font-bold text-zinc-900 dark:text-zinc-100 truncate text-xs">${item.shortName}</h4><span class="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">${item.category}</span></div>
-                        </div>
-                        <div class="pt-1.5 space-y-1 text-[10px] text-zinc-500 dark:text-zinc-400">
-                            <div class="flex justify-between"><span>Base</span><span class="font-semibold text-zinc-700 dark:text-zinc-200">${item.basePrice > 0 ? item.basePrice.toLocaleString() + ' ₽' : '-'}</span></div>
-                            <div class="flex justify-between"><span>Weight</span><span class="font-semibold text-zinc-700 dark:text-zinc-200">${item.weight} kg</span></div>
-                            ${item.caliber ? `<div class="flex justify-between"><span>Caliber</span><span class="font-semibold text-emerald-600">${item.caliber}</span></div>` : ''}
-                            ${item.class ? `<div class="flex justify-between"><span>Armor</span><span class="font-semibold text-emerald-600">Class ${item.class}</span></div>` : ''}
-                        </div>
-                    `;
-                }
-                hoverTimeout = null;
-            }, 3000);
-        }
-
-        function posTooltip(e) {
-            const w = 224;
-            let l = e.pageX + 15,
-                t = e.pageY + 15;
-            if (l + w > window.innerWidth) l = e.pageX - w - 15;
-            tooltip.style.left = `${l}px`;
-            tooltip.style.top = `${t}px`;
-        }
-
-        function hideTooltip() {
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = null;
-            }
-            hoveredItem = null;
-            tooltip.classList.remove('opacity-100');
-            tooltip.classList.add('opacity-0');
-        }
-
-        // ============================================================
-        //  13. STATS
+        //  12. STATS
         // ============================================================
         function calcStats() {
             const count = itemsIndex.length;
@@ -1213,7 +1131,7 @@
         }
 
         // ============================================================
-        //  14. SEARCH (DEBOUNCED)
+        //  13. SEARCH (DEBOUNCED)
         // ============================================================
         const searchInput = document.getElementById('grid-search-input');
         searchInput.addEventListener('input', () => {
@@ -1222,7 +1140,7 @@
         });
 
         // ============================================================
-        //  15. CLEAR FILTERS
+        //  14. CLEAR FILTERS
         // ============================================================
         document.getElementById('toolbar-clear-filters').addEventListener('click', () => {
             searchInput.value = '';
@@ -1230,7 +1148,7 @@
         });
 
         // ============================================================
-        //  16. TOGGLE ICONS (placeholder)
+        //  15. TOGGLE ICONS (placeholder)
         // ============================================================
         document.getElementById('toolbar-toggle-icons').addEventListener('click', function() {
             showIcons = !showIcons;
@@ -1239,7 +1157,7 @@
         });
 
         // ============================================================
-        //  17. MENUS
+        //  16. MENUS
         // ============================================================
         const fileMenuBtn = document.getElementById('menu-btn-file');
         const fileDropdown = document.getElementById('dropdown-menu-file');
@@ -1257,7 +1175,7 @@
         document.addEventListener('click', closeAllMenus);
 
         // ============================================================
-        //  18. EXPORT
+        //  17. EXPORT
         // ============================================================
         const exportModal = document.getElementById('export-modal');
         document.getElementById('menu-opt-export').addEventListener('click', () => { exportModal.classList.remove('hidden');
@@ -1268,11 +1186,9 @@
             const format = document.getElementById('export-format').value;
             let src = [...itemsIndex];
             if (scope === 'current') {
-                // Apply current category filter
                 if (selectedCategories.size > 0) {
                     src = src.filter(i => selectedCategories.has(i.category));
                 }
-                // Also apply search if any
                 const q = document.getElementById('grid-search-input').value.toLowerCase().trim();
                 if (q) {
                     src = src.filter(r =>
@@ -1323,18 +1239,17 @@
         });
 
         // ============================================================
-        //  19. KEYBOARD SHORTCUTS
+        //  18. KEYBOARD SHORTCUTS
         // ============================================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') { exportModal.classList.add('hidden');
-                hideTooltip();
                 closeAllMenus(); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault();
                 searchInput.focus(); }
         });
 
         // ============================================================
-        //  20. PANE DIVIDERS RESIZE
+        //  19. PANE DIVIDERS RESIZE
         // ============================================================
         function setupDivider(dividerId, targetPanelId, minWidth, maxWidth, reverse = false) {
             const divider = document.getElementById(dividerId);
@@ -1366,7 +1281,7 @@
         setupDivider('detail-divider', 'detail-panel', 200, 500, false);
 
         // ============================================================
-        //  21. BOOT
+        //  20. BOOT
         // ============================================================
         loadTarkovData();
     </script>
