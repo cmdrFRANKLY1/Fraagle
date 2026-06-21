@@ -260,17 +260,20 @@
     <div id="tarkov-section" class="hidden w-full border border-lightBorder dark:border-darkBorder rounded-2xl bg-white/50 dark:bg-darkCard/20 p-4 backdrop-blur-md">
         <button id="tarkov-collapse-btn" class="w-full flex items-center justify-between font-bold text-sm tracking-wider uppercase text-zinc-500 dark:text-zinc-400 focus:outline-none cursor-pointer">
             <span class="flex items-center gap-2">⚔️ Escape from Tarkov Apps</span>
-            <span id="tarkov-arrow" class="transition-transform duration-200 rotate-180">▼</span>
+            <span id="tarkov-arrow" class="transition-transform duration-200">▼</span>
         </button>
-        <div id="tarkov-apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-4 transition-all duration-300">
+        <div id="tarkov-apps-grid" class="hidden grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-4 transition-all duration-300">
             <!-- Tarkov apps render here -->
         </div>
     </div>
 
-    <!-- General Workspace Section -->
+    <!-- General Workspace Section (Collapsible Accordion) -->
     <div id="general-section" class="hidden w-full border border-lightBorder dark:border-darkBorder rounded-2xl bg-white/50 dark:bg-darkCard/20 p-4 backdrop-blur-md">
-        <h2 class="font-bold text-sm tracking-wider uppercase text-zinc-500 dark:text-zinc-400 select-none px-1">🛠️ General Workspace Apps</h2>
-        <div id="apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-4">
+        <button id="general-collapse-btn" class="w-full flex items-center justify-between font-bold text-sm tracking-wider uppercase text-zinc-500 dark:text-zinc-400 focus:outline-none cursor-pointer">
+            <span class="flex items-center gap-2">🛠️ General Workspace Apps</span>
+            <span id="general-arrow" class="transition-transform duration-200">▼</span>
+        </button>
+        <div id="apps-grid" class="hidden grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-4 transition-all duration-300">
             <!-- General apps render here -->
         </div>
     </div>
@@ -645,18 +648,7 @@
             }
         }
 
-        // Append Local Apps to the Unified Search Index
-        localAppsRawList.forEach(app => {
-            const title = getAppTitle(app);
-            searchIndex.push({
-                id: `app-${app}`,
-                title: title,
-                type: 'app',
-                url: `/apps/${app}`,
-                description: `Launch local workspace application: ${title}. Run locally at Fraagle Hub directory, clean custom HTML logic.`,
-                category: 'Workspace App'
-            });
-        });
+        // We do NOT append local apps to the Search Index to keep search results pristine and free of applications!
 
         // Set default grid lists
         currentlyFilteredApps = [...localAppsRawList];
@@ -1176,6 +1168,27 @@
                 breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${(item.title || '').replace(/\s+/g, '_')}`;
             }
 
+            // Custom tags for Tarkov items: (<caliber>) (<category>) (<price>) ending in a (<Wikipedia>) hyperlink
+            let tagsHtml = '';
+            if (item.type === 'tarkov') {
+                const caliberVal = item.caliber ? item.caliber.replace('Caliber', '').trim() : null;
+                const caliberTag = caliberVal ? `<span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[11px] px-2 py-0.5 rounded-md mr-1.5 select-none">(${caliberVal})</span>` : '';
+                const cleanCat = item.category ? item.category.replace('Tarkov: ', '') : 'General';
+                const categoryTag = `<span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[11px] px-2 py-0.5 rounded-md mr-1.5 select-none">(${cleanCat})</span>`;
+                const priceVal = item.avgPrice || item.basePrice || 0;
+                const priceTag = `<span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[11px] px-2 py-0.5 rounded-md mr-1.5 select-none">(${priceVal > 0 ? priceVal.toLocaleString() + ' ₽' : 'N/A'})</span>`;
+                const wikiLinkTag = `<a href="${item.url}" target="_blank" class="inline-block bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 font-bold text-[11px] px-2.5 py-0.5 rounded-md hover:underline">Wikipedia ↗</a>`;
+                
+                tagsHtml = `
+                    <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        ${caliberTag}
+                        ${categoryTag}
+                        ${priceTag}
+                        ${wikiLinkTag}
+                    </div>
+                `;
+            }
+
             resultBlock.innerHTML = `
                 <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1 tracking-wide truncate flex items-center gap-1.5 select-none">
                     <span>${breadcrumbPath}</span>
@@ -1185,12 +1198,14 @@
                         ${item.title || 'Untitled'}
                     </h3>
                 </a>
+                ${item.type === 'tarkov' ? tagsHtml : `
                 <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                     <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[10px] tracking-wider px-1.5 py-0.5 rounded-md mr-1.5 select-none uppercase">
                         ${item.category || 'General'}
                     </span>
                     ${item.description || ''}
                 </p>
+                `}
             `;
 
             // Anchor hover listeners for Tarkov items, traders, and quests in search results
@@ -1288,9 +1303,8 @@
         if (query.length > 0) {
             renderAutocompleteDropdown(matchedResultsBuffer, true);
         } else {
-            // Show default loaded applications if nothing is written yet
-            const defaultSuggestions = searchIndex.filter(item => item && item.type === 'app');
-            renderAutocompleteDropdown(defaultSuggestions, false);
+            // Search field should NOT show any applications or default suggestions on focus when empty
+            dropdownResults.classList.add('hidden');
         }
     });
 
@@ -1311,14 +1325,14 @@
             return;
         }
 
-        // Filter globally safely
+        // Filter globally safely (Excluding apps completely as we removed app indexing from the unified search index)
         matchedResultsBuffer = searchIndex.filter(item => {
             const title = (item?.title || '').toLowerCase();
             const category = (item?.category || '').toLowerCase();
             return title.includes(query) || category.includes(query);
         });
 
-        // Update local apps matching in parallel
+        // Update local apps matching in parallel for the dashboard grid view
         currentlyFilteredApps = localAppsRawList.filter(app => {
             const title = getAppTitle(app).toLowerCase();
             return title.includes(query) || app.toLowerCase().includes(query);
