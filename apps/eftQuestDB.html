@@ -3,28 +3,36 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tarkov Quest Directory & Database</title>
+    <title>Fraagle Apps - EFT Quest Directory</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Bebas+Neue&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <script>
-        // Custom Tailwind configurations for EFT dark tactical styling
+        (function() {
+            const userTheme = localStorage.getItem('theme') || 'dark';
+            if (userTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        eftDark: '#0d0d0e',
-                        eftCard: '#151618',
-                        eftBorder: '#2a2c30',
-                        eftGold: '#e5b358',
-                        eftGoldHover: '#ffcf73',
-                        eftGreen: '#4ade80',
-                        eftRed: '#ef4444',
+                        darkBg: '#09090b',
+                        darkCard: '#18181b',
+                        darkBorder: '#27272a',
+                        lightBg: '#f8f9fa',
+                        lightCard: '#ffffff',
+                        lightBorder: '#e2e8f0',
+                        accentIndigo: '#6366f1',
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        bebas: ['Bebas Neue', 'sans-serif'],
+                        space: ['Space Grotesk', 'sans-serif'],
                     }
                 }
             }
@@ -32,133 +40,167 @@
     </script>
     <style>
         body {
-            background-color: #0d0d0e;
-            color: #e4e4e7;
-            background-image: radial-gradient(circle at 50% 0%, rgba(229, 179, 88, 0.05) 0%, transparent 50%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        h1, .header-title, .category-title {
+            font-family: 'Space Grotesk', sans-serif;
         }
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0d0d0e;
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: #2a2c30;
-            border-radius: 4px;
+            background: rgba(156, 163, 175, 0.25);
+            border-radius: 9999px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #e5b358;
+            background: rgba(156, 163, 175, 0.45);
+        }
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
         }
         .trader-active {
-            border-color: #e5b358;
-            color: #e5b358;
-            background-color: rgba(229, 179, 88, 0.05);
+            border-color: #6366f1;
+            color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.08);
+        }
+        .dark .trader-active {
+            background-color: rgba(99, 102, 241, 0.15);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-eftGold selection:text-eftDark">
+<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col relative overflow-x-hidden p-3 sm:p-5 select-none">
 
-    <!-- Ambient Grid & Lighting Elements -->
-    <div class="fixed inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:24px_24px] z-0"></div>
+    <!-- Ambient Glows -->
+    <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+    <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/5 dark:bg-purple-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
 
-    <!-- Main Navigation Bar -->
-    <header class="sticky top-0 z-40 bg-eftDark/90 backdrop-blur-md border-b border-eftBorder/80 px-4 py-3 sm:px-6">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="h-10 w-10 bg-eftGold/10 border border-eftGold/40 rounded-lg flex items-center justify-center text-eftGold shadow-[0_0_15px_rgba(229,179,88,0.1)]">
-                    <i class="fa-solid fa-shield-halved text-xl"></i>
-                </div>
+    <!-- Main Container -->
+    <div class="max-w-7xl w-full mx-auto flex flex-col gap-4 relative z-10">
+
+        <!-- Header -->
+        <header class="flex items-center justify-between p-2.5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md relative select-none z-20">
+            <div class="flex items-center space-x-2.5">
+                <a href="../index.html" class="p-1.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white hover:bg-zinc-50 dark:bg-darkCard/50 dark:hover:bg-darkCard transition-all duration-200 text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer shadow-sm" title="Back to Index">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+                    </svg>
+                </a>
                 <div>
-                    <h1 class="font-bebas text-2xl tracking-wider text-white">Tarkov Quest Guide</h1>
-                    <p class="text-[9px] font-bold uppercase tracking-widest text-zinc-500">Live API Task Companion & Database</p>
+                    <h1 class="header-title text-xs sm:text-sm font-bold tracking-tight bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent select-none uppercase">EFT Quest Guide</h1>
+                    <p class="text-[7px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Companion & Database</p>
                 </div>
             </div>
 
-            <!-- Informational Counters Bar -->
-            <div class="flex items-center gap-4 bg-eftCard/60 border border-eftBorder px-4 py-1.5 rounded-xl">
-                <div class="text-center">
-                    <div class="text-[9px] font-semibold text-zinc-500 uppercase">Total Quests</div>
-                    <div id="statsTotalTasks" class="text-xs font-bold text-eftGold">0</div>
-                </div>
+            <!-- Informational Total -->
+            <div class="hidden sm:flex items-center space-x-2 text-[8px] font-bold tracking-wider uppercase border border-lightBorder dark:border-darkBorder px-2.5 py-1 rounded-full bg-white/30 dark:bg-darkCard/30 text-zinc-500 dark:text-zinc-400">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span>Active Quests matching:</span>
+                <span id="statsTotalTasks" class="text-indigo-500 dark:text-indigo-400 ml-1">0</span>
             </div>
-        </div>
-    </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 z-10 flex flex-col gap-6">
+            <!-- Quick settings toggles -->
+            <div class="flex items-center space-x-2 relative z-10">
+                <button id="gradient-toggle" class="p-1.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm flex items-center justify-center cursor-pointer">
+                    <svg class="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
+                    </svg>
+                </button>
+
+                <button id="theme-toggle" class="p-1.5 rounded-lg border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard transition-all focus:outline-none flex items-center justify-center cursor-pointer shadow-sm">
+                    <svg id="theme-toggle-sun-icon" class="hidden w-3.5 h-3.5 text-yellow-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <svg id="theme-toggle-moon-icon" class="hidden w-3.5 h-3.5 text-zinc-100" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
 
         <!-- Search and Filters Section -->
-        <section class="bg-eftCard border border-eftBorder rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-xl">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <section class="bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl p-4 shadow-xl backdrop-blur-md">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5">
                 
                 <!-- Search Box -->
                 <div class="md:col-span-8 relative">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-500">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-400">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </span>
                     <input type="text" id="questSearchInput" 
-                        class="w-full bg-eftDark border border-eftBorder focus:border-eftGold/60 rounded-xl py-2.5 pl-9 pr-4 text-xs font-medium text-zinc-100 placeholder-zinc-500 focus:outline-none transition-all"
-                        placeholder="Search quests, traders, or required item names..." />
+                        class="w-full bg-white dark:bg-darkBg/60 border border-lightBorder dark:border-darkBorder focus:border-indigo-500 rounded-xl py-2 pl-9 pr-4 text-xs font-medium text-zinc-800 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none transition-all"
+                        placeholder="Search quests, traders, maps, or required items..." />
                 </div>
 
                 <!-- Sort Options -->
                 <div class="md:col-span-4 flex items-center justify-end gap-2">
-                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Sort by:</span>
-                    <select id="sortOption" class="w-full bg-eftDark border border-eftBorder focus:border-eftGold/40 rounded-xl py-2 px-4 text-xs text-zinc-300 focus:outline-none">
-                        <option value="level-asc">Min Player Level (Low to High)</option>
-                        <option value="level-desc">Min Player Level (High to Low)</option>
-                        <option value="exp-desc">Reward Experience (Highest First)</option>
-                        <option value="name-asc">Quest Alphabetical (A-Z)</option>
+                    <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-wider whitespace-nowrap">Sort by:</span>
+                    <select id="sortOption" class="w-full bg-white dark:bg-darkBg/60 border border-lightBorder dark:border-darkBorder focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-zinc-700 dark:text-zinc-300 focus:outline-none">
+                        <option value="level-asc">Min Level (Low to High)</option>
+                        <option value="level-desc">Min Level (High to Low)</option>
+                        <option value="exp-desc">Reward XP (Highest First)</option>
+                        <option value="name-asc">Alphabetical (A-Z)</option>
                     </select>
                 </div>
             </div>
 
             <!-- Trader Quick Select tabs -->
-            <div class="border-t border-eftBorder/50 pt-4 flex flex-col gap-2">
-                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Traders filter</span>
+            <div class="border-t border-lightBorder dark:border-darkBorder/40 mt-3.5 pt-3 flex flex-col gap-2">
+                <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Traders filter</span>
                 <div id="traderFilterTabs" class="flex flex-wrap gap-1.5 overflow-x-auto pb-1">
-                    <button class="trader-tab trader-active px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="all">All</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Prapor">Prapor</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Therapist">Therapist</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Skier">Skier</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Peacekeeper">Peacekeeper</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Mechanic">Mechanic</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Ragman">Ragman</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Jaeger">Jaeger</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Fence">Fence</button>
-                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Lightkeeper">Lightkeeper</button>
+                    <button class="trader-tab trader-active px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="all">All</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Prapor">Prapor</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Therapist">Therapist</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Skier">Skier</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Peacekeeper">Peacekeeper</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Mechanic">Mechanic</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Ragman">Ragman</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Jaeger">Jaeger</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Fence">Fence</button>
+                    <button class="trader-tab px-3 py-1 rounded-lg border border-lightBorder dark:border-darkBorder text-[9px] font-bold uppercase transition hover:bg-zinc-100 dark:hover:bg-zinc-800" data-trader="Lightkeeper">Lightkeeper</button>
                 </div>
             </div>
         </section>
 
         <!-- Loading / Notification Indicators -->
-        <div id="statusNotification" class="bg-eftCard border border-eftBorder p-12 text-center rounded-2xl flex flex-col items-center justify-center gap-4 shadow-xl transition-all">
+        <div id="statusNotification" class="bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder p-12 text-center rounded-2xl flex flex-col items-center justify-center gap-4 shadow-xl backdrop-blur-md transition-all">
             <div id="spinnerContainer" class="relative w-12 h-12 flex items-center justify-center">
-                <div class="absolute inset-0 rounded-full border-2 border-zinc-800"></div>
-                <div class="absolute inset-0 rounded-full border-2 border-eftGold border-t-transparent animate-spin"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-zinc-200 dark:border-zinc-800"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin"></div>
             </div>
             <div>
-                <h3 id="statusTitle" class="font-bebas text-xl tracking-wider text-zinc-100">Contacting Tarkov API</h3>
-                <p id="statusDesc" class="text-xs text-zinc-500 mt-1 uppercase font-semibold">Pulling latest live tasks database from tarkov.dev...</p>
+                <h3 id="statusTitle" class="category-title text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">Contacting Tarkov API</h3>
+                <p id="statusDesc" class="text-[9px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase font-semibold tracking-wider">Pulling latest tasks database from tarkov.dev...</p>
             </div>
         </div>
 
         <!-- Quests Container (Dynamically populated) -->
         <div id="questsContent" class="hidden flex flex-col gap-8">
             <!-- Dynamically grouped content by Traders -->
-            <div id="traderGroupsContainer" class="flex flex-col gap-8"></div>
+            <div id="traderGroupsContainer" class="flex flex-col gap-6"></div>
         </div>
-    </main>
+    </div>
 
     <!-- Modal for Detailed Objective Checklist & Raid Item Tracker -->
-    <div id="questDetailModal" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity duration-300 opacity-0">
-        <div class="bg-eftCard border border-eftBorder w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
-            <div class="px-5 py-4 border-b border-eftBorder flex items-center justify-between">
+    <div id="questDetailModal" class="fixed inset-0 bg-zinc-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-white dark:bg-darkCard border border-lightBorder dark:border-darkBorder w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
+            <div class="px-5 py-4 border-b border-lightBorder dark:border-darkBorder/40 flex items-center justify-between">
                 <div>
-                    <span id="modalTrader" class="text-[9px] font-extrabold uppercase tracking-widest text-eftGold"></span>
-                    <h2 id="modalTitle" class="font-bebas text-xl tracking-wider text-zinc-100">Quest Name</h2>
+                    <span id="modalTrader" class="text-[8px] font-extrabold uppercase tracking-widest text-indigo-500 dark:text-indigo-400"></span>
+                    <h2 id="modalTitle" class="category-title text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">Quest Name</h2>
                 </div>
-                <button onclick="QuestApp.closeModal()" class="text-zinc-500 hover:text-zinc-200 transition">
+                <button onclick="QuestApp.closeModal()" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
@@ -166,15 +208,15 @@
             <div class="p-5 overflow-y-auto flex-1 flex flex-col gap-5">
                 <!-- Requirements Section -->
                 <div>
-                    <h4 class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider mb-2">Prerequisite Tasks:</h4>
-                    <div id="modalPrerequisites" class="flex flex-wrap gap-1.5 text-xs text-zinc-400">
+                    <h4 class="text-[9px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Prerequisite Tasks:</h4>
+                    <div id="modalPrerequisites" class="flex flex-wrap gap-1.5 text-xs">
                         <!-- Prereqs dynamically injected -->
                     </div>
                 </div>
 
                 <!-- Quest Objectives & Required Items -->
                 <div>
-                    <h4 class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider mb-2">Quest Objectives & Required Items:</h4>
+                    <h4 class="text-[9px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Quest Objectives & Required Items:</h4>
                     <div id="modalObjectives" class="flex flex-col gap-2">
                         <!-- Objectives with counters/images injected -->
                     </div>
@@ -182,24 +224,24 @@
 
                 <!-- Quest Rewards -->
                 <div>
-                    <h4 class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider mb-2">Completion Rewards:</h4>
+                    <h4 class="text-[9px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Completion Rewards:</h4>
                     <div id="modalRewards" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                         <!-- Reward cards dynamically injected -->
                     </div>
                 </div>
             </div>
 
-            <div class="px-5 py-4 border-t border-eftBorder flex items-center justify-between bg-zinc-900/40">
-                <div class="flex items-center gap-2 text-xs text-zinc-400">
-                    <a id="modalWikiLink" href="#" target="_blank" class="text-eftGold hover:text-eftGoldHover transition flex items-center gap-1">
-                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Task Wiki
+            <div class="px-5 py-4 border-t border-lightBorder dark:border-darkBorder/40 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/40">
+                <div class="flex items-center gap-2 text-[10px] text-zinc-400 dark:text-zinc-500">
+                    <a id="modalWikiLink" href="#" target="_blank" class="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> View Task Wiki
                     </a>
                     <span>or use</span>
-                    <a href="https://tarkovquestie.com/" target="_blank" class="text-eftGold hover:text-eftGoldHover font-semibold transition flex items-center gap-1">
+                    <a href="https://tarkovquestie.com/" target="_blank" class="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold transition flex items-center gap-1">
                         TarkovQuestie!
                     </a>
                 </div>
-                <button onclick="QuestApp.closeModal()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl transition">
+                <button onclick="QuestApp.closeModal()" class="px-4 py-2 border border-lightBorder dark:border-darkBorder bg-white hover:bg-zinc-50 dark:bg-darkCard/50 dark:hover:bg-darkCard text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wider rounded-xl transition">
                     Close Guide
                 </button>
             </div>
@@ -207,13 +249,11 @@
     </div>
 
     <!-- Footer -->
-    <footer class="mt-12 py-6 border-t border-eftBorder bg-eftDark text-center text-xs text-zinc-500">
-        <p class="uppercase font-semibold tracking-wider">Data provided by live tarkov.dev GraphQL API</p>
-        <p class="text-[10px] text-zinc-600 mt-1">This tool is a safe, clean fan-made companion database intended exclusively for gaming community reference.</p>
+    <footer class="text-center text-[8px] font-medium text-zinc-400 dark:text-zinc-500 tracking-wide select-none py-4 border-t border-lightBorder dark:border-darkBorder/30 mt-6">
+        <span>Fraagle Apps • Tarkov Quest Guide • Data provided by live tarkov.dev GraphQL API</span>
     </footer>
 
     <script>
-        // Corrected official Tarkov.dev endpoint
         const API_URL = "https://api.tarkov.dev/graphql";
 
         // Extremely rich Fallback database of major EFT Quests across all traders for sandbox environments
@@ -538,6 +578,8 @@
             init: async function() {
                 this.bindUI();
                 await this.fetchQuests();
+                this.setupThemeToggle();
+                this.setupGradientToggle();
                 this.updateStatistics();
             },
 
@@ -554,6 +596,41 @@
                         this.render();
                     });
                 });
+            },
+
+            // Generates clean wiki page URLs based on key names
+            getItemWikiLink: function(name) {
+                if (!name) return "https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki";
+                const formatted = encodeURIComponent(name.trim().replace(/\s+/g, '_'));
+                return `https://escapefromtarkov.fandom.com/wiki/${formatted}`;
+            },
+
+            // Replaces known Tarkov-specific words with hyperlinks inside free text descriptions
+            linkifyText: function(text) {
+                if (!text) return '';
+                const traders = ["Prapor", "Therapist", "Skier", "Peacekeeper", "Mechanic", "Ragman", "Jaeger", "Fence", "Lightkeeper"];
+                const maps = ["Customs", "Woods", "Factory", "Shoreline", "Interchange", "Reserve", "Lighthouse", "Labs", "The Lab", "Streets of Tarkov", "Streets", "Ground Zero"];
+
+                let replaced = text;
+
+                // Linkify map names first to avoid nested substring matching conflicts
+                maps.forEach(map => {
+                    const regex = new RegExp(`\\b${map}\\b`, 'gi');
+                    replaced = replaced.replace(regex, (match) => {
+                        const urlFriendlyMap = match.replace(/\s+/g, '_');
+                        return `<a href="https://escapefromtarkov.fandom.com/wiki/${urlFriendlyMap}" target="_blank" class="text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 underline decoration-dotted transition-colors font-medium">${match}</a>`;
+                    });
+                });
+
+                // Linkify traders
+                traders.forEach(trader => {
+                    const regex = new RegExp(`\\b${trader}\\b`, 'gi');
+                    replaced = replaced.replace(regex, (match) => {
+                        return `<a href="https://escapefromtarkov.fandom.com/wiki/${match}" target="_blank" class="text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 underline decoration-dotted transition-colors font-medium">${match}</a>`;
+                    });
+                });
+
+                return replaced;
             },
 
             fetchQuests: async function() {
@@ -668,10 +745,10 @@
                 const sortedTraders = Object.keys(groups).sort();
                 if (sortedTraders.length === 0) {
                     container.innerHTML = `
-                        <div class="text-center py-12 border border-dashed border-eftBorder rounded-2xl bg-eftCard/30">
-                            <i class="fa-solid fa-hourglass-empty text-3xl text-zinc-600 mb-3"></i>
-                            <h4 class="font-bebas text-lg text-zinc-400">No matching quests found</h4>
-                            <p class="text-xs text-zinc-500 mt-1 uppercase font-semibold">Try modifying your search tags or level constraints</p>
+                        <div class="text-center py-12 border border-dashed border-lightBorder dark:border-darkBorder rounded-2xl bg-white/20 dark:bg-darkCard/30 backdrop-blur-md">
+                            <i class="fa-solid fa-hourglass-empty text-3xl text-zinc-400 mb-3 animate-pulse"></i>
+                            <h4 class="category-title text-sm font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">No matching quests found</h4>
+                            <p class="text-[10px] text-zinc-400 mt-1 uppercase font-semibold">Try modifying your search tags or criteria</p>
                         </div>
                     `;
                     return;
@@ -684,11 +761,14 @@
                     traderSection.className = "flex flex-col gap-4";
                     
                     traderSection.innerHTML = `
-                        <div class="flex items-center gap-3 border-b border-eftBorder/80 pb-2">
-                            <div class="h-6 w-1.5 bg-eftGold rounded-full"></div>
-                            <h2 class="font-bebas text-xl tracking-wider text-white">${trader} <span class="text-xs text-zinc-500 font-sans font-normal lowercase">(${traderTasks.length} tasks matching)</span></h2>
+                        <div class="flex items-center gap-3 border-b border-lightBorder dark:border-darkBorder/40 pb-2">
+                            <div class="h-4 w-1 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full"></div>
+                            <h2 class="category-title text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-zinc-50">
+                                <a href="https://escapefromtarkov.fandom.com/wiki/${trader}" target="_blank" class="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">${trader}</a> 
+                                <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-sans font-medium lowercase">(${traderTasks.length} tasks matching)</span>
+                            </h2>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
                             ${traderTasks.map(q => this.buildQuestCardHtml(q)).join('')}
                         </div>
                     `;
@@ -705,35 +785,38 @@
                 const traderName = q.trader?.name || "Unknown";
 
                 return `
-                    <div class="bg-eftCard border border-eftBorder rounded-2xl p-4 flex flex-col justify-between gap-4 hover:translate-y-[-2px] transition-all duration-300">
+                    <div class="card-hover bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl p-4 flex flex-col justify-between gap-4 transition-all duration-300 backdrop-blur-md">
                         <div>
                             <div class="flex items-start justify-between gap-2">
-                                <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">LEVEL ${q.minPlayerLevel || 1}</span>
-                                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">+${q.experience || 0} XP</span>
+                                <span class="text-[8px] font-extrabold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">LEVEL ${q.minPlayerLevel || 1}</span>
+                                <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wide">+${q.experience || 0} XP</span>
                             </div>
 
-                            <h3 class="font-bebas text-lg text-zinc-100 tracking-wide mt-2 hover:text-eftGold cursor-pointer transition" onclick="QuestApp.openModal('${q.id}')">
+                            <h3 class="category-title text-sm font-bold text-zinc-900 dark:text-zinc-100 tracking-tight mt-2.5 hover:text-indigo-500 dark:hover:text-indigo-400 cursor-pointer transition-colors" onclick="QuestApp.openModal('${q.id}')">
                                 ${q.name}
                             </h3>
-                            <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">${traderName}</p>
+                            <p class="text-[9px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase tracking-wider">
+                                <a href="https://escapefromtarkov.fandom.com/wiki/${traderName}" target="_blank" class="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">${traderName}</a>
+                            </p>
 
                             <!-- Prereq indicator if task requires previous completed tasks -->
                             ${q.taskRequirements && q.taskRequirements.length > 0 ? `
-                                <div class="flex items-center gap-1 text-[9px] font-bold text-eftGold mt-2">
+                                <div class="flex items-center gap-1 text-[8px] font-bold text-indigo-500 dark:text-indigo-400 mt-2">
                                     <i class="fa-solid fa-lock text-[8px]"></i> Requires Prerequisite Tasks
                                 </div>
                             ` : ''}
 
                             <!-- Mini Items summary -->
                             ${itemObjectives.length > 0 ? `
-                                <div class="mt-3 flex flex-col gap-1 border-t border-eftBorder/50 pt-3">
-                                    <span class="text-[9px] font-extrabold text-zinc-500 uppercase tracking-wider">Required Items:</span>
+                                <div class="mt-3 flex flex-col gap-1 border-t border-lightBorder dark:border-darkBorder/40 pt-3">
+                                    <span class="text-[8px] font-extrabold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Required Items:</span>
                                     <div class="flex flex-wrap gap-1.5 mt-1">
                                         ${itemObjectives.map(o => {
+                                            const itemUrl = QuestApp.getItemWikiLink(o.item.name);
                                             return `
-                                                <span class="text-[9px] px-2 py-0.5 rounded bg-zinc-900 border border-eftBorder text-zinc-400">
+                                                <a href="${itemUrl}" target="_blank" class="text-[8px] px-2 py-0.5 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder/80 text-zinc-600 dark:text-zinc-400 hover:border-indigo-500 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
                                                     ${o.item.shortName || o.item.name} (${o.count || 1})
-                                                </span>
+                                                </a>
                                             `;
                                         }).join('')}
                                     </div>
@@ -742,8 +825,8 @@
                         </div>
 
                         <!-- Footer Status Controls -->
-                        <div class="flex items-center justify-between gap-2 pt-2 border-t border-eftBorder/30">
-                            <button onclick="QuestApp.openModal('${q.id}')" class="text-[10px] text-zinc-400 hover:text-eftGold font-bold uppercase tracking-wider transition flex items-center gap-1">
+                        <div class="flex items-center justify-between gap-2 pt-2 border-t border-lightBorder/40 dark:border-darkBorder/30">
+                            <button onclick="QuestApp.openModal('${q.id}')" class="text-[9px] text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 dark:hover:text-indigo-400 font-bold uppercase tracking-wider transition-colors flex items-center gap-1">
                                 <i class="fa-solid fa-chevron-right text-[8px]"></i> Read Guide
                             </button>
                         </div>
@@ -755,7 +838,8 @@
                 const q = this.quests.find(task => task.id === questId);
                 if (!q) return;
 
-                document.getElementById('modalTrader').textContent = q.trader?.name || "Unknown";
+                const traderName = q.trader?.name || "Unknown";
+                document.getElementById('modalTrader').innerHTML = `<a href="https://escapefromtarkov.fandom.com/wiki/${traderName}" target="_blank" class="hover:text-indigo-500 hover:underline transition-colors">${traderName}</a>`;
                 document.getElementById('modalTitle').textContent = q.name;
 
                 // Handle wiki link
@@ -773,12 +857,13 @@
                 if (q.taskRequirements && q.taskRequirements.length > 0) {
                     q.taskRequirements.forEach(req => {
                         const rBadge = document.createElement('span');
-                        rBadge.className = "px-2 py-1 rounded bg-zinc-900 border border-eftBorder text-[10px]";
-                        rBadge.innerHTML = `<i class="fa-solid fa-lock text-[8px] text-eftGold"></i> Requires: ${req.task?.name || "Unknown Task"}`;
+                        rBadge.className = "px-2 py-1 rounded bg-zinc-50 dark:bg-zinc-900 border border-lightBorder dark:border-darkBorder text-[9px]";
+                        const taskWikiUrl = QuestApp.getItemWikiLink(req.task?.name || "");
+                        rBadge.innerHTML = `<i class="fa-solid fa-lock text-[8px] text-indigo-500 dark:text-indigo-400"></i> Requires: <a href="${taskWikiUrl}" target="_blank" class="hover:text-indigo-500 underline transition-colors">${req.task?.name || "Unknown Task"}</a>`;
                         prereqContainer.appendChild(rBadge);
                     });
                 } else {
-                    prereqContainer.innerHTML = `<span class="text-[10px] text-zinc-500 italic">None - available immediately</span>`;
+                    prereqContainer.innerHTML = `<span class="text-[9px] text-zinc-400 italic">None - available immediately</span>`;
                 }
 
                 // Inject Objectives and Checklist counter
@@ -788,38 +873,40 @@
                 (q.objectives || []).forEach(obj => {
                     const isItem = !!obj.item;
                     const required = obj.count || 1;
+                    const descriptionLinked = QuestApp.linkifyText(obj.description);
 
                     let row = document.createElement('div');
-                    row.className = "p-3 bg-zinc-900/50 border border-eftBorder rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs";
+                    row.className = "p-3 bg-zinc-50/50 dark:bg-zinc-900/50 border border-lightBorder dark:border-darkBorder rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs";
                     
                     if (isItem) {
+                        const itemUrl = QuestApp.getItemWikiLink(obj.item.name);
                         row.innerHTML = `
                             <div class="flex items-start gap-2.5">
-                                <div class="h-8 w-8 rounded-lg bg-zinc-800 border border-eftBorder/80 flex items-center justify-center text-eftGold">
+                                <div class="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-lightBorder dark:border-darkBorder/80 flex items-center justify-center text-indigo-500">
                                     <i class="fa-solid fa-box-open"></i>
                                 </div>
                                 <div>
-                                    <p class="font-medium text-zinc-100">${obj.description}</p>
-                                    <p class="text-[9px] text-zinc-500 font-bold uppercase mt-0.5 tracking-wider">
-                                        Item: ${obj.item.name} 
+                                    <p class="font-medium text-zinc-800 dark:text-zinc-100">${descriptionLinked}</p>
+                                    <p class="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase mt-0.5 tracking-wider">
+                                        Item: <a href="${itemUrl}" target="_blank" class="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 underline transition-colors">${obj.item.name}</a> 
                                         ${obj.foundInRaid ? '<span class="text-emerald-500 ml-1.5">• Found In Raid Required</span>' : ''}
                                     </p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-bold text-zinc-500 uppercase">Quantity:</span>
-                                <span class="px-2.5 py-1 rounded bg-zinc-800/80 font-mono font-bold text-zinc-200 border border-eftBorder">${required}</span>
+                                <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase">Quantity:</span>
+                                <span class="px-2.5 py-1 rounded bg-white dark:bg-zinc-800/80 font-mono font-bold text-zinc-700 dark:text-zinc-200 border border-lightBorder dark:border-darkBorder">${required}</span>
                             </div>
                         `;
                     } else {
                         row.innerHTML = `
                             <div class="flex items-start gap-2.5">
-                                <div class="h-8 w-8 rounded-lg bg-zinc-800 border border-eftBorder/80 flex items-center justify-center text-zinc-400">
+                                <div class="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-lightBorder dark:border-darkBorder/80 flex items-center justify-center text-zinc-500">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
                                 <div>
-                                    <p class="font-medium text-zinc-100">${obj.description}</p>
-                                    <p class="text-[9px] text-zinc-500 font-bold uppercase mt-0.5 tracking-wider">Objective Type: ${obj.type ? obj.type.toUpperCase() : 'UNKNOWN'}</p>
+                                    <p class="font-medium text-zinc-800 dark:text-zinc-100">${descriptionLinked}</p>
+                                    <p class="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase mt-0.5 tracking-wider">Objective Type: ${obj.type ? obj.type.toUpperCase() : 'UNKNOWN'}</p>
                                 </div>
                             </div>
                         `;
@@ -833,10 +920,10 @@
                 rewardsContainer.innerHTML = '';
                 
                 const expReward = document.createElement('div');
-                expReward.className = "p-2 px-3 rounded-lg border border-eftBorder bg-zinc-900/30 flex justify-between items-center";
+                expReward.className = "p-2 px-3 rounded-lg border border-lightBorder dark:border-darkBorder bg-zinc-50/50 dark:bg-zinc-900/30 flex justify-between items-center";
                 expReward.innerHTML = `
-                    <span class="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Experience Points</span>
-                    <span class="font-bold text-eftGold">+${q.experience || 0} XP</span>
+                    <span class="text-[9px] text-zinc-400 dark:text-zinc-500 uppercase font-bold tracking-wider">Experience Points</span>
+                    <span class="font-bold text-indigo-500 dark:text-indigo-400">+${q.experience || 0} XP</span>
                 `;
                 rewardsContainer.appendChild(expReward);
 
@@ -855,6 +942,61 @@
                 setTimeout(() => {
                     modal.classList.add('hidden');
                 }, 300);
+            },
+
+            setupThemeToggle: function() {
+                const btn = document.getElementById('theme-toggle');
+                const sun = document.getElementById('theme-toggle-sun-icon');
+                const moon = document.getElementById('theme-toggle-moon-icon');
+
+                const applyTheme = (theme) => {
+                    if (theme === 'dark') {
+                        document.documentElement.classList.add('dark');
+                        sun.classList.add('hidden');
+                        moon.classList.remove('hidden');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        sun.classList.remove('hidden');
+                        moon.classList.add('hidden');
+                    }
+                    localStorage.setItem('theme', theme);
+                };
+
+                const current = localStorage.getItem('theme') || 'dark';
+                applyTheme(current);
+
+                btn.addEventListener('click', () => {
+                    const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                    applyTheme(next);
+                });
+            },
+
+            setupGradientToggle: function() {
+                const btn = document.getElementById('gradient-toggle');
+                const g1 = document.getElementById('ambient-glow-1');
+                const g2 = document.getElementById('ambient-glow-2');
+
+                const apply = (state) => {
+                    if (state === 'enabled') {
+                        g1.classList.remove('opacity-0', 'pointer-events-none');
+                        g2.classList.remove('opacity-0', 'pointer-events-none');
+                        btn.classList.remove('opacity-40');
+                    } else {
+                        g1.classList.add('opacity-0', 'pointer-events-none');
+                        g2.classList.add('opacity-0', 'pointer-events-none');
+                        btn.classList.add('opacity-40');
+                    }
+                };
+
+                const saved = localStorage.getItem('ambient-glow') || 'enabled';
+                apply(saved);
+
+                btn.addEventListener('click', () => {
+                    const current = localStorage.getItem('ambient-glow') || 'enabled';
+                    const next = current === 'enabled' ? 'disabled' : 'enabled';
+                    localStorage.setItem('ambient-glow', next);
+                    apply(next);
+                });
             },
 
             updateStatistics: function() {
