@@ -155,7 +155,7 @@
             <div class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white/90 dark:bg-darkCard/70 backdrop-blur-md focus-within:bg-white dark:focus-within:bg-darkCard/90 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 focus-within:shadow-xl focus-within:shadow-indigo-500/10 focus-within:border-indigo-500/50 dark:focus-within:border-indigo-400/50 transition-all duration-300">
                 <!-- Search Icon -->
                 <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 
                 <!-- Search Input Field -->
@@ -171,7 +171,7 @@
                 <!-- Clear Search Button -->
                 <button id="clear-search" class="hidden p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 focus:outline-none mr-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
 
@@ -242,162 +242,56 @@
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.03c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.03A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.077 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.01-.09-.024-.124a13.194 13.194 0 0 1-1.875-1.024.084.084 0 0 1-.008-.139c.12-.09.242-.18.354-.275a.075.077 0 0 1 .075-.01c3.986 1.83 8.33 1.83 12.24 0a.075.075 0 0 1 .075.01c.12.095.24.185.354.276a.085.084 0 0 1-.008.139 12.924 12.924 0 0 1-1.875 1.024.082.082 0 0 0-.024.124c.362.7.774 1.364 1.226 1.994a.076.076 0 0 0 .084.028 19.83 19.9 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/>
             </svg>
+        </a>
+    </div>
+
+    <div class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 flex items-center justify-between">
+        <span id="results-meta-text">About 0 results (0.00 seconds)</span>
+        <button id="results-close-btn" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">Clear Search</button>
+    </div>
+    <div id="google-results-container" class="space-y-6">
+        <!-- Search entries populate here dynamically -->
+    </div>
+</div>
+
+<!-- Default Shortcuts Presentation Grid wrapped in a container that can be hidden -->
+<div id="apps-section" class="hidden w-full max-w-4xl px-4 mb-8 flex flex-col gap-6">
+    <!-- Escape from Tarkov Section (Collapsible Accordion) -->
+    <div id="tarkov-section" class="hidden w-full border border-lightBorder dark:border-darkBorder rounded-2xl bg-white/50 dark:bg-darkCard/20 p-4 backdrop-blur-md">
+        <button id="tarkov-collapse-btn" class="w-full flex items-center justify-between font-bold text-sm tracking-wider uppercase text-zinc-500 dark:text-zinc-400 focus:outline-none cursor-pointer">
+            <span class="flex items-center gap-2">⚔️ Escape from Tarkov Apps</span>
+            <span id="tarkov-arrow" class="transition-transform duration-200 rotate-180">▼</span>
         </button>
-
-        <!-- Profile Avatar Button with Fallback Protection -->
-        <div class="w-10 h-10 rounded-xl overflow-hidden border border-lightBorder dark:border-darkBorder shadow-sm hover:shadow-lg hover:border-indigo-500/30 dark:hover:border-indigo-400/30 transition-all duration-200 cursor-pointer select-none">
-            <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
-        </div>
-    </div>
-</header>
-
-<!-- Main Content Container -->
-<main class="flex-grow flex flex-col items-center justify-start px-4 pt-10 sm:pt-16 relative z-10 w-full max-w-4xl mx-auto">
-    
-    <!-- Fraagle Logo Placeholder -->
-    <div class="mb-6 select-none text-center">
-        <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm">
-            <!-- Static Fallback in case of slow execution -->
-            <span class="text-fraagleBlue">F</span>
-            <span class="text-fraagleRed">r</span>
-            <span class="text-fraagleYellow">a</span>
-            <span class="text-fraagleBlue">a</span>
-            <span class="text-fraagleGreen">g</span>
-            <span class="text-fraagleRed">l</span>
-            <span class="text-fraagleBlue">e</span>
-        </h1>
-        <!-- Dynamic Subtitle Container -->
-        <p id="logo-subtitle" class="text-xs sm:text-sm font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 mt-2 min-h-[1.25rem]"></p>
-    </div>
-
-    <!-- Sleek Search Box Wrapper with Ambient Shadows -->
-    <div class="w-full max-w-[584px] mb-8 relative group" id="search-container">
-        <div class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white/90 dark:bg-darkCard/70 backdrop-blur-md focus-within:bg-white dark:focus-within:bg-darkCard/90 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 focus-within:shadow-xl focus-within:shadow-indigo-500/10 focus-within:border-indigo-500/50 dark:focus-within:border-indigo-400/50 transition-all duration-300">
-            <!-- Search Icon -->
-            <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-            
-            <!-- Search Input Field -->
-            <input 
-                type="text" 
-                id="search-input"
-                placeholder="Search..." 
-                class="w-full bg-transparent border-none outline-none text-[16px] text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500"
-                autocomplete="off"
-                autofocus
-            >
-
-            <!-- Clear Search Button -->
-            <button id="clear-search" class="hidden p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 focus:outline-none mr-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-
-            <!-- Voice Mic Icon -->
-            <svg class="w-5 h-5 text-zinc-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer hidden sm:block transition" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
-            </svg>
-        </div>
-
-        <!-- Autocomplete Search Results Dropdown -->
-        <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-3 bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl overflow-hidden z-40 max-h-80 overflow-y-auto backdrop-blur-xl transition duration-150 transform scale-100">
-            <div id="dropdown-results-container" class="py-2">
-                <!-- Matches appear here -->
-            </div>
+        <div id="tarkov-apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-4 transition-all duration-300">
+            <!-- Tarkov apps render here -->
         </div>
     </div>
 
-    <!-- Google-Style Search Results Dashboard (Hidden by default) -->
-    <div id="google-results-view" class="hidden w-full max-w-2xl px-2 mb-12">
-        <!-- Battlestate Games Channels Bar placed at the top of the search site, right below the search bar (transparent & borderless) -->
-        <div id="bsg-channels-bar" class="hidden mb-6 flex items-center justify-center gap-6 text-zinc-500 dark:text-zinc-400 bg-transparent py-2 select-none">
-            <!-- BSG EFT Homepage -->
-            <a href="https://www.escapefromtarkov.com/" target="_blank" title="Official EFT Homepage" class="hover:text-fraagleBlue transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zM12.5 3.042A8.967 8.967 0 0012 3c-1.196 0-2.324.288-3.354.799m6.708 0A8.967 8.967 0 0112 3a8.967 8.967 0 01-3.354.799M12 3v18m0-18c-1.84 1.84-5.16 1.84-7 0m7 0c1.84 1.84 5.16 1.84 7 0m-7 0a9 9 0 010 18M3.055 11H20.94m-20.94 2H20.94"></path>
-                </svg>
-            </a>
-            <!-- YouTube -->
-            <a href="https://www.youtube.com/battlestategames" target="_blank" title="BSG YouTube" class="hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5 12 3.5 12 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-            </a>
-            <!-- Twitter / X -->
-            <a href="https://x.com/bstategames" target="_blank" title="BSG Twitter / X" class="hover:text-sky-500 dark:hover:text-zinc-100 transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 7.56 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.085L1.254 2.25h6.8l4.8 6.35 5.39-6.35zM15.902 19.77h1.832L7.284 4.59H5.318L15.902 19.77z"/>
-                </svg>
-            </a>
-            <!-- Instagram -->
-            <a href="https://www.instagram.com/escapefromtarkov/" target="_blank" title="Official Instagram" class="hover:text-pink-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
-            </a>
-            <!-- TikTok -->
-            <a href="https://www.tiktok.com/@escapefromtarkov" target="_blank" title="Official TikTok" class="hover:text-zinc-800 dark:hover:text-white transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.525.02c1.31.02 2.61.05 3.91.09.08 1.54.81 2.96 1.99 3.84.01.68.02 1.35.03 2.03-1.22-.02-2.42-.44-3.38-1.25-.03 2.93-.05 5.86-.08 8.79a6.38 6.38 0 0 1-5.11 6.27c-3.13.62-6.27-1.12-7.24-4.14A6.41 6.41 0 0 1 5.8 8.43c.12 1.99.16 3.99.18 5.98a4.42 4.42 0 0 0-2.82 4.14c.03 2.45 2.05 4.41 4.5 4.38s4.41-2.05 4.38-4.5c.03-4.8.05-9.61.08-14.41a6.44 6.41 0 0 1 .58-4z"/>
-                </svg>
-            </a>
-            <!-- Facebook -->
-            <a href="https://www.facebook.com/escapefromtarkov/" target="_blank" title="Official Facebook" class="hover:text-blue-600 transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-            </a>
-            <!-- Telegram -->
-            <a href="https://t.me/escapefromtarkovEN" target="_blank" title="Official Telegram" class="hover:text-sky-400 transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.14-.26.26-.53.26l.213-3.05 5.56-5.022c.24-.213-.054-.334-.373-.12l-6.869 4.32-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.535-.203 1.006.122.858.826z"/>
-                </svg>
-            </a>
-            <!-- Discord -->
-            <a href="https://discord.gg/escapefromtarkovofficial" target="_blank" title="Official Discord" class="hover:text-indigo-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.03c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.03A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.077 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.01-.09-.024-.124a13.194 13.194 0 0 1-1.875-1.024.084.084 0 0 1-.008-.139c.12-.09.242-.18.354-.275a.075.077 0 0 1 .075-.01c3.986 1.83 8.33 1.83 12.24 0a.075.075 0 0 1 .075.01c.12.095.24.185.354.276a.085.084 0 0 1-.008.139 12.924 12.924 0 0 1-1.875 1.024.082.082 0 0 0-.024.124c.362.7.774 1.364 1.226 1.994a.076.076 0 0 0 .084.028 19.83 19.9 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/>
-                </svg>
-            </a>
-        </div>
-
-        <div class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 flex items-center justify-between">
-            <span id="results-meta-text">About 0 results (0.00 seconds)</span>
-            <button id="results-close-btn" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">Clear Search</button>
-        </div>
-        <div id="google-results-container" class="space-y-6">
-            <!-- Search entries populate here dynamically -->
+    <!-- General Workspace Section -->
+    <div id="general-section" class="hidden w-full border border-lightBorder dark:border-darkBorder rounded-2xl bg-white/50 dark:bg-darkCard/20 p-4 backdrop-blur-md">
+        <h2 class="font-bold text-sm tracking-wider uppercase text-zinc-500 dark:text-zinc-400 select-none px-1">🛠️ General Workspace Apps</h2>
+        <div id="apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4 mt-4">
+            <!-- General apps render here -->
         </div>
     </div>
 
-    <!-- Default Shortcuts Presentation Grid wrapped in a container that can be hidden -->
-    <div id="apps-section" class="hidden w-full max-w-4xl px-4 mb-8">
-        <!-- Dynamic Grid Target -->
-        <div id="apps-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-5 justify-center">
-            <!-- Apps will render dynamically here -->
-        </div>
+    <!-- Empty / No Results State -->
+    <div id="no-results" class="hidden text-center py-8">
+        <p class="text-zinc-500 dark:text-zinc-400">No matching apps found.</p>
+    </div>
+</div>
 
-        <!-- Empty / No Results State -->
-        <div id="no-results" class="hidden text-center py-8">
-            <p class="text-zinc-500 dark:text-zinc-400">No matching apps found.</p>
+<!-- Dynamic Registry / Setup Warning Alert (Informational) -->
+<div id="setup-warning" class="hidden mt-6 mb-8 p-4 max-w-xl rounded-2xl border border-yellow-500/10 bg-yellow-500/5 text-xs text-yellow-600 dark:text-yellow-400 backdrop-blur-md">
+    <div class="flex items-start">
+        <svg class="w-5 h-5 mr-2.5 flex-shrink-0 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <div>
+            <span class="font-bold">Displaying Local Fallback list.</span> For production, write a <code>generate-list.js</code> build script in Vercel to auto-output <code>public/app-list.json</code> containing your HTML array!
         </div>
     </div>
-
-    <!-- Dynamic Registry / Setup Warning Alert (Informational) -->
-    <div id="setup-warning" class="hidden mt-6 mb-8 p-4 max-w-xl rounded-2xl border border-yellow-500/10 bg-yellow-500/5 text-xs text-yellow-600 dark:text-yellow-400 backdrop-blur-md">
-        <div class="flex items-start">
-            <svg class="w-5 h-5 mr-2.5 flex-shrink-0 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-            </svg>
-            <div>
-                <span class="font-bold">Displaying Local Fallback list.</span> For production, write a <code>generate-list.js</code> build script in Vercel to auto-output <code>public/app-list.json</code> containing your HTML array!
-            </div>
-        </div>
-    </div>
+</div>
 
 </main>
 
@@ -516,11 +410,18 @@
     ];
 
     function getAppTitle(fileName) {
-        return fileName
-            .replace('.html', '')
-            .split(/[-_]/)
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+        let name = fileName.replace('.html', '');
+        
+        // Check if it starts with "eft" (case-insensitive) and strip it
+        if (name.toLowerCase().startsWith('eft')) {
+            name = name.slice(3);
+        }
+        
+        // Add spaces before single uppercase letters (ignore consecutive capitals like DB)
+        return name
+            .replace(/([a-z])([A-Z])/g, '$1 $2') // e.g., "TarkovKit" -> "Tarkov Kit"
+            .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2') // e.g., "DBKit" -> "DB Kit"
+            .trim();
     }
 
     function updateUIVisibility() {
@@ -690,7 +591,7 @@
             "using pure imagination.",
             "while drinking warm cocoa.",
             "powered by friendly space sloths.",
-            "at the speed of a startled turtle.",
+            "at the speed of a startled twilight turtle.",
             "inside a comfortable pocket dimension.",
             "approved by intergalactic wizards.",
             "optimized for maximum coziness.",
@@ -929,15 +830,25 @@
     // --- DASHBOARD RENDERING AGENTS ---
     function renderApps(appsToRender) {
         const grid = document.getElementById('apps-grid');
+        const tarkovGrid = document.getElementById('tarkov-apps-grid');
+        const tarkovSection = document.getElementById('tarkov-section');
+        const generalSection = document.getElementById('general-section');
         const noResults = document.getElementById('no-results');
+        
         grid.innerHTML = '';
+        tarkovGrid.innerHTML = '';
 
         if (appsToRender.length === 0) {
             noResults.classList.remove('hidden');
+            tarkovSection.classList.add('hidden');
+            generalSection.classList.add('hidden');
             return;
         } else {
             noResults.classList.add('hidden');
         }
+
+        let hasTarkov = false;
+        let hasGeneral = false;
 
         appsToRender.forEach((app, index) => {
             const title = getAppTitle(app);
@@ -958,8 +869,26 @@
                 </span>
             `;
 
-            grid.appendChild(card);
+            if (app.toLowerCase().startsWith('eft')) {
+                tarkovGrid.appendChild(card);
+                hasTarkov = true;
+            } else {
+                grid.appendChild(card);
+                hasGeneral = true;
+            }
         });
+
+        if (hasTarkov) {
+            tarkovSection.classList.remove('hidden');
+        } else {
+            tarkovSection.classList.add('hidden');
+        }
+
+        if (hasGeneral) {
+            generalSection.classList.remove('hidden');
+        } else {
+            generalSection.classList.add('hidden');
+        }
     }
 
     function renderLauncherDropdown(appsToRender) {
@@ -979,7 +908,7 @@
                 <div class="w-10 h-10 rounded-lg bg-gradient-to-tr ${gradient} border flex items-center justify-center font-bold text-sm shadow-inner group-hover:scale-105 transition duration-200">
                     ${firstLetter}
                 </div>
-                <span class="mt-2 text-[11px] font-medium text-zinc-700 dark:text-zinc-200 truncate w-full px-1">
+                <span class="mt-2 text-[11px] font-medium text-zinc-700 dark:text-zinc-200 truncate w-full px-1 font-semibold">
                     ${title}
                 </span>
             `;
