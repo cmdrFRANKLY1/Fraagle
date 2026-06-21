@@ -203,7 +203,7 @@
                         <!-- Search filter & Categorizer triggers -->
                         <div class="flex flex-wrap items-center gap-2">
                             <input type="text" id="binds-search" placeholder="Filter actions..." class="py-1.5 px-3.5 border border-lightBorder dark:border-darkBorder bg-white/50 dark:bg-zinc-950/40 rounded-xl text-xs outline-none focus:border-indigo-500 focus:shadow-sm" />
-                            <select id="binds-category-filter" class="py-1.5 px-3 border border-lightBorder dark:border-darkBorder bg-white/50 dark:bg-zinc-950/40 text-xs rounded-xl outline-none font-semibold cursor-pointer">
+                            <select id="binds-category-filter" class="py-1.5 px-3 border border-lightBorder dark:border-darkBorder bg-white/50 dark:bg-zinc-950/45 text-xs rounded-xl outline-none font-semibold cursor-pointer">
                                 <option value="all">All Binds</option>
                                 <option value="movement">Movement</option>
                                 <option value="combat">Combat</option>
@@ -222,14 +222,14 @@
 
             <!-- Right-Side Inspector Card Panels -->
             <aside class="flex flex-col gap-6">
-                <!-- Panel 1: Live Key Preview (Hover state) -->
-                <div id="preview-inspector-card" class="bg-white/70 dark:bg-darkCard/50 border border-[#cbd5e1] dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+                <!-- Panel 1: Live Key Preview (Hover state - Lock Height constraints to avoid layout shifting) -->
+                <div id="preview-inspector-card" class="bg-white/70 dark:bg-darkCard/50 border border-[#cbd5e1] dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4 h-[256px]">
                     <h3 class="text-sm font-bold text-indigo-500 dark:text-indigo-400 flex items-center space-x-2 border-b border-[#cbd5e1] dark:border-darkBorder pb-3 uppercase tracking-wider">
                         <span>⚡</span>
                         <span>Live Key Preview</span>
                     </h3>
                     
-                    <div id="preview-empty-state" class="text-center py-6 text-zinc-400 dark:text-zinc-500 text-xs leading-relaxed flex flex-col items-center">
+                    <div id="preview-empty-state" class="text-center text-zinc-400 dark:text-zinc-500 text-xs leading-relaxed flex flex-col items-center justify-center h-full">
                         <span class="text-2xl mb-2">✨</span>
                         <span>Hover over any key or binding to preview details instantly.</span>
                     </div>
@@ -809,6 +809,7 @@
                 this.activeKeybinds = { ...this.DEMO_DATABASE };
                 this.renderKeyboard();
                 this.renderBindingsList();
+                this.updatePinnedInspector();
                 this.setStatus('DEMO SYNCED', 'ready');
 
                 const overlay = document.getElementById('permission-screen');
