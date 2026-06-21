@@ -68,6 +68,23 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden p-6 select-none">
 
+    <!-- Premium Full-Screen Loading Screen Overlay -->
+    <div id="app-loading-screen" class="fixed inset-0 bg-lightBg dark:bg-darkBg z-50 flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out">
+        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col items-center space-y-4 text-center">
+            <!-- Spinner Ring -->
+            <div class="relative w-16 h-16 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-4 border-zinc-200 dark:border-zinc-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+            <div>
+                <h2 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 uppercase tracking-widest font-mono">Synchronizing Data</h2>
+                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase font-semibold tracking-wider">Retrieving live caches from Tarkov.dev...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Decorative Ambient Soft Glow Gradients -->
     <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
     <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
@@ -107,14 +124,14 @@
                 <!-- Gradient Glow Toggle Button -->
                 <button id="gradient-toggle" class="p-2 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Glow Gradients">
                     <svg class="w-4.5 h-4.5 text-zinc-600 dark:text-zinc-300 pointer-events-none transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
                     </svg>
                 </button>
 
                 <!-- Theme Toggle Button -->
-                <button id="theme-toggle" class="p-2 rounded-lg border border-white/30 bg-white/10 dark:bg-white/5 hover:bg-white/20 transition-all focus:outline-none flex items-center justify-center cursor-pointer shadow-sm" aria-label="Toggle Theme">
+                <button id="theme-toggle" class="p-2 rounded-lg border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard transition-all focus:outline-none flex items-center justify-center cursor-pointer shadow-sm" aria-label="Toggle Theme">
                     <!-- Sun Icon -->
-                    <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-300 pointer-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-500 pointer-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                     <!-- Moon Icon -->
@@ -151,9 +168,9 @@
             </div>
         </section>
 
-        <!-- Reels Slot Spinners container -->
-        <section class="hidden grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-white dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300" id="reelsContainer">
-            <!-- Populated dynamically -->
+        <!-- Reels Slot Spinners container (Visible by default to avoid delay layout shifts) -->
+        <section class="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-white dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300" id="reelsContainer">
+            <!-- Populated dynamically upon data synchronization -->
         </section>
 
         <!-- Action Buttons Area -->
@@ -517,9 +534,6 @@
                         }
                     });
                 }
-                
-                container.classList.remove('hidden');
-                container.classList.add('grid');
             },
 
             // Lightweight track item node factory - only real icons while shuffling, template if cleared/null
@@ -588,8 +602,6 @@
                 if (showDetails) {
                     detailsPanel.style.display = 'block';
                     grid.innerHTML = html;
-                    const totals = this.calcTotals(this.currentLoadout);
-                    this.animateTotal(totals.pvp, totals.pve);
                     
                     grid.querySelectorAll('.loadout-item').forEach(el => {
                         const cat = el.dataset.category;
@@ -616,10 +628,6 @@
                             <p class="text-[11px] max-w-[240px] leading-relaxed">Press [ RANDOMIZE ] or press the Spacebar to build a tactical flea-market loadout!</p>
                         </div>
                     `;
-                    if (!this.isSpinning) {
-                        document.getElementById('pvpTotal').textContent = '₽0';
-                        document.getElementById('pveTotal').textContent = '₽0';
-                    }
                 }
 
                 this.updateButtons();
@@ -683,8 +691,14 @@
                 this.setStatus('ROLLING...', 'loading');
                 this.updateButtons();
 
-                document.getElementById('pvpTotal').innerHTML = '<span class="price-spinner"></span>';
-                document.getElementById('pveTotal').innerHTML = '<span class="price-spinner"></span>';
+                // Reset spin totals back to ₽0 at the start of spinning
+                this.animateTotal(0, 0, 100);
+
+                // Clear previous loadout data from spinning categories
+                activeCats.forEach(c => {
+                    this.currentLoadout[c] = null;
+                });
+
                 document.getElementById('detailsPanel').style.display = 'none';
 
                 // Hide generated title badge upon re-spin
@@ -723,6 +737,10 @@
                         this.stoppedCount++;
                         this.currentLoadout[cat] = targetLoadout[cat];
                         
+                        // Count up dynamically as soon as each individual reel/slot clicks and lands
+                        const runningTotals = this.calcTotals(this.currentLoadout);
+                        this.animateTotal(runningTotals.pvp, runningTotals.pve, 300);
+
                         // Bounce/Scale pop burst effect when landing on a winner
                         const reel = document.querySelector(`[data-category="${cat}"]`);
                         if (reel) {
@@ -919,9 +937,24 @@
                     this.setStatus('READY', 'ready');
                     this.updateButtons();
 
+                    // Fade out and remove loading overlay once data is successfully synchronized
+                    const loader = document.getElementById('app-loading-screen');
+                    if (loader) {
+                        loader.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => loader.remove(), 500);
+                    }
+
                 } catch (err) {
                     console.error('Init error:', err);
                     this.setStatus('API ERROR', '');
+
+                    // Also remove loading overlay if an error occurs so the error message is visible
+                    const loader = document.getElementById('app-loading-screen');
+                    if (loader) {
+                        loader.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => loader.remove(), 500);
+                    }
+
                     document.getElementById('loadoutGrid').innerHTML = `
                         <div class="col-span-full text-center py-12 text-zinc-400 dark:text-zinc-500 flex flex-col items-center">
                             <span class="text-4xl mb-3">⚠️</span>
