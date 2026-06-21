@@ -25,12 +25,12 @@
                     colors: {
                         excelGreen: '#107c41',
                         excelGreenHover: '#0b5931',
-                        darkBg: '#101010', // Deep black background
-                        darkCard: '#18181b', // Dark card
+                        darkBg: '#09090b', // Sleek Zinc dark background
+                        darkCard: '#18181b', // Clean card
                         darkBorder: '#27272a', // Subtle dark borders
-                        lightBg: '#f8f9fa', // Pristine soft off-white background
-                        lightCard: '#ffffff', // Clean white card
-                        lightBorder: '#e2e8f0', // Crisp slate border
+                        lightBg: '#f4f4f5', // Soft off-white background
+                        lightCard: '#ffffff', // Clean white cells
+                        lightBorder: '#e4e4e7', // Subtle light borders
                         fraagleBlue: '#3b82f6',
                         fraagleRed: '#ef4444',
                         fraagleYellow: '#f59e0b',
@@ -47,12 +47,12 @@
     <style>
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
         
         /* CSS Variable columns for dynamic sizing/auto-fitting */
         :root {
-            --col-a: 200px;
+            --col-a: 220px;
             --col-b: 110px;
             --col-c: 120px;
             --col-d: 110px;
@@ -70,9 +70,8 @@
         }
         /* Excel style table gridlines */
         .excel-cell {
-            border-bottom: 1px solid #cbd5e1;
-            border-right: 1px solid #cbd5e1;
-            transition: background-color 0.1s ease;
+            border-bottom: 1px solid #e4e4e7;
+            border-right: 1px solid #e4e4e7;
         }
         .dark .excel-cell {
             border-bottom: 1px solid #27272a;
@@ -190,6 +189,12 @@
                 <span class="text-base">⚖️</span>
                 <span class="text-[9px] mt-0.5">Load Selected</span>
             </button>
+            
+            <!-- Icon Toggle Button inside Toolbar ribbon -->
+            <button id="toolbar-toggle-icons" class="flex flex-col items-center justify-center p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                <span id="icon-toggle-emoji" class="text-base">🖼️</span>
+                <span id="icon-toggle-label" class="text-[9px] mt-0.5">Hide Icons</span>
+            </button>
         </div>
 
         <!-- Divider line -->
@@ -279,7 +284,7 @@
                 </div>
             </div>
 
-            <!-- Spreadsheet Grid Rows container -->
+            <!-- Spreadsheet Grid Rows container (Optimized Event Delegated Container) -->
             <div id="spreadsheet-grid-body" class="text-xs font-mono bg-white dark:bg-[#151515] w-full">
                 <!-- Rows populated dynamically here -->
             </div>
@@ -292,7 +297,7 @@
         <aside id="side-pane" class="w-80 border-l border-[#cbd5e1] dark:border-darkBorder bg-[#faf9f8] dark:bg-darkCard/50 backdrop-blur-md flex flex-col shrink-0 overflow-y-auto min-w-[200px] max-w-[500px]">
             
             <!-- Item Inspector Section (Dynamic selection showcase) -->
-            <div class="p-4 border-b border-[#cbd5e1] dark:border-darkBorder bg-zinc-100/50 dark:bg-zinc-800/20">
+            <div class="p-4 border-b border-[#cbd5e1] dark:border-[#27272a] bg-zinc-100/50 dark:bg-zinc-800/20">
                 <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2">
                     <span>🔍</span>
                     <span>Selected Item Inspector</span>
@@ -336,7 +341,7 @@
             </div>
 
             <!-- Comparison Header & Slots Displays -->
-            <div class="p-4 border-b border-[#cbd5e1] dark:border-darkBorder bg-zinc-100/30 dark:bg-zinc-800/10">
+            <div class="p-4 border-b border-[#cbd5e1] dark:border-[#27272a] bg-zinc-100/30 dark:bg-zinc-800/10">
                 <h3 class="text-sm font-bold text-zinc-700 dark:text-zinc-300 flex items-center space-x-2">
                     <span>⚖️</span>
                     <span>Active Comparison Slots</span>
