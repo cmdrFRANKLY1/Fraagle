@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fraagle Sheets – Escape from Tarkov DB</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <script>
+        (function() {
+            const userTheme = localStorage.getItem('theme') || 'dark';
+            if (userTheme === 'dark') document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+        })();
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        excelGreen: '#107c41',
+                        excelGreenHover: '#0b5931',
+                        darkBg: '#09090b',
+                        darkCard: '#18181b',
+                        darkBorder: '#27272a',
+                        lightBg: '#f4f4f5',
+                        lightCard: '#ffffff',
+                        lightBorder: '#e4e4e7',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        :root {
+            --col-a: 220px;
+            --col-b: 110px;
+            --col-c: 120px;
+            --col-d: 110px;
+            --col-e: 110px;
+            --col-f: 90px;
+            --col-g: 100px;
+            --col-h: 110px;
+            --col-i: 90px;
+            --col-j: 110px;
+            --col-k: 110px;
+        }
+        .excel-grid {
+            grid-template-columns: 40px var(--col-a) var(--col-b) var(--col-c) var(--col-d) var(--col-e) var(--col-f) var(--col-g) var(--col-h) var(--col-i) var(--col-j) var(--col-k);
+        }
+        .excel-cell {
+            border-bottom: 1px solid #e4e4e7;
+            border-right: 1px solid #e4e4e7;
+        }
+        .dark .excel-cell {
+            border-bottom: 1px solid #27272a;
+            border-right: 1px solid #27272a;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .col-resize-handle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 1.5px;
+            height: 100%;
+            cursor: col-resize;
+            z-index: 20;
+            background: transparent;
+            transition: background 0.15s;
+        }
+        .col-resize-handle:hover {
+            background: #107c41;
+            width: 3px;
+        }
+        .row-resize-handle {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1.5px;
+            background: transparent;
+            cursor: row-resize;
+            z-index: 10;
+            transition: background 0.15s;
+        }
+        .row-resize-handle:hover {
+            background: #107c41;
+            height: 3px;
+        }
+        .wiki-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            background: transparent;
+            color: #3b82f6;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+        .wiki-btn:hover {
+            background: #3b82f620;
+            color: #2563eb;
+        }
+        .dark .wiki-btn:hover {
+            background: #3b82f630;
+            color: #60a5fa;
+        }
+        .search-input {
+            transition: border-color 0.15s;
+        }
+        .search-input:focus {
+            border-color: #107c41;
+            outline: none;
+        }
+        .row-selected {
+            background: #d1fae5 !important;
+        }
+        .dark .row-selected {
+            background: #1a3a2a !important;
+        }
+        .loader {
+            border: 2px solid #e4e4e7;
+            border-top: 2px solid #107c41;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 0.8s linear infinite;
+            margin: 6px auto;
+        }
+        .dark .loader {
+            border-color: #27272a;
+            border-top-color: #107c41;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Explorer panel – Categories with checkboxes */
+        #explorer-panel {
+            width: 200px;
+            min-width: 140px;
+            max-width: 280px;
+            background: #f3f2f1;
+            border-right: 1px solid #e4e4e7;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+            padding: 0.75rem 0.5rem;
+        }
+        .dark #explorer-panel {
+            background: #1a1a1e;
+            border-right-color: #27272a;
+        }
+        .explorer-header {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #a1a1aa;
+            padding: 0.25rem 0.5rem 0.5rem;
+            border-bottom: 1px solid #e4e4e7;
+            margin-bottom: 0.5rem;
+        }
+        .dark .explorer-header {
+            border-bottom-color: #27272a;
+            color: #6b7280;
+        }
+        .explorer-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #3f3f46;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .dark .explorer-item {
+            color: #d4d4d8;
+        }
+        .explorer-item:hover {
+            background: #e4e4e7;
+        }
+        .dark .explorer-item:hover {
+            background: #27272a;
+        }
+        .explorer-item input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            accent-color: #107c41;
+            flex-shrink: 0;
+        }
+        .explorer-item .badge {
+            font-size: 0.6rem;
+            background: #e4e4e7;
+            color: #3f3f46;
+            padding: 0 6px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+        .dark .explorer-item .badge {
+            background: #3f3f46;
+            color: #d4d4d8;
+        }
+        .explorer-item.active {
+            background: #107c41;
+            color: white;
+        }
+        .dark .explorer-item.active {
+            background: #107c41;
+            color: white;
+        }
+        .explorer-item.active .badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        #detail-panel {
+            width: 320px;
+            min-width: 200px;
+            max-width: 500px;
+            background: #faf9f8;
+            border-left: 1px solid #e4e4e7;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .dark #detail-panel {
+            background: #18181b;
+            border-left-color: #27272a;
+        }
+        .panel-header {
+            padding: 1rem 1.25rem 0.5rem;
+            border-bottom: 1px solid #e4e4e7;
+        }
+        .dark .panel-header {
+            border-bottom-color: #27272a;
+        }
+        .panel-content {
+            padding: 1.25rem;
+            flex: 1;
+        }
+        .detail-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #a1a1aa;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .detail-empty span {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .dark .detail-empty {
+            color: #6b7280;
+        }
+
+        .pane-divider {
+            width: 1.5px;
+            background: #cbd5e1;
+            cursor: col-resize;
+            flex-shrink: 0;
+            transition: background 0.15s, width 0.15s;
+        }
+        .pane-divider:hover {
+            background: #107c41;
+            width: 3px;
+        }
+        .dark .pane-divider {
+            background: #27272a;
+        }
+        .dark .pane-divider:hover {
+            background: #107c41;
+        }
+    </style>
+</head>
+<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 h-screen flex flex-col overflow-hidden select-none">
+
+    <!-- ===== HEADER ===== -->
+    <header class="bg-[#107c41] text-white h-12 flex items-center justify-between px-4 shrink-0 z-20">
+        <div class="flex items-center space-x-3">
+            <a href="../index.html" class="p-1.5 rounded hover:bg-white/10 transition-all flex items-center justify-center" title="Back to Hub">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+            </a>
+            <div class="bg-white text-[#107c41] p-1 rounded font-bold text-sm tracking-tighter">田</div>
+            <span class="font-semibold text-sm">Fraagle Sheets</span>
+            <span class="text-xs opacity-75 border-l border-white/30 pl-2">Escape from Tarkov DB</span>
+        </div>
+        <div class="flex items-center space-x-3 text-xs">
+            <button id="theme-toggle" class="p-2 rounded-lg border border-white/30 bg-white/10 hover:bg-white/20 transition-all flex items-center justify-center cursor-pointer" aria-label="Toggle Theme">
+                <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-300 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <svg id="theme-toggle-moon-icon" class="hidden w-4.5 h-4.5 text-zinc-100 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+            <div class="w-7 h-7 rounded-full bg-emerald-700 border border-white/20 flex items-center justify-center font-bold text-xs select-none">U</div>
+        </div>
+    </header>
+
+    <!-- ===== RIBBON ===== -->
+    <nav class="bg-[#f3f2f1] dark:bg-[#18181b] border-b border-[#cbd5e1] dark:border-[#27272a] h-10 flex items-center px-4 shrink-0 z-30 text-xs text-zinc-600 dark:text-zinc-400">
+        <div class="flex space-x-6 h-full items-center relative">
+            <div class="relative h-full flex items-center">
+                <button id="menu-btn-file" class="font-semibold text-zinc-700 dark:text-zinc-300 hover:text-[#107c41] px-2 py-1 rounded transition h-full flex items-center">
+                    File <span class="ml-1 text-[8px] opacity-60">▼</span>
+                </button>
+                <div id="dropdown-menu-file" class="hidden absolute top-full left-0 mt-0.5 w-44 bg-white dark:bg-darkCard border border-[#cbd5e1] dark:border-darkBorder rounded-lg shadow-xl py-1 z-40">
+                    <button id="menu-opt-export" class="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center space-x-2">
+                        <span>📤</span> <span>Export Sheet</span>
+                    </button>
+                    <a href="../index.html" class="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center space-x-2">
+                        <span>🚪</span> <span>Exit</span>
+                    </a>
+                </div>
+            </div>
+            <div class="relative h-full flex items-center">
+                <button id="menu-btn-view" class="font-semibold text-zinc-700 dark:text-zinc-300 hover:text-[#107c41] px-2 py-1 rounded transition h-full flex items-center">
+                    View <span class="ml-1 text-[8px] opacity-60">▼</span>
+                </button>
+                <div id="dropdown-menu-view" class="hidden absolute top-full left-0 mt-0.5 w-48 bg-white dark:bg-darkCard border border-[#cbd5e1] dark:border-darkBorder rounded-lg shadow-xl py-1 z-40">
+                    <div class="px-4 py-1 text-[9px] uppercase tracking-wider text-zinc-400 font-bold">Grid Font</div>
+                    <button onclick="changeAppFont('Plus Jakarta Sans')" class="w-full text-left px-4 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-sans">Plus Jakarta Sans</button>
+                    <button onclick="changeAppFont('Inter')" class="w-full text-left px-4 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-sans">Inter</button>
+                    <button onclick="changeAppFont('Roboto Mono')" class="w-full text-left px-4 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-mono">Roboto Mono</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== TOOLBAR ===== -->
+    <section class="bg-white dark:bg-[#1f1f23] border-b border-[#cbd5e1] dark:border-[#27272a] h-16 flex items-center px-4 space-x-6 shrink-0 z-10 text-xs">
+        <div class="flex flex-col space-y-1">
+            <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Search Filter</span>
+            <div class="flex items-center bg-[#f3f2f1] dark:bg-[#18181b] rounded border border-lightBorder dark:border-darkBorder px-2 py-1">
+                <input type="text" id="grid-search-input" placeholder="Search rows..." class="search-input bg-transparent border-none outline-none w-44 text-zinc-800 dark:text-zinc-100" />
+                <span class="text-zinc-400 select-none">🔍</span>
+            </div>
+        </div>
+
+        <div class="h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
+
+        <div class="flex items-center space-x-3">
+            <button id="toolbar-clear-filters" class="flex flex-col items-center justify-center p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                <span class="text-base">🧹</span>
+                <span class="text-[9px] mt-0.5">Clear</span>
+            </button>
+            <button id="toolbar-toggle-icons" class="flex flex-col items-center justify-center p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                <span id="icon-toggle-emoji" class="text-base">🖼️</span>
+                <span id="icon-toggle-label" class="text-[9px] mt-0.5">Hide Icons</span>
+            </button>
+        </div>
+
+        <div class="h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800"></div>
+
+        <div class="hidden sm:flex flex-col justify-center">
+            <span class="text-[10px] text-zinc-400 dark:text-zinc-500 font-semibold uppercase">Stats</span>
+            <div class="flex space-x-4 text-[11px] font-medium text-zinc-500 dark:text-zinc-300 mt-1">
+                <div>Items: <span id="stat-total" class="font-bold text-[#107c41]">…</span></div>
+                <div>Avg Price: <span id="stat-avg-price" class="font-bold text-[#107c41]">…</span></div>
+                <div>Avg Weight: <span id="stat-avg-weight" class="font-bold text-[#107c41]">…</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FORMULA BAR ===== -->
+    <section class="bg-[#f3f2f1] dark:bg-[#18181b] border-b border-[#cbd5e1] dark:border-[#27272a] h-9 flex items-center px-2 shrink-0 text-xs font-mono">
+        <div id="active-cell-indicator" class="w-12 bg-white dark:bg-darkCard h-6 border border-[#cbd5e1] dark:border-darkBorder rounded text-center flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-bold select-all">A1</div>
+        <div class="text-zinc-400 dark:text-zinc-600 mx-2 text-sm select-none">|</div>
+        <span class="text-zinc-400 select-none mr-2 font-semibold">fx</span>
+        <div class="flex-grow bg-white dark:bg-darkCard h-6 border border-[#cbd5e1] dark:border-darkBorder rounded flex items-center px-2">
+            <input type="text" id="excel-formula-input" readonly value="=TarkovSpreadsheet.Index()" class="w-full bg-transparent border-none outline-none select-all text-zinc-700 dark:text-zinc-300" />
+        </div>
+    </section>
+
+    <!-- ===== MAIN WORKSPACE ===== -->
+    <div class="flex-grow flex overflow-hidden w-full relative z-0">
+
+        <!-- Explorer Panel (Categories) -->
+        <div id="explorer-panel">
+            <div class="explorer-header">📂 Categories</div>
+            <div id="explorer-list" class="space-y-0.5">
+                <!-- populated by JS -->
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div id="explorer-divider" class="pane-divider"></div>
+
+        <!-- Grid Container -->
+        <div class="flex-grow overflow-auto relative select-none">
+            <!-- Sticky Header Row -->
+            <div class="sticky top-0 left-0 right-0 z-10 bg-[#f3f2f1] dark:bg-[#1e1e21] text-xs font-semibold text-zinc-500 dark:text-zinc-400 flex items-center h-8 select-none border-b border-[#cbd5e1] dark:border-[#27272a]">
+                <div class="w-10 flex-shrink-0 text-center border-r border-[#cbd5e1] dark:border-[#27272a] h-full flex items-center justify-center bg-[#f3f2f1] dark:bg-[#1e1e21]"></div>
+                <div class="excel-grid grid flex-grow h-full items-center text-center">
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('name')">
+                        A (Name) <span id="sort-indicator-name" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-a')" ondblclick="autoSizeColumn('col-a', 260)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('shortName')">
+                        B (Short) <span id="sort-indicator-shortName" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-b')" ondblclick="autoSizeColumn('col-b', 150)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('category')">
+                        C (Category) <span id="sort-indicator-category" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-c')" ondblclick="autoSizeColumn('col-c', 160)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('basePrice')">
+                        D (Price) <span id="sort-indicator-basePrice" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-d')" ondblclick="autoSizeColumn('col-d', 140)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('avg24hPrice')">
+                        E (Avg 24h) <span id="sort-indicator-avg24hPrice" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-e')" ondblclick="autoSizeColumn('col-e', 140)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('weight')">
+                        F (Weight) <span id="sort-indicator-weight" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-f')" ondblclick="autoSizeColumn('col-f', 120)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('caliber')">
+                        G (Caliber) <span id="sort-indicator-caliber" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-g')" ondblclick="autoSizeColumn('col-g', 150)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('ergonomics')">
+                        H (Ergo) <span id="sort-indicator-ergonomics" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-h')" ondblclick="autoSizeColumn('col-h', 140)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('recoilVertical')">
+                        I (Recoil) <span id="sort-indicator-recoilVertical" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-i')" ondblclick="autoSizeColumn('col-i', 120)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('class')">
+                        J (Class) <span id="sort-indicator-class" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-j')" ondblclick="autoSizeColumn('col-j', 140)"></div>
+                    </div>
+                    <div class="excel-cell h-full flex items-center justify-center select-none font-bold cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 relative" onclick="sortSpreadsheet('durability')">
+                        K (Durab.) <span id="sort-indicator-durability" class="ml-1 text-[8px]"></span>
+                        <div class="col-resize-handle" onmousedown="initColDragResize(event, 'col-k')" ondblclick="autoSizeColumn('col-k', 140)"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Body -->
+            <div id="spreadsheet-grid-body" class="text-xs font-mono bg-white dark:bg-[#151515] w-full"></div>
+        </div>
+
+        <!-- Divider -->
+        <div id="detail-divider" class="pane-divider"></div>
+
+        <!-- Detail Panel (right) -->
+        <div id="detail-panel">
+            <div class="panel-header">
+                <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2">
+                    <span>🔍</span>
+                    <span>Selected Item Details</span>
+                </h3>
+                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5 uppercase tracking-wider">Click any row to inspect</p>
+            </div>
+            <div class="panel-content" id="detail-content">
+                <div id="detail-empty" class="detail-empty">
+                    <span>🖱️</span>
+                    <p class="text-sm font-medium">No item selected</p>
+                    <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Click on a row to see details here</p>
+                </div>
+                <div id="detail-active" class="hidden space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-16 h-16 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 p-1 flex items-center justify-center border border-[#cbd5e1] dark:border-darkBorder flex-shrink-0">
+                            <img id="detail-icon" src="" alt="Icon" class="w-full h-full object-contain rounded-md" onerror="this.src='https://via.placeholder.com/64?text=No+Icon'">
+                        </div>
+                        <div class="truncate">
+                            <h4 id="detail-name" class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">Item Name</h4>
+                            <span id="detail-category" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Category</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-zinc-100 dark:border-zinc-800 pt-2.5 space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-zinc-400">Base Price</span>
+                            <span id="detail-base-price" class="font-semibold">—</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-zinc-400">Avg Market 24h</span>
+                            <span id="detail-avg-price" class="font-semibold">—</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-zinc-400">Weight</span>
+                            <span id="detail-weight" class="font-semibold">—</span>
+                        </div>
+                        <div id="detail-extra-metrics" class="space-y-2 border-t border-dashed border-zinc-100 dark:border-zinc-800 pt-2"></div>
+                    </div>
+                    <div class="pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                        <a id="detail-wiki-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition-colors shadow-sm">
+                            📖 Open Wiki
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-[#f3f2f1] dark:bg-[#18181b] border-t border-[#cbd5e1] dark:border-[#27272a] h-10 flex items-center justify-between px-4 shrink-0 text-xs z-10">
+        <div class="text-[10px] text-zinc-400 dark:text-zinc-500 select-none">Ready · Fraagle Sheets</div>
+        <div class="text-[10px] text-zinc-400 dark:text-zinc-500 select-none">Escape from Tarkov DB</div>
+    </footer>
+
+    <!-- ===== EXPORT MODAL ===== -->
+    <div id="export-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-white dark:bg-darkCard border border-[#cbd5e1] dark:border-darkBorder rounded-2xl w-full max-w-md p-6 shadow-2xl mx-4">
+            <h3 class="text-base font-bold text-[#107c41] flex items-center space-x-2 mb-2"><span>📥</span><span>Export</span></h3>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-6">Choose scope and format.</p>
+            <div class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Scope</label>
+                    <select id="export-scope" class="w-full text-xs p-2 rounded-lg border border-[#cbd5e1] dark:border-darkBorder bg-[#f3f2f1] dark:bg-[#151515] outline-none">
+                        <option value="current">Current Filter</option>
+                        <option value="all">Full Dataset</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-bold text-zinc-400 uppercase tracking-wide">Format</label>
+                    <select id="export-format" class="w-full text-xs p-2 rounded-lg border border-[#cbd5e1] dark:border-darkBorder bg-[#f3f2f1] dark:bg-[#151515] outline-none">
+                        <option value="csv">CSV (*.csv)</option>
+                        <option value="txt">Tabbed TXT (*.txt)</option>
+                        <option value="markdown">Markdown (*.md)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center justify-end space-x-3 mt-8">
+                <button id="export-modal-cancel" class="px-4 py-2 border border-[#cbd5e1] dark:border-darkBorder text-xs font-semibold rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer">Cancel</button>
+                <button id="export-modal-confirm" class="px-4 py-2 bg-[#107c41] text-white text-xs font-semibold rounded-xl hover:bg-emerald-600 transition-colors cursor-pointer">Export</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOOLTIP ===== -->
+    <div id="hover-tooltip" class="absolute pointer-events-none z-50 bg-white/95 dark:bg-darkCard/95 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3.5 shadow-2xl max-w-xs transition-opacity duration-200 opacity-0 text-xs flex flex-col space-y-1.5 backdrop-blur-md min-w-[200px] min-h-[90px]"></div>
+
+    <script>
+        // ============================================================
+        //  1. DATA & STATE
+        // ============================================================
+        let itemsIndex = [];
+        let uniqueCategories = [];
+        let selectedCategories = new Set(); // stores category names; if empty => show all
+        let selectedCellReference = 'A1';
+        let selectedItemId = null;
+        let rowHeights = {};
+        let activeSortCol = '';
+        let activeSortAsc = true;
+        let searchDebounceTimer = null;
+        let showIcons = true;
+
+        let hoverTimeout = null;
+        let hoveredItem = null;
+
+        // ============================================================
+        //  2. FALLBACK DATABASE
+        // ============================================================
+        const fallbackDatabase = [
+            { id: "1", name: "M4A1 5.56x45 assault rifle", shortName: "M4A1", basePrice: 55000, avg24hPrice: 59000,
+                weight: 3.1, caliber: "5.56x45mm", fireRate: 800, ergonomics: 54, recoilVertical: 78, class: null,
+                durability: null, category: "Weapons", iconLink: null },
+            { id: "2", name: "AK-74N 5.45x39 assault rifle", shortName: "AK-74N", basePrice: 38000, avg24hPrice: 39500,
+                weight: 3.4, caliber: "5.45x39mm", fireRate: 650, ergonomics: 45, recoilVertical: 82, class: null,
+                durability: null, category: "Weapons", iconLink: null },
+            { id: "3", name: "Altyn helmet (Olive)", shortName: "Altyn", basePrice: 120000, avg24hPrice: 155000, weight: 4.1,
+                caliber: null, fireRate: null, ergonomics: -15, recoilVertical: null, class: 5, durability: 45,
+                category: "Armor", iconLink: null },
+            { id: "4", name: "6B43 Zabralo-Sh Body Armor", shortName: "Zabralo", basePrice: 280000, avg24hPrice: 340000,
+                weight: 16.0, caliber: null, fireRate: null, ergonomics: null, recoilVertical: null, class: 6,
+                durability: 85, category: "Armor", iconLink: null },
+            { id: "5", name: "SIG MCX .300 Blackout", shortName: "MCX", basePrice: 47000, avg24hPrice: 51000, weight: 3.2,
+                caliber: ".300 Blackout", fireRate: 700, ergonomics: 48, recoilVertical: 80, class: null, durability: null,
+                category: "Weapons", iconLink: null },
+            { id: "6", name: "Gzhel-K armor", shortName: "Gzhel", basePrice: 95000, avg24hPrice: 112000, weight: 8.7,
+                caliber: null, fireRate: null, ergonomics: null, recoilVertical: null, class: 5, durability: 65,
+                category: "Armor", iconLink: null },
+            { id: "7", name: "EOTech EXPS3 holographic sight", shortName: "EXPS3", basePrice: 22000, avg24hPrice: 25000,
+                weight: 0.4, caliber: null, fireRate: null, ergonomics: 0, recoilVertical: null, class: null,
+                durability: null, category: "Attachments", iconLink: null },
+            { id: "8", name: "RK-2 foregrip", shortName: "RK-2", basePrice: 12000, avg24hPrice: 14000, weight: 0.25,
+                caliber: null, fireRate: null, ergonomics: 2, recoilVertical: -8, class: null, durability: null,
+                category: "Attachments", iconLink: null },
+        ];
+
+        // ============================================================
+        //  3. THEME
+        // ============================================================
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('theme-toggle-sun-icon');
+        const moonIcon = document.getElementById('theme-toggle-moon-icon');
+
+        function applyTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        applyTheme(currentTheme === 'dark');
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const next = isDark ? 'light' : 'dark';
+            localStorage.setItem('theme', next);
+            applyTheme(next === 'dark');
+        });
+
+        // ============================================================
+        //  4. FONT SWITCHER
+        // ============================================================
+        function changeAppFont(font) {
+            document.body.style.fontFamily = `"${font}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+            closeAllMenus();
+        }
+
+        // ============================================================
+        //  5. DATA FETCH
+        // ============================================================
+        async function fetchTarkovGraphQL(query) {
+            try {
+                const res = await fetch('https://api.tarkov.dev/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                if (!res.ok) return null;
+                const json = await res.json();
+                return json.data;
+            } catch { return null; }
+        }
+
+        async function loadTarkovData() {
+            const query = `query {
+                pvp: items(lang: en, gameMode: regular) {
+                    id name shortName wikiLink iconLink basePrice weight avg24hPrice category { name }
+                    properties {
+                        __typename
+                        ... on ItemPropertiesWeapon { caliber fireRate ergonomics recoilVertical }
+                        ... on ItemPropertiesArmor { class durability }
+                    }
+                }
+            }`;
+            let raw = [];
+
+            try {
+                const resp = await fetch('/api/tarkov-data');
+                if (resp.ok) {
+                    const json = await resp.json();
+                    raw = json?.data?.pvp || json?.pvp || [];
+                } else throw new Error('proxy off');
+            } catch {
+                const live = await fetchTarkovGraphQL(query);
+                raw = live?.pvp || [];
+            }
+
+            if (!raw || raw.length === 0) {
+                itemsIndex = fallbackDatabase;
+            } else {
+                itemsIndex = raw.filter(Boolean).map(item => ({
+                    id: item.id,
+                    name: item.name || 'Unknown',
+                    shortName: item.shortName || item.name,
+                    category: item.category?.name || 'General',
+                    basePrice: item.basePrice || 0,
+                    avg24hPrice: item.avg24hPrice || 0,
+                    weight: item.weight || 0,
+                    caliber: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.caliber : null,
+                    fireRate: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.fireRate : null,
+                    ergonomics: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.ergonomics :
+                    null,
+                    recoilVertical: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties
+                        .recoilVertical : null,
+                    class: item.properties?.__typename === 'ItemPropertiesArmor' ? item.properties.class : null,
+                    durability: item.properties?.__typename === 'ItemPropertiesArmor' ? item.properties.durability :
+                        null,
+                    iconLink: item.iconLink,
+                    wikiLink: item.wikiLink || null,
+                }));
+            }
+
+            const catSet = new Set();
+            itemsIndex.forEach(i => { if (i.category) catSet.add(i.category); });
+            uniqueCategories = Array.from(catSet).sort();
+
+            // Initialize selectedCategories with all categories
+            selectedCategories = new Set(uniqueCategories);
+
+            renderExplorer();
+            filterAndRender();
+            calcStats();
+        }
+
+        // ============================================================
+        //  6. EXPLORER WITH CHECKBOXES
+        // ============================================================
+        const explorerList = document.getElementById('explorer-list');
+
+        function renderExplorer() {
+            explorerList.innerHTML = '';
+
+            // "All Items" master checkbox
+            const allChecked = selectedCategories.size === uniqueCategories.length && uniqueCategories.length > 0;
+            const allDiv = document.createElement('div');
+            allDiv.className = 'explorer-item';
+            allDiv.innerHTML = `
+                <input type="checkbox" id="explorer-all" ${allChecked ? 'checked' : ''}>
+                <label for="explorer-all" class="flex-1 cursor-pointer" style="font-weight:600;">All Categories</label>
+                <span class="badge">${itemsIndex.length}</span>
+            `;
+            const allCheckbox = allDiv.querySelector('input');
+            allCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    // Select all categories
+                    selectedCategories = new Set(uniqueCategories);
+                } else {
+                    // Deselect all (empty set = show all)
+                    selectedCategories = new Set();
+                }
+                renderExplorer();
+                filterAndRender();
+            });
+            explorerList.appendChild(allDiv);
+
+            // Individual categories
+            uniqueCategories.forEach(cat => {
+                const count = itemsIndex.filter(i => i.category === cat).length;
+                const checked = selectedCategories.has(cat);
+                const div = document.createElement('div');
+                div.className = 'explorer-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="explorer-${cat.replace(/\s+/g, '')}" ${checked ? 'checked' : ''}>
+                    <label for="explorer-${cat.replace(/\s+/g, '')}" class="flex-1 cursor-pointer">${cat}</label>
+                    <span class="badge">${count}</span>
+                `;
+                const cb = div.querySelector('input');
+                cb.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedCategories.add(cat);
+                    } else {
+                        selectedCategories.delete(cat);
+                    }
+                    renderExplorer();
+                    filterAndRender();
+                });
+                explorerList.appendChild(div);
+            });
+        }
+
+        // ============================================================
+        //  7. SORTING
+        // ============================================================
+        function sortSpreadsheet(col) {
+            if (activeSortCol === col) activeSortAsc = !activeSortAsc;
+            else { activeSortCol = col;
+                activeSortAsc = true; }
+            updateSortUI();
+            itemsIndex.sort((a, b) => {
+                let va = a[col],
+                    vb = b[col];
+                if (va === null || va === undefined) return 1;
+                if (vb === null || vb === undefined) return -1;
+                if (typeof va === 'string' && typeof vb === 'string') return activeSortAsc ? va.localeCompare(vb) : vb
+                    .localeCompare(va);
+                return activeSortAsc ? va - vb : vb - va;
+            });
+            filterAndRender();
+        }
+
+        function updateSortUI() {
+            ['name', 'shortName', 'category', 'basePrice', 'avg24hPrice', 'weight', 'caliber', 'ergonomics', 'recoilVertical',
+                'class', 'durability'
+            ].forEach(c => {
+                const el = document.getElementById(`sort-indicator-${c}`);
+                if (el) {
+                    if (c === activeSortCol) {
+                        el.textContent = activeSortAsc ? ' ▲' : ' ▼';
+                        el.className = 'ml-1 text-[8px] text-[#107c41] font-bold';
+                    } else { el.textContent = '';
+                        el.className = 'ml-1 text-[8px]'; }
+                }
+            });
+        }
+
+        // ============================================================
+        //  8. COL / ROW RESIZE
+        // ============================================================
+        function initColDragResize(e, colVar) {
+            e.preventDefault();
+            const startX = e.pageX;
+            const root = document.documentElement;
+            const startW = parseInt(getComputedStyle(root).getPropertyValue(`--${colVar}`)) || 110;
+
+            function onMove(me) {
+                const w = Math.max(50, Math.min(600, startW + (me.pageX - startX)));
+                root.style.setProperty(`--${colVar}`, `${w}px`);
+            }
+
+            function onUp() { document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp); }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        }
+
+        function autoSizeColumn(colVar, target) {
+            document.documentElement.style.setProperty(`--${colVar}`, `${target}px`);
+        }
+
+        function initRowDragResize(e, rowNum, el) {
+            e.preventDefault();
+            const startY = e.pageY;
+            const startH = el.offsetHeight;
+
+            function onMove(me) {
+                const h = Math.max(24, Math.min(200, startH + (me.pageY - startY)));
+                rowHeights[rowNum] = h;
+                el.style.height = `${h}px`;
+            }
+
+            function onUp() { document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp); }
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+        }
+
+        // ============================================================
+        //  9. WIKI LINK HELPERS
+        // ============================================================
+        function buildWikiUrl(item) {
+            if (item.wikiLink) return item.wikiLink;
+            const slug = item.name.replace(/ /g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
+            return `https://escapefromtarkov.fandom.com/wiki/${encodeURIComponent(slug)}`;
+        }
+
+        function wikiIconHtml(item, small = true) {
+            const url = buildWikiUrl(item);
+            const size = small ? 'text-sm' : 'text-base';
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="wiki-btn ${size}" title="Open Tarkov Wiki" onclick="event.stopPropagation();">📖</a>`;
+        }
+
+        // ============================================================
+        //  10. DETAIL PANEL UPDATE
+        // ============================================================
+        function updateDetailPanel(item) {
+            const empty = document.getElementById('detail-empty');
+            const active = document.getElementById('detail-active');
+
+            if (!item) {
+                empty.classList.remove('hidden');
+                active.classList.add('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            active.classList.remove('hidden');
+
+            document.getElementById('detail-name').textContent = item.name;
+            document.getElementById('detail-category').textContent = item.category;
+            document.getElementById('detail-base-price').textContent = item.basePrice > 0 ? item.basePrice.toLocaleString() +
+                ' ₽' : '—';
+            document.getElementById('detail-avg-price').textContent = item.avg24hPrice > 0 ? item.avg24hPrice.toLocaleString() +
+                ' ₽' : '—';
+            document.getElementById('detail-weight').textContent = item.weight ? item.weight + ' kg' : '—';
+
+            const iconImg = document.getElementById('detail-icon');
+            iconImg.src = item.iconLink || 'https://via.placeholder.com/64?text=No+Icon';
+
+            const extra = document.getElementById('detail-extra-metrics');
+            let html = '';
+            if (item.caliber) html +=
+                `<div class="flex justify-between"><span class="text-zinc-400">Caliber</span><span class="font-semibold">${item.caliber}</span></div>`;
+            if (item.fireRate) html +=
+                `<div class="flex justify-between"><span class="text-zinc-400">Fire Rate</span><span class="font-semibold">${item.fireRate} RPM</span></div>`;
+            if (item.ergonomics !== null) html +=
+                `<div class="flex justify-between"><span class="text-zinc-400">Ergonomics</span><span class="font-semibold">${item.ergonomics}</span></div>`;
+            if (item.recoilVertical !== null) html +=
+                `<div class="flex justify-between"><span class="text-zinc-400">Vertical Recoil</span><span class="font-semibold">${item.recoilVertical}</span></div>`;
+            if (item.class !== null) html +=
+                `<div class="flex justify-between"><span class="text-zinc-400">Armor Class</span><span class="font-semibold text-emerald-600 dark:text-emerald-400">${item.class}</span></div>`;
+            if (item.durability !== null) html +=
+                `<div class="flex justify-between"><span class="text-zinc-400">Durability</span><span class="font-semibold">${item.durability}</span></div>`;
+            extra.innerHTML = html || '<div class="text-[10px] text-zinc-400 italic">No extra attributes</div>';
+
+            const wikiLink = document.getElementById('detail-wiki-link');
+            wikiLink.href = buildWikiUrl(item);
+        }
+
+        // ============================================================
+        //  11. RENDER GRID (with category filter)
+        // ============================================================
+        function filterAndRender() {
+            const grid = document.getElementById('spreadsheet-grid-body');
+            grid.innerHTML = '';
+
+            let rows = [...itemsIndex];
+
+            // Apply category filter: if selectedCategories is empty, show all; else filter by selected
+            if (selectedCategories.size > 0) {
+                rows = rows.filter(i => selectedCategories.has(i.category));
+            }
+
+            const q = document.getElementById('grid-search-input').value.toLowerCase().trim();
+            if (q) {
+                rows = rows.filter(r =>
+                    r.name.toLowerCase().includes(q) ||
+                    r.shortName.toLowerCase().includes(q) ||
+                    r.category.toLowerCase().includes(q)
+                );
+            }
+
+            if (rows.length === 0) {
+                grid.innerHTML =
+                    `<div class="flex items-center justify-center py-20 text-zinc-400 bg-white dark:bg-[#151515] h-full"><span>No records found.</span></div>`;
+                return;
+            }
+
+            const frag = document.createDocumentFragment();
+
+            rows.forEach((row, idx) => {
+                const num = idx + 1;
+                const div = document.createElement('div');
+                const sel = row.id === selectedItemId;
+                const h = rowHeights[num] ? `${rowHeights[num]}px` : '32px';
+                div.style.height = h;
+                div.className =
+                    `flex items-center h-8 relative select-all transition-colors duration-100 border-b border-[#cbd5e1] dark:border-[#27272a] hover:bg-zinc-100/50 dark:hover:bg-zinc-800/30 ${sel ? 'row-selected' : ''}`;
+
+                const rowLabel = document.createElement('div');
+                rowLabel.className =
+                    'row-indicator-header w-10 flex-shrink-0 text-center border-r border-[#cbd5e1] dark:border-[#27272a] bg-[#f3f2f1] dark:bg-[#1e1e21] text-zinc-400 font-bold select-none h-full relative flex items-center justify-center';
+                rowLabel.innerHTML =
+                    `<span>${num}</span><div class="row-resize-handle" title="Drag to resize row"></div>`;
+                div.appendChild(rowLabel);
+
+                const cells = document.createElement('div');
+                cells.className = 'excel-grid grid flex-grow h-full items-center text-left';
+
+                // Column A: Name + Wiki link
+                const cellA = document.createElement('div');
+                cellA.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a] gap-1';
+                cellA.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'truncate flex-grow';
+                nameSpan.textContent = row.name;
+                cellA.appendChild(nameSpan);
+                const wikiA = document.createElement('span');
+                wikiA.innerHTML = wikiIconHtml(row, true);
+                cellA.appendChild(wikiA);
+                cells.appendChild(cellA);
+
+                // Column B: Short Name
+                const cellB = document.createElement('div');
+                cellB.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellB.textContent = row.shortName;
+                cellB.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellB);
+
+                // Column C: Category
+                const cellC = document.createElement('div');
+                cellC.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellC.textContent = row.category;
+                cellC.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellC);
+
+                // Column D: Base Price
+                const cellD = document.createElement('div');
+                cellD.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellD.textContent = row.basePrice > 0 ? row.basePrice.toLocaleString() + ' ₽' : '-';
+                cellD.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellD);
+
+                // Column E: Avg 24h
+                const cellE = document.createElement('div');
+                cellE.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellE.textContent = row.avg24hPrice > 0 ? row.avg24hPrice.toLocaleString() + ' ₽' : '-';
+                cellE.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellE);
+
+                // Column F: Weight
+                const cellF = document.createElement('div');
+                cellF.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellF.textContent = row.weight ? row.weight + ' kg' : '-';
+                cellF.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellF);
+
+                // Column G: Caliber
+                const cellG = document.createElement('div');
+                cellG.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellG.textContent = row.caliber || '-';
+                cellG.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellG);
+
+                // Column H: Ergonomics
+                const cellH = document.createElement('div');
+                cellH.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellH.textContent = row.ergonomics !== null ? row.ergonomics : '-';
+                cellH.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellH);
+
+                // Column I: Recoil
+                const cellI = document.createElement('div');
+                cellI.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellI.textContent = row.recoilVertical !== null ? row.recoilVertical : '-';
+                cellI.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellI);
+
+                // Column J: Class
+                const cellJ = document.createElement('div');
+                cellJ.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellJ.textContent = row.class !== null ? row.class : '-';
+                cellJ.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellJ);
+
+                // Column K: Durability
+                const cellK = document.createElement('div');
+                cellK.className =
+                    'excel-cell h-full flex items-center px-2 truncate cursor-pointer border-[#cbd5e1] dark:border-[#27272a]';
+                cellK.textContent = row.durability !== null ? row.durability : '-';
+                cellK.onclick = () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                };
+                cells.appendChild(cellK);
+
+                div.appendChild(cells);
+
+                const handle = div.querySelector('.row-resize-handle');
+                if (handle) {
+                    handle.addEventListener('mousedown', (e) => initRowDragResize(e, num, div));
+                    handle.addEventListener('dblclick', (e) => {
+                        e.preventDefault();
+                        rowHeights[num] = 32;
+                        div.style.height = '32px';
+                    });
+                }
+
+                div.addEventListener('dblclick', () => {
+                    selectedItemId = row.id;
+                    updateDetailPanel(row);
+                    filterAndRender();
+                });
+
+                div.addEventListener('mouseenter', (e) => startTooltip(e, row));
+                div.addEventListener('mousemove', posTooltip);
+                div.addEventListener('mouseleave', hideTooltip);
+
+                frag.appendChild(div);
+            });
+
+            grid.appendChild(frag);
+            document.getElementById('excel-formula-input').value = `=ROWS(${rows.length})`;
+        }
+
+        // ============================================================
+        //  12. TOOLTIP WITH 3s DELAY
+        // ============================================================
+        const tooltip = document.getElementById('hover-tooltip');
+
+        function startTooltip(e, item) {
+            posTooltip(e);
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = null;
+            }
+            hoveredItem = item;
+
+            tooltip.classList.remove('opacity-0');
+            tooltip.classList.add('opacity-100');
+            tooltip.innerHTML = `
+                <div class="flex flex-col items-center py-2">
+                    <div class="loader"></div>
+                    <span class="text-[10px] text-zinc-400 mt-1">Loading item…</span>
+                </div>
+            `;
+
+            hoverTimeout = setTimeout(() => {
+                if (hoveredItem === item) {
+                    const icon = item.iconLink || 'https://via.placeholder.com/48x48?text=No+Icon';
+                    tooltip.innerHTML = `
+                        <div class="flex items-center gap-2 pb-2 border-b border-lightBorder dark:border-darkBorder">
+                            <img src="${icon}" class="w-8 h-8 object-contain rounded" onerror="this.src='https://via.placeholder.com/48x48?text=No+Icon'">
+                            <div class="truncate"><h4 class="font-bold text-zinc-900 dark:text-zinc-100 truncate text-xs">${item.shortName}</h4><span class="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">${item.category}</span></div>
+                        </div>
+                        <div class="pt-1.5 space-y-1 text-[10px] text-zinc-500 dark:text-zinc-400">
+                            <div class="flex justify-between"><span>Base</span><span class="font-semibold text-zinc-700 dark:text-zinc-200">${item.basePrice > 0 ? item.basePrice.toLocaleString() + ' ₽' : '-'}</span></div>
+                            <div class="flex justify-between"><span>Weight</span><span class="font-semibold text-zinc-700 dark:text-zinc-200">${item.weight} kg</span></div>
+                            ${item.caliber ? `<div class="flex justify-between"><span>Caliber</span><span class="font-semibold text-emerald-600">${item.caliber}</span></div>` : ''}
+                            ${item.class ? `<div class="flex justify-between"><span>Armor</span><span class="font-semibold text-emerald-600">Class ${item.class}</span></div>` : ''}
+                        </div>
+                    `;
+                }
+                hoverTimeout = null;
+            }, 3000);
+        }
+
+        function posTooltip(e) {
+            const w = 224;
+            let l = e.pageX + 15,
+                t = e.pageY + 15;
+            if (l + w > window.innerWidth) l = e.pageX - w - 15;
+            tooltip.style.left = `${l}px`;
+            tooltip.style.top = `${t}px`;
+        }
+
+        function hideTooltip() {
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = null;
+            }
+            hoveredItem = null;
+            tooltip.classList.remove('opacity-100');
+            tooltip.classList.add('opacity-0');
+        }
+
+        // ============================================================
+        //  13. STATS
+        // ============================================================
+        function calcStats() {
+            const count = itemsIndex.length;
+            const totalP = itemsIndex.reduce((s, i) => s + (i.basePrice || 0), 0);
+            const totalW = itemsIndex.reduce((s, i) => s + (i.weight || 0), 0);
+            document.getElementById('stat-total').textContent = count;
+            document.getElementById('stat-avg-price').textContent = count > 0 ? `${Math.round(totalP / count).toLocaleString()} ₽` :
+                '0 ₽';
+            document.getElementById('stat-avg-weight').textContent = count > 0 ? `${(totalW / count).toFixed(2)} kg` : '0 kg';
+        }
+
+        // ============================================================
+        //  14. SEARCH (DEBOUNCED)
+        // ============================================================
+        const searchInput = document.getElementById('grid-search-input');
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => filterAndRender(), 100);
+        });
+
+        // ============================================================
+        //  15. CLEAR FILTERS
+        // ============================================================
+        document.getElementById('toolbar-clear-filters').addEventListener('click', () => {
+            searchInput.value = '';
+            filterAndRender();
+        });
+
+        // ============================================================
+        //  16. TOGGLE ICONS (placeholder)
+        // ============================================================
+        document.getElementById('toolbar-toggle-icons').addEventListener('click', function() {
+            showIcons = !showIcons;
+            document.getElementById('icon-toggle-emoji').textContent = showIcons ? '🖼️' : '🚫';
+            document.getElementById('icon-toggle-label').textContent = showIcons ? 'Hide Icons' : 'Show Icons';
+        });
+
+        // ============================================================
+        //  17. MENUS
+        // ============================================================
+        const fileMenuBtn = document.getElementById('menu-btn-file');
+        const fileDropdown = document.getElementById('dropdown-menu-file');
+        const viewMenuBtn = document.getElementById('menu-btn-view');
+        const viewDropdown = document.getElementById('dropdown-menu-view');
+
+        function closeAllMenus() { fileDropdown.classList.add('hidden');
+            viewDropdown.classList.add('hidden'); }
+        fileMenuBtn.addEventListener('click', (e) => { e.stopPropagation();
+            closeAllMenus();
+            fileDropdown.classList.toggle('hidden'); });
+        viewMenuBtn.addEventListener('click', (e) => { e.stopPropagation();
+            closeAllMenus();
+            viewDropdown.classList.toggle('hidden'); });
+        document.addEventListener('click', closeAllMenus);
+
+        // ============================================================
+        //  18. EXPORT
+        // ============================================================
+        const exportModal = document.getElementById('export-modal');
+        document.getElementById('menu-opt-export').addEventListener('click', () => { exportModal.classList.remove('hidden');
+            closeAllMenus(); });
+        document.getElementById('export-modal-cancel').addEventListener('click', () => { exportModal.classList.add('hidden'); });
+        document.getElementById('export-modal-confirm').addEventListener('click', () => {
+            const scope = document.getElementById('export-scope').value;
+            const format = document.getElementById('export-format').value;
+            let src = [...itemsIndex];
+            if (scope === 'current') {
+                // Apply current category filter
+                if (selectedCategories.size > 0) {
+                    src = src.filter(i => selectedCategories.has(i.category));
+                }
+                // Also apply search if any
+                const q = document.getElementById('grid-search-input').value.toLowerCase().trim();
+                if (q) {
+                    src = src.filter(r =>
+                        r.name.toLowerCase().includes(q) ||
+                        r.shortName.toLowerCase().includes(q) ||
+                        r.category.toLowerCase().includes(q)
+                    );
+                }
+            }
+
+            let content = '',
+                ext = '.csv';
+            if (format === 'csv') {
+                content += 'Name,Short Name,Category,Base Price,Avg 24h,Weight,Caliber,Ergonomics,Recoil,Class,Durability,Wiki\n';
+                src.forEach(r => {
+                    content +=
+                        `"${r.name.replace(/"/g,'""')}","${r.shortName.replace(/"/g,'""')}","${r.category}",${r.basePrice},${r.avg24hPrice},${r.weight},"${r.caliber||''}",${r.ergonomics!==null?r.ergonomics:''},${r.recoilVertical!==null?r.recoilVertical:''},${r.class!==null?r.class:''},${r.durability!==null?r.durability:''},"${buildWikiUrl(r)}"\n`;
+                });
+                ext = '.csv';
+            } else if (format === 'txt') {
+                content +=
+                    'Name\tShort Name\tCategory\tBase Price\tAvg 24h\tWeight\tCaliber\tErgonomics\tRecoil\tClass\tDurability\tWiki\n';
+                src.forEach(r => {
+                    content +=
+                        `${r.name}\t${r.shortName}\t${r.category}\t${r.basePrice}\t${r.avg24hPrice}\t${r.weight}\t${r.caliber||''}\t${r.ergonomics!==null?r.ergonomics:''}\t${r.recoilVertical!==null?r.recoilVertical:''}\t${r.class!==null?r.class:''}\t${r.durability!==null?r.durability:''}\t${buildWikiUrl(r)}\n`;
+                });
+                ext = '.txt';
+            } else if (format === 'markdown') {
+                content +=
+                    '| Name | Short Name | Category | Base Price | Avg 24h | Weight | Caliber | Ergo | Recoil | Class | Durability | Wiki |\n';
+                content +=
+                    '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n';
+                src.forEach(r => {
+                    content +=
+                        `| ${r.name} | ${r.shortName} | ${r.category} | ${r.basePrice>0?r.basePrice.toLocaleString()+' ₽':'-'} | ${r.avg24hPrice>0?r.avg24hPrice.toLocaleString()+' ₽':'-'} | ${r.weight} kg | ${r.caliber||'-'} | ${r.ergonomics!==null?r.ergonomics:'-'} | ${r.recoilVertical!==null?r.recoilVertical:'-'} | ${r.class!==null?r.class:'-'} | ${r.durability!==null?r.durability:'-'} | [Wiki](${buildWikiUrl(r)}) |\n`;
+                });
+                ext = '.md';
+            }
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `fraagle_export_${activeSheetTab || 'all'}${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            exportModal.classList.add('hidden');
+        });
+
+        // ============================================================
+        //  19. KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { exportModal.classList.add('hidden');
+                hideTooltip();
+                closeAllMenus(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault();
+                searchInput.focus(); }
+        });
+
+        // ============================================================
+        //  20. PANE DIVIDERS RESIZE
+        // ============================================================
+        function setupDivider(dividerId, targetPanelId, minWidth, maxWidth, reverse = false) {
+            const divider = document.getElementById(dividerId);
+            const panel = document.getElementById(targetPanelId);
+            if (!divider || !panel) return;
+
+            divider.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                const startX = e.pageX;
+                const startWidth = panel.offsetWidth;
+
+                function onMove(me) {
+                    let delta = me.pageX - startX;
+                    if (reverse) delta = -delta;
+                    const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + delta));
+                    panel.style.width = newWidth + 'px';
+                }
+
+                function onUp() {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                }
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        }
+
+        setupDivider('explorer-divider', 'explorer-panel', 140, 280, true);
+        setupDivider('detail-divider', 'detail-panel', 200, 500, false);
+
+        // ============================================================
+        //  21. BOOT
+        // ============================================================
+        loadTarkovData();
+    </script>
+</body>
+</html>

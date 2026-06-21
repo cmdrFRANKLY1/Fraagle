@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fraagle Apps - Tarkov Loadout Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <script>
+        // Immediately inject correct theme class before body renders to avoid flashing
+        (function() {
+            const userTheme = localStorage.getItem('theme') || 'dark';
+            if (userTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
+        // Tailwind configuration for advanced modern styling in both modes
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#09090b', // Deep zinc dark background
+                        darkCard: '#18181b', // Dark card
+                        darkBorder: '#27272a', // Subtle dark borders
+                        lightBg: '#f8f9fa', // Pristine soft off-white background
+                        lightCard: '#ffffff', // Clean white card
+                        lightBorder: '#e2e8f0', // Crisp slate border
+                        fraagleBlue: '#3b82f6',
+                        fraagleRed: '#ef4444',
+                        fraagleYellow: '#f59e0b',
+                        fraagleGreen: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        h1, .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        /* Custom smooth scrollbar for premium look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.25);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.45);
+        }
+    </style>
+</head>
+<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden p-6 select-none">
+
+    <!-- Decorative Ambient Soft Glow Gradients -->
+    <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+    <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+
+    <!-- Main App Container -->
+    <div class="max-w-7xl w-full mx-auto flex flex-col gap-6 relative z-10">
+
+        <!-- Top Navigation Header Row -->
+        <header class="flex items-center justify-between p-4 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md relative select-none z-20">
+            <!-- Left Side: Back Arrow and Brand Label -->
+            <div class="flex items-center space-x-3">
+                <a href="../index.html" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard transition-all duration-200 text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer shadow-sm" title="Back to Index">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="header-title text-sm sm:text-base font-bold tracking-tight bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent select-none uppercase">Loadout Generator</h1>
+                    <p class="text-[9px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Live Flea Caches</p>
+                </div>
+            </div>
+
+            <!-- Center: Live Clock & Date (Absolute Centered) -->
+            <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex flex-col items-center justify-center text-center select-none z-0">
+                <span id="clock-time" class="text-xs sm:text-sm font-bold tracking-wider text-zinc-700 dark:text-zinc-200">00:00:00</span>
+                <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-0.5 whitespace-nowrap">Sunday, June 21, 2026</span>
+            </div>
+
+            <!-- Right Side: Status Indicator & Interface Toggles -->
+            <div class="flex items-center space-x-2 sm:space-x-3 relative z-10">
+                <!-- Status Badge -->
+                <div class="hidden lg:flex items-center space-x-2 text-[9px] font-bold tracking-wider uppercase border border-lightBorder dark:border-darkBorder px-3 py-1.5 rounded-full bg-white/30 dark:bg-darkCard/30 text-zinc-500 dark:text-zinc-400">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-zinc-400" id="statusDot"></span>
+                    <span id="statusText">INITIALIZING...</span>
+                </div>
+
+                <!-- Gradient Glow Toggle Button -->
+                <button id="gradient-toggle" class="p-2 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Glow Gradients">
+                    <svg class="w-4.5 h-4.5 text-zinc-600 dark:text-zinc-300 pointer-events-none transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
+                    </svg>
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="p-2 rounded-lg border border-white/30 bg-white/10 dark:bg-white/5 hover:bg-white/20 transition-all focus:outline-none flex items-center justify-center cursor-pointer shadow-sm" aria-label="Toggle Theme">
+                    <!-- Sun Icon -->
+                    <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-300 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <!-- Moon Icon -->
+                    <svg id="theme-toggle-moon-icon" class="hidden w-4.5 h-4.5 text-zinc-100 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+
+                <!-- Profile Avatar Button with Fallback Protection -->
+                <div class="w-9 h-9 rounded-xl overflow-hidden border border-lightBorder dark:border-darkBorder shadow-sm hover:shadow-lg hover:border-indigo-500/30 dark:hover:border-indigo-400/30 transition-all duration-200 cursor-pointer select-none">
+                    <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Value Indicators Card Row -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- PvP cost bar Card -->
+            <div class="flex items-center justify-between p-5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md">
+                <div>
+                    <span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Total PvP Value</span>
+                    <h2 class="text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 mt-1 select-all transition-all duration-300" id="pvpTotal">₽0</h2>
+                </div>
+                <span class="text-[9px] font-bold text-zinc-600 dark:text-zinc-300 border border-lightBorder dark:border-darkBorder bg-white dark:bg-darkCard px-3 py-1 rounded-full uppercase tracking-wider select-none shadow-sm">PvP Market</span>
+            </div>
+
+            <!-- PvE cost bar Card -->
+            <div class="flex items-center justify-between p-5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md">
+                <div>
+                    <span class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Total PvE Value</span>
+                    <h2 class="text-3xl font-extrabold tracking-tight text-zinc-800 dark:text-zinc-100 mt-1 select-all transition-all duration-300" id="pveTotal">₽0</h2>
+                </div>
+                <span class="text-[9px] font-bold text-zinc-600 dark:text-zinc-300 border border-lightBorder dark:border-darkBorder bg-white dark:bg-darkCard px-3 py-1 rounded-full uppercase tracking-wider select-none shadow-sm">PvE Market</span>
+            </div>
+        </section>
+
+        <!-- Reels Slot Spinners container -->
+        <section class="hidden grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300" id="reelsContainer">
+            <!-- Populated dynamically -->
+        </section>
+
+        <!-- Action Buttons Area -->
+        <section class="flex flex-col sm:flex-row gap-4 items-stretch justify-center select-none">
+            <button class="flex-grow sm:flex-grow-[2] py-4 px-8 font-bold text-xs uppercase tracking-widest bg-[#107c41] hover:bg-emerald-600 active:scale-[0.98] transition-all text-white rounded-xl shadow-lg cursor-pointer flex items-center justify-center space-x-2" id="spinBtn" disabled>
+                <span class="btn-text">[ RANDOMIZE ]</span>
+                <span class="spinner" id="spinSpinner"></span>
+            </button>
+            <button class="flex-grow py-4 px-6 font-semibold text-xs uppercase tracking-wider border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard text-zinc-700 dark:text-zinc-200 rounded-xl transition cursor-pointer flex items-center justify-center space-x-2" id="saveBtn" disabled>
+                <span class="btn-text">SAVE REPORT</span>
+                <span class="spinner"></span>
+            </button>
+            <button class="flex-grow py-4 px-6 font-semibold text-xs uppercase tracking-wider border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard text-zinc-700 dark:text-zinc-200 rounded-xl transition cursor-pointer flex items-center justify-center space-x-2" id="clearBtn" disabled>
+                <span class="btn-text">CLEAR</span>
+                <span class="spinner"></span>
+            </button>
+        </section>
+
+        <!-- Details Breakdown Panel -->
+        <section class="hidden p-6 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md transition-all duration-300" id="detailsPanel">
+            <div class="text-sm font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest border-b border-lightBorder dark:border-darkBorder pb-3.5 mb-5 flex items-center space-x-2">
+                <span>▸ Selected Loadout Breakdown</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="loadoutGrid">
+                <!-- Detailed item rows populate here -->
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Floating Mouse-Over Tooltip Preview Card -->
+    <div id="hover-tooltip" class="absolute pointer-events-none z-50 bg-white/95 dark:bg-darkCard/95 border border-[#cbd5e1] dark:border-darkBorder rounded-xl p-3.5 shadow-2xl max-w-xs transition-opacity duration-200 opacity-0 text-xs flex flex-col space-y-1.5 backdrop-blur-md">
+        <!-- Filled dynamically during hover operations -->
+    </div>
+
+    <script>
+        // ================================================================
+        //  TARKOV LOADOUT ENGINE (Synchronized Aesthetics V3)
+        // ================================================================
+        const App = {
+            PROXY_URL: '/api/tarkov-data',
+            FALLBACK_API_URL: 'https://api.tarkov.dev/graphql',
+
+            ALL_CATEGORIES: [
+                'PrimaryWeapon', 'SecondaryWeapon', 'Pistol',
+                'Helmet', 'Armor', 'Vest', 'Backpack',
+                'Headphone', 'Face Cover', 'Eyewear'
+            ],
+
+            CAT_LABELS: {
+                'PrimaryWeapon': 'Primary',
+                'SecondaryWeapon': 'Secondary',
+                'Pistol': 'Sidearm',
+                'Helmet': 'Headwear',
+                'Armor': 'Body Armor',
+                'Vest': 'Tactical Rig',
+                'Backpack': 'Backpack',
+                'Headphone': 'Headset',
+                'Face Cover': 'Face Cover',
+                'Eyewear': 'Eyewear'
+            },
+
+            REEL_CATS: [
+                'PrimaryWeapon', 'SecondaryWeapon', 'Pistol',
+                'Helmet', 'Armor', 'Vest', 'Backpack',
+                'Headphone', 'Face Cover', 'Eyewear'
+            ],
+
+            allItems: [],
+            byCategory: {},
+            currentLoadout: {},
+            isSpinning: false,
+            stoppedCount: 0,
+            totalCats: 0,
+            enabledCategories: {},  
+
+            // ---- Fetch items (Tries proxy first, falls back directly to API) ----
+            fetchAll: async function() {
+                try {
+                    this.setStatus('READING CACHED DATA...', 'loading');
+                    const r = await fetch(this.PROXY_URL);
+                    if (!r.ok) {
+                        throw new Error(`Proxy returned status: ${r.status}`);
+                    }
+                    const j = await r.json();
+                    return this.parseResponse(j);
+                } catch (proxyError) {
+                    console.warn("API Cache layer offline, falling back directly to Tarkov GraphQL API:", proxyError);
+                    this.setStatus('GETTING ONLINE DATA...', 'loading');
+
+                    const q = `
+                    query {
+                        pvp: items(lang: en, gameMode: regular) {
+                            id name shortName wikiLink iconLink basePrice weight avg24hPrice types
+                            category { name }
+                            properties { __typename
+                                ... on ItemPropertiesWeapon { caliber fireRate ergonomics recoilVertical }
+                                ... on ItemPropertiesArmor { class durability }
+                            }
+                        }
+                        pve: items(lang: en, gameMode: pve) { id avg24hPrice }
+                    }`;
+
+                    const r = await fetch(this.FALLBACK_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: q })
+                    });
+                    
+                    const j = await r.json();
+                    if (j.errors) throw new Error(j.errors[0].message);
+                    return this.parseResponse(j);
+                }
+            },
+
+            parseResponse: function(jsonPayload) {
+                const pvp = jsonPayload.data.pvp || [];
+                const pve = jsonPayload.data.pve || [];
+                const pveMap = {};
+                for (const it of pve) pveMap[it.id] = it.avg24hPrice;
+                for (const it of pvp) it.pvePrice = pveMap[it.id] || null;
+                return pvp;
+            },
+
+            isFunctional: function(item) {
+                const types = (item.types || []).map(t => t.toLowerCase());
+                const name = (item.name || '').toLowerCase();
+                const cat = (item.category?.name || '').toLowerCase();
+
+                const badTypes = ['modification', 'ammo', 'magazine', 'component', 'functionalmod'];
+                if (types.some(t => badTypes.includes(t))) return false;
+
+                const badKeywords = [
+                    'receiver', 'charging handle', 'grip', 'stock', 'barrel', 'slide', 'magazine',
+                    'mount', 'sight', 'scope', 'compensator', 'silencer', 'suppressor', 'thread',
+                    'adapter', 'gas block', 'handguard', 'foregrip', 'chassis', 'buttpad',
+                    'handle', 'buffer tube', 'muzzle brake', 'barrel', 'gas tube', 'rail', 'keymod', 'mlok'
+                ];
+                if (badKeywords.some(k => name.includes(k) || cat.includes(k))) return false;
+
+                return true;
+            },
+
+            categorize: function(items) {
+                const fleaItems = items.filter(i => (i.avg24hPrice > 0 || i.pvePrice > 0));
+
+                const map = {};
+                for (const c of this.ALL_CATEGORIES) map[c] = [];
+
+                fleaItems.forEach(item => {
+                    const catName = (item.category?.name || '').toLowerCase();
+                    const nameLow = (item.name || '').toLowerCase();
+                    const types = (item.types || []).map(t => t.toLowerCase());
+
+                    if (catName.includes('pistol') || catName.includes('handgun') || types.includes('pistol') || types.includes('handgun')) {
+                        if (this.isFunctional(item)) {
+                            map['Pistol'].push(item);
+                        }
+                        return;
+                    }
+
+                    if (catName.includes('rifle') || catName.includes('smg') || catName.includes('shotgun') || 
+                        catName.includes('carbine') || catName.includes('machinegun') || catName.includes('marksman') || 
+                        types.includes('weapon')) {
+                        if (this.isFunctional(item)) {
+                            map['PrimaryWeapon'].push(item);
+                            map['SecondaryWeapon'].push(item);
+                        }
+                        return;
+                    }
+
+                    if (catName.includes('headphone') || catName.includes('headset') || types.includes('headphones') || types.includes('headset')) {
+                        map['Headphone'].push(item);
+                        return;
+                    }
+
+                    if (catName.includes('headwear') || catName.includes('helmet') || types.includes('helmet')) {
+                        if (!types.includes('modification') && !nameLow.includes('mount') && !nameLow.includes('shield') && !nameLow.includes('visor') && !nameLow.includes('plate') && !nameLow.includes('strap')) {
+                            map['Helmet'].push(item);
+                        }
+                        return;
+                    }
+
+                    if (catName.includes('face cover') || catName.includes('mask') || types.includes('facecover')) {
+                        map['Face Cover'].push(item);
+                        return;
+                    }
+
+                    if (catName.includes('armor') || types.includes('armor')) {
+                        if (!catName.includes('headwear') && !catName.includes('helmet') && !types.includes('helmet') && 
+                            !catName.includes('rig') && !types.includes('rig') && !types.includes('chestRig') &&
+                            !types.includes('modification') && !nameLow.includes('plate') && !nameLow.includes('insert')) {
+                            map['Armor'].push(item);
+                        }
+                        return;
+                    }
+
+                    if (catName.includes('rig') || catName.includes('vest') || types.includes('rig') || types.includes('chestrig')) {
+                        if (!types.includes('modification') && !nameLow.includes('plate') && !nameLow.includes('insert')) {
+                            map['Vest'].push(item);
+                        }
+                        return;
+                    }
+
+                    if (catName.includes('backpack') || types.includes('backpack')) {
+                        map['Backpack'].push(item);
+                        return;
+                    }
+
+                    if (catName.includes('glasses') || catName.includes('eyewear') || catName.includes('goggles') || types.includes('glasses') || types.includes('eyewear')) {
+                        map['Eyewear'].push(item);
+                        return;
+                    }
+                });
+
+                for (const k in map) {
+                    map[k].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                }
+                return map;
+            },
+
+            pick: function(arr) {
+                if (!arr || !arr.length) return null;
+                return arr[Math.floor(Math.random() * arr.length)];
+            },
+
+            getIconHtml: function(item) {
+                if (item?.iconLink) {
+                    return `<img src="${item.iconLink}" alt="" class="w-full h-full object-contain filter dark:brightness-110" loading="lazy" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=80'" />`;
+                } else {
+                    return `<span class="placeholder text-zinc-400 dark:text-zinc-600">∅</span>`;
+                }
+            },
+
+            getStats: function(item) {
+                const lines = [];
+                if (item.avg24hPrice) lines.push({ label: 'PvP', value: '₽' + item.avg24hPrice.toLocaleString() });
+                if (item.pvePrice) lines.push({ label: 'PvE', value: '₽' + item.pvePrice.toLocaleString() });
+                if (item.weight) lines.push({ label: 'Weight', value: item.weight + 'kg' });
+                
+                const p = item?.properties;
+                if (p) {
+                    if (p.caliber) {
+                        const cal = p.caliber.replace('Caliber', '').trim();
+                        lines.push({
+                            label: 'Cal',
+                            value: cal,
+                            link: `https://escapefromtarkov.fandom.com/wiki/Special:Search?search=${encodeURIComponent(cal)}`
+                        });
+                    }
+                    if (p.fireRate) lines.push({ label: 'RPM', value: p.fireRate });
+                    if (p.ergonomics) lines.push({ label: 'Ergo', value: p.ergonomics });
+                    if (p.recoilVertical) lines.push({ label: 'V.Rec', value: p.recoilVertical });
+                    if (p.class) lines.push({ label: 'Class', value: p.class });
+                    if (p.durability) lines.push({ label: 'Dur', value: p.durability });
+                }
+                return lines;
+            },
+
+            calcTotals: function(loadout) {
+                let pvp = 0, pve = 0;
+                for (const c of this.ALL_CATEGORIES) {
+                    const it = loadout[c];
+                    if (!it) continue;
+                    pvp += it.avg24hPrice || 0;
+                    pve += it.pvePrice || 0;
+                }
+                return { pvp, pve };
+            },
+
+            animateTotal: function(targetPvp, targetPve, duration = 400) {
+                const pvpEl = document.getElementById('pvpTotal');
+                const pveEl = document.getElementById('pveTotal');
+                
+                const startPvp = parseInt(pvpEl.textContent.replace(/\D/g, '')) || 0;
+                const startPve = parseInt(pveEl.textContent.replace(/\D/g, '')) || 0;
+                const startTime = performance.now();
+
+                const update = (now) => {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const currentPvp = Math.round(startPvp + (targetPvp - startPvp) * eased);
+                    const currentPve = Math.round(startPve + (targetPve - startPve) * eased);
+                    
+                    pvpEl.textContent = '₽' + currentPvp.toLocaleString();
+                    pveEl.textContent = '₽' + currentPve.toLocaleString();
+                    
+                    if (progress < 1) requestAnimationFrame(update);
+                };
+                requestAnimationFrame(update);
+            },
+
+            // High-quality, safe category "template" icons used strictly when cleared/initial
+            getPlaceholderIconHtml: function(cat) {
+                const icons = {
+                    'PrimaryWeapon': 'fa-gun text-blue-500/60 dark:text-blue-400/40',
+                    'SecondaryWeapon': 'fa-gun text-teal-500/60 dark:text-teal-400/40',
+                    'Pistol': 'fa-gun text-indigo-500/60 dark:text-indigo-400/40',
+                    'Helmet': 'fa-shield-halved text-amber-500/60 dark:text-amber-400/40',
+                    'Armor': 'fa-vest text-rose-500/60 dark:text-rose-400/40',
+                    'Vest': 'fa-shirt text-purple-500/60 dark:text-purple-400/40',
+                    'Backpack': 'fa-bag-shopping text-emerald-500/60 dark:text-emerald-400/40',
+                    'Headphone': 'fa-headphones text-cyan-500/60 dark:text-cyan-400/40',
+                    'Face Cover': 'fa-mask text-pink-500/60 dark:text-pink-400/40',
+                    'Eyewear': 'fa-glasses text-sky-500/60 dark:text-sky-400/40'
+                };
+                const iconClass = icons[cat] || 'fa-box text-zinc-400 dark:text-zinc-600';
+                return `
+                    <div class="flex flex-col items-center justify-center p-3 rounded-xl border border-dashed border-lightBorder/60 dark:border-darkBorder/40 bg-zinc-50/50 dark:bg-zinc-900/10 w-20 h-20 shadow-inner">
+                        <i class="fa-solid ${iconClass} text-2xl"></i>
+                    </div>
+                `;
+            },
+
+            // --- DEFENSIVE COMPARATIVE REEL SELECTORS CREATION (Clean categories only, NO names inside slots) ---
+            renderReels: function() {
+                const container = document.getElementById('reelsContainer');
+                container.innerHTML = '';
+                for (const cat of this.REEL_CATS) {
+                    const reel = document.createElement('div');
+                    reel.className = 'flex flex-col items-center justify-between p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/40 dark:bg-zinc-900/40 relative aspect-square transition-all duration-300 overflow-hidden h-44';
+                    reel.dataset.category = cat;
+
+                    const label = this.CAT_LABELS[cat] || cat;
+                    const checked = this.enabledCategories[cat];
+
+                    reel.innerHTML = `
+                        <!-- Toggle check selection badge -->
+                        <div class="reel-toggle absolute top-2.5 left-2.5 text-xs font-bold text-zinc-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer select-none transition-colors duration-150 ${checked ? 'text-indigo-500 dark:text-indigo-400' : ''}" data-category="${cat}">${checked ? '☑' : '☐'}</div>
+                        
+                        <!-- Category name header -->
+                        <div class="cat-label text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest border border-lightBorder dark:border-darkBorder px-2 py-0.5 rounded bg-white/50 dark:bg-darkCard/50 w-full text-center truncate z-10 select-none">${label}</div>
+                        
+                        <!-- Premium CS:GO Slide Viewport (Strictly NO item names visible inside) -->
+                        <div class="relative w-full h-28 overflow-hidden rounded-xl border border-lightBorder/40 dark:border-darkBorder/40 bg-white/20 dark:bg-zinc-950/20 flex items-center justify-center mt-1">
+                            <!-- Center Indicator Tick Mark (Sleek CSS CS:GO line) -->
+                            <div class="absolute inset-y-0 left-0 w-1 bg-indigo-500 dark:bg-indigo-400 z-10"></div>
+                            
+                            <!-- Sliding track -->
+                            <div class="reel-track absolute left-0 right-0 flex flex-col items-center" id="reelIcon-${cat}">
+                                <div class="w-full h-28 flex items-center justify-center flex-shrink-0 select-none">
+                                    <span class="placeholder text-zinc-400 dark:text-zinc-600">∅</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reel-index absolute top-2.5 right-2.5 text-[9px] font-bold text-zinc-300 dark:text-zinc-600 select-none">#${this.REEL_CATS.indexOf(cat)+1}</div>
+                    `;
+                    container.appendChild(reel);
+
+                    // Reel Hovering Highlights Bottom Detail Card
+                    reel.addEventListener('mouseenter', () => {
+                        const target = document.querySelector(`.loadout-item[data-category="${cat}"]`);
+                        if (target) {
+                            target.classList.add('bg-emerald-50/70', 'dark:bg-emerald-950/20', 'border-emerald-500/40', 'dark:border-emerald-500/50');
+                            target.classList.remove('bg-white/40', 'dark:bg-zinc-900/40');
+                        }
+                    });
+                    reel.addEventListener('mouseleave', () => {
+                        const target = document.querySelector(`.loadout-item[data-category="${cat}"]`);
+                        if (target) {
+                            target.classList.remove('bg-emerald-50/70', 'dark:bg-emerald-950/20', 'border-emerald-500/40', 'dark:border-emerald-500/50');
+                            target.classList.add('bg-white/40', 'dark:bg-zinc-900/40');
+                        }
+                    });
+                }
+
+                // Checkbox toggle logic
+                container.querySelectorAll('.reel-toggle').forEach(el => {
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation(); 
+                        const cat = el.dataset.category;
+                        if (!cat) return;
+                        this.enabledCategories[cat] = !this.enabledCategories[cat];
+                        const isChecked = this.enabledCategories[cat];
+                        
+                        el.textContent = isChecked ? '☑' : '☐';
+                        el.classList.toggle('text-indigo-500', isChecked);
+                        
+                        const reel = el.closest('[data-category]');
+                        if (reel) {
+                            if (!isChecked) {
+                                reel.classList.add('opacity-40');
+                            } else {
+                                reel.classList.remove('opacity-40');
+                            }
+                        }
+                        
+                        this.updateSpinButton();
+                    });
+                });
+                
+                container.classList.remove('hidden');
+                container.classList.add('grid');
+            },
+
+            // Lightweight track item node factory - only real icons while shuffling, template if cleared/null
+            createTrackItemNode: function(item, cat) {
+                const container = document.createElement('div');
+                container.className = 'w-full h-28 flex items-center justify-center flex-shrink-0 select-none';
+                
+                if (item) {
+                    container.innerHTML = this.getIconHtml(item);
+                } else {
+                    // Reintroduced category template icon on clear / initial state instead of "∅"
+                    container.innerHTML = this.getPlaceholderIconHtml(cat);
+                }
+                return container;
+            },
+
+            populateComparisonSelects: function() {
+                // Dummy/defensive matching helper keeping dependencies intact
+            },
+
+            updateReel: function(cat, item) {
+                const track = document.getElementById('reelIcon-' + cat);
+                if (track) {
+                    track.innerHTML = '';
+                    track.style.transition = 'none';
+                    track.style.transform = 'translateY(0px)';
+                    track.appendChild(this.createTrackItemNode(item, cat));
+                }
+            },
+
+            renderLoadout: function() {
+                const grid = document.getElementById('loadoutGrid');
+                const detailsPanel = document.getElementById('detailsPanel');
+                let html = '';
+                let hasItems = false;
+
+                for (const cat of this.ALL_CATEGORIES) {
+                    const item = this.currentLoadout[cat];
+                    if (!item) continue;
+                    
+                    hasItems = true;
+                    const label = this.CAT_LABELS[cat] || cat;
+                    const stats = this.getStats(item);
+                    const wikiLink = item.wikiLink || `https://escapefromtarkov.fandom.com/wiki/Special:Search?search=${encodeURIComponent(item.name)}`;
+
+                    const statsHtml = stats.map(s => {
+                        let valueDisplay = s.value;
+                        if (s.link) valueDisplay = `<a href="${s.link}" target="_blank" class="text-blue-500 dark:text-blue-400 hover:underline">${s.value}</a>`;
+                        return `<span class="flex items-center space-x-1"><span class="text-[9px] uppercase tracking-wider text-zinc-400 dark:text-zinc-500 font-semibold">${s.label}:</span> <span class="font-bold text-zinc-700 dark:text-zinc-200">${valueDisplay}</span></span>`;
+                    }).join('');
+
+                    html += `
+                        <div class="loadout-item flex items-start gap-4 p-4 border border-lightBorder dark:border-darkBorder bg-white/40 dark:bg-zinc-900/40 rounded-2xl hover:border-indigo-500/30 dark:hover:border-indigo-400/30 hover:bg-white dark:hover:bg-darkCard transition-all duration-300 shadow-sm" data-category="${cat}">
+                            <div class="w-14 h-14 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 p-1 flex items-center justify-center border border-lightBorder dark:border-darkBorder flex-shrink-0">${this.getIconHtml(item)}</div>
+                            <div class="flex-grow min-w-0">
+                                <div class="flex items-baseline justify-between gap-3">
+                                    <a href="${wikiLink}" target="_blank" class="text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:underline truncate max-w-full" title="${item.name}">${item.name}</a>
+                                </div>
+                                <div class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mt-1">${label}</div>
+                                ${statsHtml ? `<div class="flex flex-wrap gap-x-3 gap-y-1 mt-2.5 text-[10px]">${statsHtml}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const showDetails = hasItems && !(this.isSpinning && this.stoppedCount === 0);
+
+                if (showDetails) {
+                    detailsPanel.style.display = 'block';
+                    grid.innerHTML = html;
+                    const totals = this.calcTotals(this.currentLoadout);
+                    this.animateTotal(totals.pvp, totals.pve);
+                    
+                    grid.querySelectorAll('.loadout-item').forEach(el => {
+                        const cat = el.dataset.category;
+
+                        el.addEventListener('mouseenter', () => {
+                            const reel = document.querySelector(`[data-category="${cat}"]`);
+                            if (reel) {
+                                reel.classList.add('border-indigo-500/60', 'bg-indigo-500/5');
+                            }
+                        });
+                        el.addEventListener('mouseleave', () => {
+                            const reel = document.querySelector(`[data-category="${cat}"]`);
+                            if (reel) {
+                                reel.classList.remove('border-indigo-500/60', 'bg-indigo-500/5');
+                            }
+                        });
+                    });
+                } else {
+                    detailsPanel.style.display = 'none';
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-12 text-zinc-400 dark:text-zinc-500 flex flex-col items-center">
+                            <span class="text-4xl mb-3">∅</span>
+                            <h4 class="text-xs font-bold uppercase tracking-wider mb-1">Waiting for Randomization</h4>
+                            <p class="text-[11px] max-w-[240px] leading-relaxed">Press [ RANDOMIZE ] or press the Spacebar to build a tactical flea-market loadout!</p>
+                        </div>
+                    `;
+                    if (!this.isSpinning) {
+                        document.getElementById('pvpTotal').textContent = '₽0';
+                        document.getElementById('pveTotal').textContent = '₽0';
+                    }
+                }
+
+                this.updateButtons();
+            },
+
+            // --- CS:GO CAROUSEL SPIN METHOD (Smooth hardware vertical animation with extreme suspense) ---
+            performSpin: function() {
+                if (this.isSpinning) return;
+                
+                const activeCats = this.ALL_CATEGORIES.filter(c => this.enabledCategories[c] && this.byCategory[c]?.length > 0);
+                if (activeCats.length === 0) return;
+
+                this.isSpinning = true;
+                this.stoppedCount = 0;
+                this.totalCats = activeCats.length;
+
+                this.setStatus('ROLLING...', 'loading');
+                this.updateButtons();
+
+                document.getElementById('pvpTotal').innerHTML = '<span class="price-spinner"></span>';
+                document.getElementById('pveTotal').innerHTML = '<span class="price-spinner"></span>';
+                document.getElementById('detailsPanel').style.display = 'none';
+
+                const reels = document.querySelectorAll('[data-category]');
+                reels.forEach(r => {
+                    if (activeCats.includes(r.dataset.category)) {
+                        r.classList.add('border-indigo-500/60', 'bg-indigo-500/5');
+                        r.classList.remove('opacity-40');
+                    }
+                });
+
+                // Pick final winners
+                const targetLoadout = { ...this.currentLoadout };
+                activeCats.forEach(c => {
+                    targetLoadout[c] = this.pick(this.byCategory[c]);
+                });
+
+                // Animate rolling track strips - strictly with item icons inside shuffling, NO templates during rotation
+                activeCats.forEach(cat => {
+                    const track = document.getElementById('reelIcon-' + cat);
+                    if (!track) return;
+
+                    const pool = this.byCategory[cat];
+                    const stripCount = 26 + Math.floor(Math.random() * 8); // 26 to 34 items for variable stopping alignments
+                    
+                    track.innerHTML = '';
+
+                    // Item 1 is the currently selected item or a random item
+                    const currentItem = this.currentLoadout[cat] || this.pick(pool);
+                    track.appendChild(this.createTrackItemNode(currentItem, cat));
+
+                    // Items 2 through N-1 are randomized item icons in shuffling instead of template placeholders
+                    for (let i = 1; i < stripCount - 1; i++) {
+                        const randomItem = this.pick(pool);
+                        track.appendChild(this.createTrackItemNode(randomItem, cat));
+                    }
+
+                    // Item N is the winning item
+                    const finalItem = targetLoadout[cat];
+                    track.appendChild(this.createTrackItemNode(finalItem, cat));
+
+                    // Instantly reset track back to start
+                    track.style.transition = 'none';
+                    track.style.transform = 'translateY(0px)';
+                    
+                    // Force DOM reflow
+                    track.offsetHeight;
+
+                    // Apply cinematic slows slowing ease transition
+                    const duration = 2800 + Math.random() * 1200; // Suspend variable alignment times
+                    track.style.transition = `transform ${duration}ms cubic-bezier(0.12, 0.88, 0.22, 1)`;
+
+                    // Slide vertical track up so the final winning item centers perfectly in the view port
+                    const itemHeight = 112; // 112px matches h-28
+                    const targetOffset = -((stripCount - 1) * itemHeight);
+                    track.style.transform = `translateY(${targetOffset}px)`;
+
+                    // Finalize individual slots on timeout end
+                    setTimeout(() => {
+                        this.stoppedCount++;
+                        this.currentLoadout[cat] = finalItem;
+                        
+                        // Cleanup track and render final item
+                        track.innerHTML = '';
+                        track.style.transition = 'none';
+                        track.style.transform = 'translateY(0px)';
+                        track.appendChild(this.createTrackItemNode(finalItem, cat));
+
+                        // Render items incrementally
+                        this.renderLoadout();
+
+                        if (this.stoppedCount === this.totalCats) {
+                            this.finishSpin();
+                        }
+                    }, duration);
+                });
+            },
+
+            finishSpin: function() {
+                this.isSpinning = false;
+                this.setStatus('READY', 'ready');
+                this.updateButtons();
+            },
+
+            clearLoadout: function() {
+                if (this.isSpinning) return;
+                for (const c of this.ALL_CATEGORIES) {
+                    this.currentLoadout[c] = null;
+                    this.updateReel(c, null); // Null triggers rendering of the custom category template icon!
+                }
+                this.renderLoadout();
+            },
+
+            saveLoadout: function() {
+                if (this.isSpinning) return;
+                let lines = [
+                    '=========================================',
+                    ' TARKOV LOADOUT REPORT',
+                    '=========================================\n'
+                ];
+                
+                const totals = this.calcTotals(this.currentLoadout);
+                lines.push(`Total PvP Value: ₽${totals.pvp.toLocaleString()}`);
+                lines.push(`Total PvE Value: ₽${totals.pve.toLocaleString()}\n`);
+
+                for (const cat of this.ALL_CATEGORIES) {
+                    const item = this.currentLoadout[cat];
+                    if (!item) continue;
+                    
+                    const label = this.CAT_LABELS[cat] || cat;
+                    lines.push(`[${label.toUpperCase()}]`);
+                    lines.push(`  Name: ${item.name}`);
+                    lines.push(`  PvP:  ₽${(item.avg24hPrice || 0).toLocaleString()}`);
+                    lines.push(`  PvE:  ₽${(item.pvePrice || 0).toLocaleString()}`);
+                    lines.push('');
+                }
+
+                const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'Tarkov_Loadout.txt';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            },
+
+            updateSpinButton: function() {
+                const anyEnabled = this.ALL_CATEGORIES.some(c => this.enabledCategories[c] && this.byCategory[c]?.length > 0);
+                const btn = document.getElementById('spinBtn');
+                btn.disabled = !anyEnabled || this.isSpinning;
+                if(this.isSpinning) btn.classList.add('loading');
+                else btn.classList.remove('loading');
+            },
+
+            updateButtons: function() {
+                const hasItems = Object.values(this.currentLoadout).some(i => i !== null);
+                
+                const saveBtn = document.getElementById('saveBtn');
+                const clearBtn = document.getElementById('clearBtn');
+                
+                saveBtn.disabled = !hasItems || this.isSpinning;
+                clearBtn.disabled = !hasItems || this.isSpinning;
+
+                if(this.isSpinning) {
+                    saveBtn.classList.add('loading');
+                    clearBtn.classList.add('loading');
+                } else {
+                    saveBtn.classList.remove('loading');
+                    clearBtn.classList.remove('loading');
+                }
+                
+                this.updateSpinButton();
+            },
+
+            setStatus: function(text, state) {
+                document.getElementById('statusText').textContent = text;
+                const dot = document.getElementById('statusDot');
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-zinc-400';
+                if (state) {
+                    if (state === 'ready') {
+                        dot.classList.add('bg-emerald-500', 'shadow-[0_0_8px_rgba(16,185,129,0.6)]');
+                    } else if (state === 'loading') {
+                        dot.classList.add('bg-[#107c41]', 'animate-pulse');
+                    }
+                }
+            },
+
+            init: async function() {
+                this.setStatus('INITIALIZING...', 'loading');
+                
+                for (const c of this.ALL_CATEGORIES) {
+                    this.enabledCategories[c] = true;
+                    this.currentLoadout[c] = null;
+                }
+
+                try {
+                    const items = await this.fetchAll();
+                    this.byCategory = this.categorize(items);
+
+                    if (!Object.values(this.byCategory).some(arr => arr.length > 0)) {
+                        throw new Error('API returned no valid flea market items.');
+                    }
+
+                    this.renderReels();
+                    
+                    for (const c of this.ALL_CATEGORIES) {
+                        this.updateReel(c, null);
+                    }
+                    
+                    this.renderLoadout();
+                    
+                    this.setStatus('READY', 'ready');
+                    this.updateButtons();
+
+                } catch (err) {
+                    console.error('Init error:', err);
+                    this.setStatus('API ERROR', '');
+                    document.getElementById('loadoutGrid').innerHTML = `
+                        <div class="col-span-full text-center py-12 text-zinc-400 dark:text-zinc-500 flex flex-col items-center">
+                            <span class="text-4xl mb-3">⚠️</span>
+                            <h4 class="text-xs font-bold uppercase tracking-wider mb-1">Failed to load Flea Market data</h4>
+                            <p class="text-[11px] max-w-[240px] leading-relaxed">${err.message}</p>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('spinBtn').addEventListener('click', () => this.performSpin());
+                document.getElementById('saveBtn').addEventListener('click', () => this.saveLoadout());
+                document.getElementById('clearBtn').addEventListener('click', () => this.clearLoadout());
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === ' ' || e.key === 'Space') {
+                        e.preventDefault();
+                        if (!document.getElementById('spinBtn').disabled) this.performSpin();
+                    }
+                });
+
+                // --- CLOCK CONTROLLER ---
+                const updateClock = () => {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    const dateStr = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    
+                    const timeEl = document.getElementById('clock-time');
+                    const dateEl = document.getElementById('clock-date');
+                    if (timeEl) timeEl.textContent = timeStr;
+                    if (dateEl) dateEl.textContent = dateStr;
+                };
+                setInterval(updateClock, 1000);
+                updateClock();
+
+                // --- AMBIENT GRADIENTS TOGGLE ENGINE ---
+                const gradientToggleBtn = document.getElementById('gradient-toggle');
+                const ambientGlow1 = document.getElementById('ambient-glow-1');
+                const ambientGlow2 = document.getElementById('ambient-glow-2');
+
+                const applyGradientState = (isEnabled) => {
+                    if (isEnabled === 'enabled') {
+                        ambientGlow1.classList.remove('opacity-0', 'pointer-events-none');
+                        ambientGlow2.classList.remove('opacity-0', 'pointer-events-none');
+                        gradientToggleBtn.classList.remove('opacity-40');
+                    } else {
+                        ambientGlow1.classList.add('opacity-0', 'pointer-events-none');
+                        ambientGlow2.classList.add('opacity-0', 'pointer-events-none');
+                        gradientToggleBtn.classList.add('opacity-40');
+                    }
+                };
+
+                const savedGradient = localStorage.getItem('ambient-glow') || 'enabled';
+                applyGradientState(savedGradient);
+
+                gradientToggleBtn.addEventListener('click', () => {
+                    const currentGradient = localStorage.getItem('ambient-glow') || 'enabled';
+                    const nextGradient = currentGradient === 'enabled' ? 'disabled' : 'enabled';
+                    localStorage.setItem('ambient-glow', nextGradient);
+                    applyGradientState(nextGradient);
+                });
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+</body>
+</html>
