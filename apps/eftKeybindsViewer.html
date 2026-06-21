@@ -90,37 +90,34 @@
             <div class="bg-zinc-50 dark:bg-zinc-950/40 border border-lightBorder dark:border-darkBorder rounded-2xl p-4 text-left">
                 <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-1.5 select-none">Windows configuration path</span>
                 <div class="flex items-center gap-2">
-                    <input type="text" id="config-path-input" readonly value="%APPDATA%\Battlestate Games\Escape from Tarkov\Settings\Control.ini" class="flex-grow bg-transparent border-none text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 outline-none select-all font-mono" />
+                    <input type="text" id="config-path-input" readonly value="C:\Users\&lt;userName&gt;\AppData\Roaming\Battlestate Games\Escape from Tarkov\Settings\Control.ini" class="flex-grow bg-transparent border-none text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 outline-none select-all font-mono" />
                     <button id="copy-path-btn" class="py-1 px-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] rounded-lg transition uppercase tracking-wider cursor-pointer">Copy</button>
                 </div>
                 <span class="text-[9px] text-zinc-400 dark:text-zinc-500 block mt-2 select-none leading-relaxed">
-                    Paste this path into your <b>Windows Explorer</b> or <b>Run dialog (Win+R)</b> to find <b>Control.ini</b> instantly.
+                    Pasting this path into your <b>Windows Explorer</b> or <b>File Dialog</b> opens the folder instantly.
                 </span>
             </div>
 
             <!-- File Upload Dropzone -->
-            <label id="drop-zone" class="border-2 border-dashed border-lightBorder dark:border-darkBorder hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-zinc-50/50 dark:bg-zinc-900/10">
+            <label id="drop-zone" class="border-2 border-dashed border-lightBorder dark:border-darkBorder hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-zinc-50/50 dark:bg-zinc-900/10" title="Clicking copies the path to your clipboard automatically!">
                 <input type="file" id="file-input" accept=".ini" class="hidden" />
                 <svg class="w-8 h-8 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                 </svg>
                 <div class="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase">Select Control.ini File</div>
-                <div class="text-[10px] text-zinc-400 dark:text-zinc-500">Drag & drop or browse your local files</div>
+                <div class="text-[10px] text-zinc-400 dark:text-zinc-500">Path copies automatically. Just paste (Ctrl+V) in the file dialog!</div>
             </label>
 
-            <!-- Bottom Option Actions (Overhauled with Auto-Load UX) -->
+            <!-- Bottom Option Actions -->
             <div class="flex items-center gap-3 w-full">
-                <button id="auto-load-btn" class="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition cursor-pointer shadow-md flex items-center justify-center space-x-2">
-                    <span>⚡</span> <span>Auto-Load Control.ini</span>
-                </button>
-                <a href="../index.html" class="flex-1 py-3 px-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-widest rounded-xl transition text-center cursor-pointer flex items-center justify-center">
+                <a href="../index.html" id="deny-exit-btn" class="w-full py-3 px-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs uppercase tracking-widest rounded-xl transition text-center cursor-pointer flex items-center justify-center">
                     Deny & Exit
                 </a>
             </div>
 
             <!-- Sandboxed Educational Privacy Tip -->
             <p class="text-[9px] text-zinc-400 dark:text-zinc-500 leading-normal italic px-2">
-                🔒 Privacy Tip: Web browsers cannot read your files silently. Clicking "Auto-Load" copies your settings path and opens your local explorer to let you select the file safely!
+                🔒 Privacy Tip: Web browsers cannot read files silently. Clicking "Select" copies your settings path to easily load your file safely!
             </p>
         </div>
     </div>
@@ -238,8 +235,8 @@
             <!-- Right-Side Selected Key / Action Inspector Card Panel -->
             <aside class="flex flex-col gap-6">
                 <!-- Inspector Card -->
-                <div class="bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
-                    <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2 border-b border-lightBorder dark:border-darkBorder pb-3 uppercase tracking-wider">
+                <div class="bg-white/70 dark:bg-darkCard/50 border border-[#cbd5e1] dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+                    <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2 border-b border-[#cbd5e1] dark:border-darkBorder pb-3 uppercase tracking-wider">
                         <span>🔍</span>
                         <span>Keybinding Inspector</span>
                     </h3>
@@ -260,7 +257,7 @@
                             </div>
                         </div>
 
-                        <div class="border-t border-lightBorder dark:border-darkBorder pt-3.5 space-y-2.5 text-xs text-zinc-600 dark:text-zinc-300">
+                        <div class="border-t border-[#cbd5e1] dark:border-darkBorder pt-3.5 space-y-2.5 text-xs text-zinc-600 dark:text-zinc-300">
                             <div class="flex justify-between">
                                 <span class="text-zinc-400 dark:text-zinc-500">Press Type:</span>
                                 <span id="inspector-press-type" class="font-bold">Double Click</span>
@@ -269,7 +266,7 @@
                                 <span class="text-zinc-400 dark:text-zinc-500">Conflict Warning:</span>
                                 <span id="inspector-conflict-warning" class="font-bold text-emerald-500">No Conflict</span>
                             </div>
-                            <p id="inspector-binding-description" class="text-[11px] text-zinc-400 leading-relaxed pt-1.5 border-t border-dashed border-lightBorder dark:border-darkBorder">
+                            <p id="inspector-binding-description" class="text-[11px] text-zinc-400 leading-relaxed pt-1.5 border-t border-dashed border-[#cbd5e1] dark:border-darkBorder">
                                 Launches any equipped explosive ordnances immediately using dynamic double click configuration.
                             </p>
                         </div>
@@ -300,6 +297,7 @@
         const App = {
             activeKeybinds: {}, // Maps raw Key character to Action objects
             selectedKey: null,
+            isCustomFileLoaded: false, // Track if a custom Control.ini was imported
 
             // Default Tarkov Keybind sets (100% clean, ready-to-inspect demo database)
             DEMO_DATABASE: {
@@ -493,6 +491,7 @@
                 // Detect conflicts (keys bound to multiple actions)
                 const isConflict = Object.values(this.activeKeybinds).filter(b => b.action === bind.action).length > 1;
                 if (isConflict) {
+                    numberConflict = isConflict;
                     conflictEl.textContent = 'Potential Conflict';
                     conflictEl.className = 'font-bold text-rose-500 animate-pulse';
                 } else {
@@ -548,14 +547,16 @@
                     row.addEventListener('mouseenter', () => {
                         const virtualKey = document.querySelector(`[data-key="${key}"]`);
                         if (virtualKey) {
-                            virtualKey.classList.add('scale-110', 'border-indigo-500', 'bg-indigo-500/20');
+                            virtualKey.classList.add('scale-110', 'border-indigo-500', 'bg-indigo-500/20', 'text-indigo-600', 'dark:text-indigo-400');
                         }
+                        this.inspectKey(key);
                     });
                     row.addEventListener('mouseleave', () => {
                         const virtualKey = document.querySelector(`[data-key="${key}"]`);
                         if (virtualKey) {
-                            virtualKey.classList.remove('scale-110', 'border-indigo-500', 'bg-indigo-500/20');
+                            virtualKey.classList.remove('scale-110', 'border-indigo-500', 'bg-indigo-500/20', 'text-indigo-600', 'dark:text-indigo-400');
                         }
+                        this.inspectKey(null);
                     });
 
                     container.appendChild(row);
@@ -611,29 +612,18 @@
                     });
                 }
 
-                // Load demo database directly when using the custom fallback button
-                const demoLoadBtn = document.getElementById('demo-load-btn');
-                if (demoLoadBtn) {
-                    demoLoadBtn.addEventListener('click', () => {
-                        this.loadDemoDatabase();
-                    });
-                }
-
-                // Auto-Load trigger button action mapping
-                const autoLoadBtn = document.getElementById('auto-load-btn');
-                if (autoLoadBtn) {
-                    autoLoadBtn.addEventListener('click', () => {
-                        // Clipboard copy shortcut sequence
-                        const input = document.getElementById('config-path-input');
-                        if (input) {
-                            input.select();
-                            document.execCommand('copy');
-                        }
-
-                        // Prompt file selector dialog immediately
-                        const fileInputEl = document.getElementById('file-input');
-                        if (fileInputEl) {
-                            fileInputEl.click();
+                // Deny & Exit conditional router
+                const denyExitBtn = document.getElementById('deny-exit-btn');
+                if (denyExitBtn) {
+                    denyExitBtn.addEventListener('click', (e) => {
+                        if (App.isCustomFileLoaded) {
+                            // Prevent going to index.html since a custom control file has already been parsed and loaded successfully
+                            e.preventDefault();
+                            const overlay = document.getElementById('permission-screen');
+                            if (overlay) {
+                                overlay.classList.add('opacity-0', 'pointer-events-none');
+                                setTimeout(() => overlay.classList.add('hidden'), 500);
+                            }
                         }
                     });
                 }
@@ -654,6 +644,8 @@
                         // If parsing returned empty, load demo fallback safely
                         if (Object.keys(this.activeKeybinds).length === 0) {
                             this.activeKeybinds = { ...this.DEMO_DATABASE };
+                        } else {
+                            App.isCustomFileLoaded = true; // Mark as successfully synchronized!
                         }
 
                         this.renderKeyboard();
@@ -674,6 +666,15 @@
                 }
 
                 if (dropZone) {
+                    // Automatically copy path on drop zone click to facilitate pasting inside browser native file picker dialog!
+                    dropZone.addEventListener('click', () => {
+                        const input = document.getElementById('config-path-input');
+                        if (input) {
+                            input.select();
+                            document.execCommand('copy');
+                        }
+                    });
+
                     dropZone.addEventListener('dragover', (e) => {
                         e.preventDefault();
                         dropZone.classList.add('border-indigo-500', 'bg-indigo-500/10');
