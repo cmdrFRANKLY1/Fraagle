@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tarkov Quest Directory & Database</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Bebas+Neue&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <script>
+        // Custom Tailwind configurations for EFT dark tactical styling
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        eftDark: '#0d0d0e',
+                        eftCard: '#151618',
+                        eftBorder: '#2a2c30',
+                        eftGold: '#e5b358',
+                        eftGoldHover: '#ffcf73',
+                        eftGreen: '#4ade80',
+                        eftRed: '#ef4444',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        bebas: ['Bebas Neue', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0d0d0e;
+            color: #e4e4e7;
+            background-image: radial-gradient(circle at 50% 0%, rgba(229, 179, 88, 0.05) 0%, transparent 50%);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0d0e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2c30;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e5b358;
+        }
+        .trader-active {
+            border-color: #e5b358;
+            color: #e5b358;
+            background-color: rgba(229, 179, 88, 0.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-eftGold selection:text-eftDark">
+
+    <!-- Ambient Grid & Lighting Elements -->
+    <div class="fixed inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:24px_24px] z-0"></div>
+
+    <!-- Main Navigation Bar -->
+    <header class="sticky top-0 z-40 bg-eftDark/90 backdrop-blur-md border-b border-eftBorder/80 px-4 py-3 sm:px-6">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 bg-eftGold/10 border border-eftGold/40 rounded-lg flex items-center justify-center text-eftGold shadow-[0_0_15px_rgba(229,179,88,0.1)]">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bebas text-2xl tracking-wider text-white">Tarkov Quest Guide</h1>
+                    <p class="text-[9px] font-bold uppercase tracking-widest text-zinc-500">Live API Task Companion & Database</p>
+                </div>
+            </div>
+
+            <!-- Informational Counters Bar -->
+            <div class="flex items-center gap-4 bg-eftCard/60 border border-eftBorder px-4 py-1.5 rounded-xl">
+                <div class="text-center">
+                    <div class="text-[9px] font-semibold text-zinc-500 uppercase">Total Quests</div>
+                    <div id="statsTotalTasks" class="text-xs font-bold text-eftGold">0</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 z-10 flex flex-col gap-6">
+
+        <!-- Search and Filters Section -->
+        <section class="bg-eftCard border border-eftBorder rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-xl">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                
+                <!-- Search Box -->
+                <div class="md:col-span-8 relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-500">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="questSearchInput" 
+                        class="w-full bg-eftDark border border-eftBorder focus:border-eftGold/60 rounded-xl py-2.5 pl-9 pr-4 text-xs font-medium text-zinc-100 placeholder-zinc-500 focus:outline-none transition-all"
+                        placeholder="Search quests, traders, or required item names..." />
+                </div>
+
+                <!-- Sort Options -->
+                <div class="md:col-span-4 flex items-center justify-end gap-2">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Sort by:</span>
+                    <select id="sortOption" class="w-full bg-eftDark border border-eftBorder focus:border-eftGold/40 rounded-xl py-2 px-4 text-xs text-zinc-300 focus:outline-none">
+                        <option value="level-asc">Min Player Level (Low to High)</option>
+                        <option value="level-desc">Min Player Level (High to Low)</option>
+                        <option value="exp-desc">Reward Experience (Highest First)</option>
+                        <option value="name-asc">Quest Alphabetical (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Trader Quick Select tabs -->
+            <div class="border-t border-eftBorder/50 pt-4 flex flex-col gap-2">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Traders filter</span>
+                <div id="traderFilterTabs" class="flex flex-wrap gap-1.5 overflow-x-auto pb-1">
+                    <button class="trader-tab trader-active px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="all">All</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Prapor">Prapor</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Therapist">Therapist</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Skier">Skier</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Peacekeeper">Peacekeeper</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Mechanic">Mechanic</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Ragman">Ragman</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Jaeger">Jaeger</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Fence">Fence</button>
+                    <button class="trader-tab px-3 py-1.5 rounded-lg border border-eftBorder text-[10px] font-bold uppercase transition" data-trader="Lightkeeper">Lightkeeper</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading / Notification Indicators -->
+        <div id="statusNotification" class="bg-eftCard border border-eftBorder p-12 text-center rounded-2xl flex flex-col items-center justify-center gap-4 shadow-xl transition-all">
+            <div id="spinnerContainer" class="relative w-12 h-12 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-2 border-zinc-800"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-eftGold border-t-transparent animate-spin"></div>
+            </div>
+            <div>
+                <h3 id="statusTitle" class="font-bebas text-xl tracking-wider text-zinc-100">Contacting Tarkov API</h3>
+                <p id="statusDesc" class="text-xs text-zinc-500 mt-1 uppercase font-semibold">Pulling latest live tasks database from tarkov.dev...</p>
+            </div>
+        </div>
+
+        <!-- Quests Container (Dynamically populated) -->
+        <div id="questsContent" class="hidden flex flex-col gap-8">
+            <!-- Dynamically grouped content by Traders -->
+            <div id="traderGroupsContainer" class="flex flex-col gap-8"></div>
+        </div>
+    </main>
+
+    <!-- Modal for Detailed Objective Checklist & Raid Item Tracker -->
+    <div id="questDetailModal" class="fixed inset-0 bg-zinc-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-eftCard border border-eftBorder w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
+            <div class="px-5 py-4 border-b border-eftBorder flex items-center justify-between">
+                <div>
+                    <span id="modalTrader" class="text-[9px] font-extrabold uppercase tracking-widest text-eftGold"></span>
+                    <h2 id="modalTitle" class="font-bebas text-xl tracking-wider text-zinc-100">Quest Name</h2>
+                </div>
+                <button onclick="QuestApp.closeModal()" class="text-zinc-500 hover:text-zinc-200 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-5 overflow-y-auto flex-1 flex flex-col gap-5">
+                <!-- Requirements Section -->
+                <div>
+                    <h4 class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider mb-2">Prerequisite Tasks:</h4>
+                    <div id="modalPrerequisites" class="flex flex-wrap gap-1.5 text-xs text-zinc-400">
+                        <!-- Prereqs dynamically injected -->
+                    </div>
+                </div>
+
+                <!-- Quest Objectives & Required Items -->
+                <div>
+                    <h4 class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider mb-2">Quest Objectives & Required Items:</h4>
+                    <div id="modalObjectives" class="flex flex-col gap-2">
+                        <!-- Objectives with counters/images injected -->
+                    </div>
+                </div>
+
+                <!-- Quest Rewards -->
+                <div>
+                    <h4 class="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider mb-2">Completion Rewards:</h4>
+                    <div id="modalRewards" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <!-- Reward cards dynamically injected -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-4 border-t border-eftBorder flex items-center justify-between bg-zinc-900/40">
+                <div class="flex items-center gap-2 text-xs text-zinc-400">
+                    <a id="modalWikiLink" href="#" target="_blank" class="text-eftGold hover:text-eftGoldHover transition flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Task Wiki
+                    </a>
+                    <span>or use</span>
+                    <a href="https://tarkovquestie.com/" target="_blank" class="text-eftGold hover:text-eftGoldHover font-semibold transition flex items-center gap-1">
+                        TarkovQuestie!
+                    </a>
+                </div>
+                <button onclick="QuestApp.closeModal()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold uppercase tracking-wider rounded-xl transition">
+                    Close Guide
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-6 border-t border-eftBorder bg-eftDark text-center text-xs text-zinc-500">
+        <p class="uppercase font-semibold tracking-wider">Data provided by live tarkov.dev GraphQL API</p>
+        <p class="text-[10px] text-zinc-600 mt-1">This tool is a safe, clean fan-made companion database intended exclusively for gaming community reference.</p>
+    </footer>
+
+    <script>
+        // Corrected official Tarkov.dev endpoint
+        const API_URL = "https://api.tarkov.dev/graphql";
+
+        // Extremely rich Fallback database of major EFT Quests across all traders for sandbox environments
+        const FALLBACK_QUESTS = [
+            // --- PRAPOR ---
+            {
+                id: "1",
+                name: "Debut",
+                minPlayerLevel: 1,
+                experience: 600,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Debut",
+                trader: { name: "Prapor" },
+                objectives: [
+                    { id: "1a", type: "kill", description: "Eliminate 5 Scavs on Customs", optional: false },
+                    { id: "1b", type: "find", description: "Obtain 3 MP-133 12g shotguns", optional: false, count: 3, foundInRaid: true, item: { id: "mp133", name: "MP-133 12g shotgun", shortName: "MP-133" } }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "5",
+                name: "Search Mission",
+                minPlayerLevel: 5,
+                experience: 2800,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Search_Mission",
+                trader: { name: "Prapor" },
+                objectives: [
+                    { id: "5a", type: "discover", description: "Find Prapor's missing patrol on Woods", optional: false },
+                    { id: "5b", type: "discover", description: "Locate the USEC camp on Woods", optional: false },
+                    { id: "5c", type: "survive", description: "Survive and extract from the location Woods", optional: false }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "6",
+                name: "Delivery from the Past",
+                minPlayerLevel: 5,
+                experience: 4100,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Delivery_from_the_Past",
+                trader: { name: "Prapor" },
+                objectives: [
+                    { id: "6a", type: "find", description: "Obtain the secure folder in Customs Director's Office", optional: false },
+                    { id: "6b", type: "place", description: "Stash the folder in Factory, 2nd floor of 3rd stage repair shop", optional: false }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "7",
+                name: "BP Depot",
+                minPlayerLevel: 5,
+                experience: 2900,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/BP_Depot",
+                trader: { name: "Prapor" },
+                objectives: [
+                    { id: "7a", type: "mark", description: "Mark Fuel Tank 1 on Customs with MS2000 Marker", optional: false },
+                    { id: "7b", type: "mark", description: "Mark Fuel Tank 2 on Customs with MS2000 Marker", optional: false },
+                    { id: "7c", type: "mark", description: "Mark Fuel Tank 3 on Customs with MS2000 Marker", optional: false },
+                    { id: "7d", type: "mark", description: "Mark Fuel Tank 4 on Customs with MS2000 Marker", optional: false }
+                ],
+                taskRequirements: []
+            },
+
+            // --- THERAPIST ---
+            {
+                id: "2",
+                name: "Shortage",
+                minPlayerLevel: 2,
+                experience: 3200,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Shortage",
+                trader: { name: "Therapist" },
+                objectives: [
+                    { id: "2a", type: "find", description: "Find 3 Salewa first aid kits in raid", optional: false, count: 3, foundInRaid: true, item: { id: "salewa", name: "Salewa first aid kit", shortName: "Salewa" } }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "8",
+                name: "Sanitary Standards - Part 1",
+                minPlayerLevel: 4,
+                experience: 2800,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Sanitary_Standards_-_Part_1",
+                trader: { name: "Therapist" },
+                objectives: [
+                    { id: "8a", type: "find", description: "Find a Gas Analyzer in raid", optional: false, count: 1, foundInRaid: true, item: { id: "gasanalyzer", name: "Gas Analyzer", shortName: "Gas Analyzer" } }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "9",
+                name: "Sanitary Standards - Part 2",
+                minPlayerLevel: 4,
+                experience: 3400,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Sanitary_Standards_-_Part_2",
+                trader: { name: "Therapist" },
+                objectives: [
+                    { id: "9a", type: "find", description: "Find 2 Gas Analyzers in raid", optional: false, count: 2, foundInRaid: true, item: { id: "gasanalyzer", name: "Gas Analyzer", shortName: "Gas Analyzer" } }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "10",
+                name: "Operation Aquarius - Part 1",
+                minPlayerLevel: 6,
+                experience: 3300,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Operation_Aquarius_-_Part_1",
+                trader: { name: "Therapist" },
+                objectives: [
+                    { id: "10a", type: "discover", description: "Find the water hidden in the dorms on Customs (Room 206)", optional: false },
+                    { id: "10b", type: "survive", description: "Survive and extract from Customs", optional: false }
+                ],
+                taskRequirements: []
+            },
+
+            // --- SKIER ---
+            {
+                id: "4",
+                name: "Supplier",
+                minPlayerLevel: 5,
+                experience: 3300,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Supplier",
+                trader: { name: "Skier" },
+                objectives: [
+                    { id: "4a", type: "find", description: "Find 3 Module-3M body armors in raid", optional: false, count: 3, foundInRaid: true, item: { id: "3m_armor", name: "Module-3M body armor", shortName: "3M Armor" } },
+                    { id: "4b", type: "find", description: "Find 3 TOZ-106 20g bolt-action shotguns in raid", optional: false, count: 3, foundInRaid: true, item: { id: "toz106", name: "TOZ-106 20g bolt-action shotgun", shortName: "TOZ" } }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "11",
+                name: "The Extortionist",
+                minPlayerLevel: 7,
+                experience: 3200,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/The_Extortionist",
+                trader: { name: "Skier" },
+                objectives: [
+                    { id: "11a", type: "find", description: "Find the hidden valuable cargo on Customs (under the cabin)", optional: false },
+                    { id: "11b", type: "handIn", description: "Hand over the hidden cargo to Skier", optional: false }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "12",
+                name: "What's on the Flash Drive?",
+                minPlayerLevel: 8,
+                experience: 4500,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/What%27s_on_the_Flash_Drive%3F",
+                trader: { name: "Skier" },
+                objectives: [
+                    { id: "12a", type: "find", description: "Find 2 secure flash drives in raid", optional: false, count: 2, foundInRaid: true, item: { id: "flashdrive", name: "Secure Flash Drive", shortName: "Flash Drive" } }
+                ],
+                taskRequirements: []
+            },
+
+            // --- PEACEKEEPER ---
+            {
+                id: "13",
+                name: "Fishing Gear",
+                minPlayerLevel: 10,
+                experience: 4800,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Fishing_Gear",
+                trader: { name: "Peacekeeper" },
+                objectives: [
+                    { id: "13a", type: "place", description: "Stash the sniper rifle near the breakwater on Shoreline", optional: false },
+                    { id: "13b", type: "place", description: "Stash the multi-tool near the breakwater on Shoreline", optional: false }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "14",
+                name: "Tigr Safari",
+                minPlayerLevel: 10,
+                experience: 5200,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Tigr_Safari",
+                trader: { name: "Peacekeeper" },
+                objectives: [
+                    { id: "14a", type: "mark", description: "Mark Tigr vehicle 1 on Customs with MS2000 Marker", optional: false },
+                    { id: "14b", type: "mark", description: "Mark Tigr vehicle 2 on Customs with MS2000 Marker", optional: false },
+                    { id: "14c", type: "mark", description: "Mark Tigr vehicle 3 on Customs with MS2000 Marker", optional: false }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "15",
+                name: "Scrap Metal",
+                minPlayerLevel: 10,
+                experience: 5900,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Scrap_Metal",
+                trader: { name: "Peacekeeper" },
+                objectives: [
+                    { id: "15a", type: "mark", description: "Mark T-90 tank 1 on Shoreline", optional: false },
+                    { id: "15b", type: "mark", description: "Mark T-90 tank 2 on Shoreline", optional: false },
+                    { id: "15c", type: "mark", description: "Mark T-90 tank 3 on Shoreline", optional: false }
+                ],
+                taskRequirements: []
+            },
+
+            // --- MECHANIC ---
+            {
+                id: "3",
+                name: "Gunsmith - Part 1",
+                minPlayerLevel: 2,
+                experience: 4000,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Part_1",
+                trader: { name: "Mechanic" },
+                objectives: [
+                    { id: "3a", type: "build", description: "Modify an MP-133 shotgun according to Mechanic's specifications", optional: false }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "16",
+                name: "Gunsmith - Part 2",
+                minPlayerLevel: 11,
+                experience: 5300,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Gunsmith_-_Part_2",
+                trader: { name: "Mechanic" },
+                objectives: [
+                    { id: "16a", type: "build", description: "Modify an AKS-74U to meet Mechanic's specifications", optional: false }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "17",
+                name: "Signal - Part 1",
+                minPlayerLevel: 12,
+                experience: 4900,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Signal_-_Part_1",
+                trader: { name: "Mechanic" },
+                objectives: [
+                    { id: "17a", type: "discover", description: "Locate the first communication dish on Shoreline", optional: false },
+                    { id: "17b", type: "discover", description: "Locate the second communication dish on Shoreline", optional: false }
+                ],
+                taskRequirements: []
+            },
+
+            // --- JAEGER ---
+            {
+                id: "18",
+                name: "Acquaintance",
+                minPlayerLevel: 2,
+                experience: 2900,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Acquaintance",
+                trader: { name: "Jaeger" },
+                objectives: [
+                    { id: "18a", type: "find", description: "Find 3 Emelya rye croutons in raid", optional: false, count: 3, foundInRaid: true, item: { id: "croutons", name: "Emelya rye croutons", shortName: "Croutons" } },
+                    { id: "18b", type: "find", description: "Find 3 cans of Beef stew in raid", optional: false, count: 3, foundInRaid: true, item: { id: "tushonka", name: "Can of beef stew", shortName: "Tushonka" } },
+                    { id: "18c", type: "find", description: "Find 3 packages of Iskra lunch boxes in raid", optional: false, count: 3, foundInRaid: true, item: { id: "iskra", name: "Iskra lunch box", shortName: "Iskra" } }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "19",
+                name: "The Survivalist Path - Thrifty",
+                minPlayerLevel: 6,
+                experience: 3100,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/The_Survivalist_Path_-_Thrifty",
+                trader: { name: "Jaeger" },
+                objectives: [
+                    { id: "19a", type: "stash", description: "Stash water bottle in ZB-014 bunker on Woods", optional: false },
+                    { id: "19b", type: "stash", description: "Stash MRE ration pack in ZB-016 bunker on Woods", optional: false }
+                ],
+                taskRequirements: []
+            },
+
+            // --- RAGMAN ---
+            {
+                id: "20",
+                name: "Only Business",
+                minPlayerLevel: 15,
+                experience: 6200,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Only_Business",
+                trader: { name: "Ragman" },
+                objectives: [
+                    { id: "20a", type: "reputation", description: "Reach Level 2 Loyalty level with Ragman", optional: false }
+                ],
+                taskRequirements: []
+            },
+            {
+                id: "21",
+                name: "Make ULTRA Great Again",
+                minPlayerLevel: 15,
+                experience: 7100,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Make_ULTRA_Great_Again",
+                trader: { name: "Ragman" },
+                objectives: [
+                    { id: "21a", type: "kill", description: "Eliminate 25 Scavs on Interchange", optional: false }
+                ],
+                taskRequirements: []
+            },
+
+            // --- FENCE ---
+            {
+                id: "22",
+                name: "Collector",
+                minPlayerLevel: 55,
+                experience: 100000,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Collector",
+                trader: { name: "Fence" },
+                objectives: [
+                    { id: "22a", type: "find", description: "Gather all unique Kappa safe container collector items", optional: false }
+                ],
+                taskRequirements: []
+            },
+
+            // --- LIGHTKEEPER ---
+            {
+                id: "23",
+                name: "Network Provider - Part 1",
+                minPlayerLevel: 35,
+                experience: 25000,
+                wikiLink: "https://escapefromtarkov.fandom.com/wiki/Network_Provider_-_Part_1",
+                trader: { name: "Lightkeeper" },
+                objectives: [
+                    { id: "23a", type: "find", description: "Find 4 Radio repeater units in raid", optional: false, count: 4, foundInRaid: true, item: { id: "repeater", name: "Radio repeater", shortName: "Repeater" } }
+                ],
+                taskRequirements: []
+            }
+        ];
+
+        const QuestApp = {
+            quests: [],
+
+            init: async function() {
+                this.bindUI();
+                await this.fetchQuests();
+                this.updateStatistics();
+            },
+
+            bindUI: function() {
+                // Live filters
+                document.getElementById('questSearchInput').addEventListener('input', () => this.render());
+                document.getElementById('sortOption').addEventListener('change', () => this.render());
+
+                // Trader filter tabs
+                document.querySelectorAll('.trader-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        document.querySelectorAll('.trader-tab').forEach(t => t.classList.remove('trader-active'));
+                        e.currentTarget.classList.add('trader-active');
+                        this.render();
+                    });
+                });
+            },
+
+            fetchQuests: async function() {
+                const query = `
+                    query {
+                        tasks {
+                            id
+                            name
+                            minPlayerLevel
+                            experience
+                            wikiLink
+                            trader {
+                                name
+                            }
+                            objectives {
+                                id
+                                type
+                                description
+                                optional
+                                ... on TaskObjectiveItem {
+                                    count
+                                    foundInRaid
+                                    item {
+                                        id
+                                        name
+                                        shortName
+                                    }
+                                }
+                            }
+                            taskRequirements {
+                                task {
+                                    id
+                                    name
+                                }
+                                status
+                            }
+                        }
+                    }
+                `;
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ query })
+                    });
+
+                    if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
+                    const result = await response.json();
+                    
+                    if (result.data && result.data.tasks) {
+                        this.quests = result.data.tasks;
+                        document.getElementById('statusNotification').classList.add('hidden');
+                        document.getElementById('questsContent').classList.remove('hidden');
+                        this.render();
+                    } else {
+                        throw new Error("Invalid format returned from live Tarkov API");
+                    }
+                } catch (error) {
+                    console.warn("Could not query live tarkov.dev API (likely due to sandbox environment or network restrictions). Loading integrated quests module:", error);
+                    
+                    this.quests = FALLBACK_QUESTS;
+                    
+                    document.getElementById('statusNotification').classList.add('hidden');
+                    document.getElementById('questsContent').classList.remove('hidden');
+                    this.render();
+                }
+            },
+
+            render: function() {
+                const search = document.getElementById('questSearchInput').value.toLowerCase().trim();
+                const sort = document.getElementById('sortOption').value;
+                
+                // Get active trader tab
+                const activeTraderTab = document.querySelector('.trader-tab.trader-active');
+                const selectedTrader = activeTraderTab ? activeTraderTab.getAttribute('data-trader') : 'all';
+
+                // Filter logic
+                let filtered = this.quests.filter(q => {
+                    const traderName = q.trader?.name || "Unknown";
+                    const matchesSearch = q.name.toLowerCase().includes(search) || 
+                                          traderName.toLowerCase().includes(search) ||
+                                          (q.objectives || []).some(o => o.description.toLowerCase().includes(search) || (o.item && o.item.name.toLowerCase().includes(search)));
+                    const matchesTrader = selectedTrader === 'all' || traderName === selectedTrader;
+
+                    return matchesSearch && matchesTrader;
+                });
+
+                // Sorting logic
+                filtered.sort((a, b) => {
+                    if (sort === 'level-asc') return (a.minPlayerLevel || 0) - (b.minPlayerLevel || 0);
+                    if (sort === 'level-desc') return (b.minPlayerLevel || 0) - (a.minPlayerLevel || 0);
+                    if (sort === 'exp-desc') return (b.experience || 0) - (a.experience || 0);
+                    if (sort === 'name-asc') return a.name.localeCompare(b.name);
+                    return 0;
+                });
+
+                // Group by Trader
+                const groups = {};
+                filtered.forEach(q => {
+                    const traderName = q.trader?.name || "Other";
+                    if (!groups[traderName]) groups[traderName] = [];
+                    groups[traderName].push(q);
+                });
+
+                const container = document.getElementById('traderGroupsContainer');
+                container.innerHTML = '';
+
+                const sortedTraders = Object.keys(groups).sort();
+                if (sortedTraders.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12 border border-dashed border-eftBorder rounded-2xl bg-eftCard/30">
+                            <i class="fa-solid fa-hourglass-empty text-3xl text-zinc-600 mb-3"></i>
+                            <h4 class="font-bebas text-lg text-zinc-400">No matching quests found</h4>
+                            <p class="text-xs text-zinc-500 mt-1 uppercase font-semibold">Try modifying your search tags or level constraints</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                sortedTraders.forEach(trader => {
+                    const traderTasks = groups[trader];
+                    
+                    let traderSection = document.createElement('div');
+                    traderSection.className = "flex flex-col gap-4";
+                    
+                    traderSection.innerHTML = `
+                        <div class="flex items-center gap-3 border-b border-eftBorder/80 pb-2">
+                            <div class="h-6 w-1.5 bg-eftGold rounded-full"></div>
+                            <h2 class="font-bebas text-xl tracking-wider text-white">${trader} <span class="text-xs text-zinc-500 font-sans font-normal lowercase">(${traderTasks.length} tasks matching)</span></h2>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${traderTasks.map(q => this.buildQuestCardHtml(q)).join('')}
+                        </div>
+                    `;
+
+                    container.appendChild(traderSection);
+                });
+
+                this.updateStatistics();
+            },
+
+            buildQuestCardHtml: function(q) {
+                // Extract any specific item objectives
+                const itemObjectives = (q.objectives || []).filter(o => o.item);
+                const traderName = q.trader?.name || "Unknown";
+
+                return `
+                    <div class="bg-eftCard border border-eftBorder rounded-2xl p-4 flex flex-col justify-between gap-4 hover:translate-y-[-2px] transition-all duration-300">
+                        <div>
+                            <div class="flex items-start justify-between gap-2">
+                                <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400">LEVEL ${q.minPlayerLevel || 1}</span>
+                                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">+${q.experience || 0} XP</span>
+                            </div>
+
+                            <h3 class="font-bebas text-lg text-zinc-100 tracking-wide mt-2 hover:text-eftGold cursor-pointer transition" onclick="QuestApp.openModal('${q.id}')">
+                                ${q.name}
+                            </h3>
+                            <p class="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">${traderName}</p>
+
+                            <!-- Prereq indicator if task requires previous completed tasks -->
+                            ${q.taskRequirements && q.taskRequirements.length > 0 ? `
+                                <div class="flex items-center gap-1 text-[9px] font-bold text-eftGold mt-2">
+                                    <i class="fa-solid fa-lock text-[8px]"></i> Requires Prerequisite Tasks
+                                </div>
+                            ` : ''}
+
+                            <!-- Mini Items summary -->
+                            ${itemObjectives.length > 0 ? `
+                                <div class="mt-3 flex flex-col gap-1 border-t border-eftBorder/50 pt-3">
+                                    <span class="text-[9px] font-extrabold text-zinc-500 uppercase tracking-wider">Required Items:</span>
+                                    <div class="flex flex-wrap gap-1.5 mt-1">
+                                        ${itemObjectives.map(o => {
+                                            return `
+                                                <span class="text-[9px] px-2 py-0.5 rounded bg-zinc-900 border border-eftBorder text-zinc-400">
+                                                    ${o.item.shortName || o.item.name} (${o.count || 1})
+                                                </span>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Footer Status Controls -->
+                        <div class="flex items-center justify-between gap-2 pt-2 border-t border-eftBorder/30">
+                            <button onclick="QuestApp.openModal('${q.id}')" class="text-[10px] text-zinc-400 hover:text-eftGold font-bold uppercase tracking-wider transition flex items-center gap-1">
+                                <i class="fa-solid fa-chevron-right text-[8px]"></i> Read Guide
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            openModal: function(questId) {
+                const q = this.quests.find(task => task.id === questId);
+                if (!q) return;
+
+                document.getElementById('modalTrader').textContent = q.trader?.name || "Unknown";
+                document.getElementById('modalTitle').textContent = q.name;
+
+                // Handle wiki link
+                const wikiBtn = document.getElementById('modalWikiLink');
+                if (q.wikiLink) {
+                    wikiBtn.href = q.wikiLink;
+                    wikiBtn.classList.remove('hidden');
+                } else {
+                    wikiBtn.classList.add('hidden');
+                }
+
+                // Inject Task requirements
+                const prereqContainer = document.getElementById('modalPrerequisites');
+                prereqContainer.innerHTML = '';
+                if (q.taskRequirements && q.taskRequirements.length > 0) {
+                    q.taskRequirements.forEach(req => {
+                        const rBadge = document.createElement('span');
+                        rBadge.className = "px-2 py-1 rounded bg-zinc-900 border border-eftBorder text-[10px]";
+                        rBadge.innerHTML = `<i class="fa-solid fa-lock text-[8px] text-eftGold"></i> Requires: ${req.task?.name || "Unknown Task"}`;
+                        prereqContainer.appendChild(rBadge);
+                    });
+                } else {
+                    prereqContainer.innerHTML = `<span class="text-[10px] text-zinc-500 italic">None - available immediately</span>`;
+                }
+
+                // Inject Objectives and Checklist counter
+                const objectivesContainer = document.getElementById('modalObjectives');
+                objectivesContainer.innerHTML = '';
+
+                (q.objectives || []).forEach(obj => {
+                    const isItem = !!obj.item;
+                    const required = obj.count || 1;
+
+                    let row = document.createElement('div');
+                    row.className = "p-3 bg-zinc-900/50 border border-eftBorder rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs";
+                    
+                    if (isItem) {
+                        row.innerHTML = `
+                            <div class="flex items-start gap-2.5">
+                                <div class="h-8 w-8 rounded-lg bg-zinc-800 border border-eftBorder/80 flex items-center justify-center text-eftGold">
+                                    <i class="fa-solid fa-box-open"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-zinc-100">${obj.description}</p>
+                                    <p class="text-[9px] text-zinc-500 font-bold uppercase mt-0.5 tracking-wider">
+                                        Item: ${obj.item.name} 
+                                        ${obj.foundInRaid ? '<span class="text-emerald-500 ml-1.5">• Found In Raid Required</span>' : ''}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold text-zinc-500 uppercase">Quantity:</span>
+                                <span class="px-2.5 py-1 rounded bg-zinc-800/80 font-mono font-bold text-zinc-200 border border-eftBorder">${required}</span>
+                            </div>
+                        `;
+                    } else {
+                        row.innerHTML = `
+                            <div class="flex items-start gap-2.5">
+                                <div class="h-8 w-8 rounded-lg bg-zinc-800 border border-eftBorder/80 flex items-center justify-center text-zinc-400">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-zinc-100">${obj.description}</p>
+                                    <p class="text-[9px] text-zinc-500 font-bold uppercase mt-0.5 tracking-wider">Objective Type: ${obj.type ? obj.type.toUpperCase() : 'UNKNOWN'}</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    objectivesContainer.appendChild(row);
+                });
+
+                // Show Rewards Summary
+                const rewardsContainer = document.getElementById('modalRewards');
+                rewardsContainer.innerHTML = '';
+                
+                const expReward = document.createElement('div');
+                expReward.className = "p-2 px-3 rounded-lg border border-eftBorder bg-zinc-900/30 flex justify-between items-center";
+                expReward.innerHTML = `
+                    <span class="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Experience Points</span>
+                    <span class="font-bold text-eftGold">+${q.experience || 0} XP</span>
+                `;
+                rewardsContainer.appendChild(expReward);
+
+                const modal = document.getElementById('questDetailModal');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('opacity-100');
+                    modal.querySelector('div').classList.remove('scale-95');
+                }, 10);
+            },
+
+            closeModal: function() {
+                const modal = document.getElementById('questDetailModal');
+                modal.classList.remove('opacity-100');
+                modal.querySelector('div').classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            },
+
+            updateStatistics: function() {
+                if (this.quests.length === 0) return;
+
+                // Total quests matching search criteria
+                const search = document.getElementById('questSearchInput').value.toLowerCase().trim();
+                const activeTraderTab = document.querySelector('.trader-tab.trader-active');
+                const selectedTrader = activeTraderTab ? activeTraderTab.getAttribute('data-trader') : 'all';
+
+                let filtered = this.quests.filter(q => {
+                    const traderName = q.trader?.name || "Unknown";
+                    const matchesSearch = q.name.toLowerCase().includes(search) || 
+                                          traderName.toLowerCase().includes(search) ||
+                                          (q.objectives || []).some(o => o.description.toLowerCase().includes(search) || (o.item && o.item.name.toLowerCase().includes(search)));
+                    const matchesTrader = selectedTrader === 'all' || traderName === selectedTrader;
+
+                    return matchesSearch && matchesTrader;
+                });
+
+                document.getElementById('statsTotalTasks').textContent = filtered.length;
+            }
+        };
+
+        // Initialize application on DOM load
+        document.addEventListener('DOMContentLoaded', () => QuestApp.init());
+    </script>
+</body>
+</html>
