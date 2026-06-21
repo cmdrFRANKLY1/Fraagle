@@ -86,18 +86,6 @@
                 </p>
             </div>
 
-            <!-- Path copy field -->
-            <div class="bg-zinc-50 dark:bg-zinc-950/40 border border-lightBorder dark:border-darkBorder rounded-2xl p-4 text-left">
-                <span class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-1.5 select-none">Windows configuration path</span>
-                <div class="flex items-center gap-2">
-                    <input type="text" id="config-path-input" readonly value="C:\Users\&lt;userName&gt;\AppData\Roaming\Battlestate Games\Escape from Tarkov\Settings\Control.ini" class="flex-grow bg-transparent border-none text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 outline-none select-all font-mono" />
-                    <button id="copy-path-btn" class="py-1 px-3 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold text-[10px] rounded-lg transition uppercase tracking-wider cursor-pointer">Copy</button>
-                </div>
-                <span class="text-[9px] text-zinc-400 dark:text-zinc-500 block mt-2 select-none leading-relaxed">
-                    Pasting this path into your <b>Windows Explorer</b> or <b>File Dialog</b> opens the folder instantly.
-                </span>
-            </div>
-
             <!-- File Upload Dropzone -->
             <label id="drop-zone" class="border-2 border-dashed border-lightBorder dark:border-darkBorder hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors bg-zinc-50/50 dark:bg-zinc-900/10" title="Select your Control.ini file">
                 <input type="file" id="file-input" accept=".ini" class="hidden" />
@@ -105,7 +93,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                 </svg>
                 <div class="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase">Select Control.ini File</div>
-                <div class="text-[10px] text-zinc-400 dark:text-zinc-500">Path copies automatically. Just paste (Ctrl+V) in the file dialog!</div>
+                <div class="text-[10px] text-zinc-400 dark:text-zinc-500">Drag & drop or browse your local files to load settings safely!</div>
             </label>
 
             <!-- Bottom Option Actions -->
@@ -117,7 +105,7 @@
 
             <!-- Sandboxed Educational Privacy Tip -->
             <p class="text-[9px] text-zinc-400 dark:text-zinc-500 leading-normal italic px-2">
-                🔒 Privacy Tip: Web browsers cannot read files silently. Copy the settings path to easily load your file safely!
+                🔒 Privacy Tip: Web browsers cannot read your files silently. Please select your file manually to load and view your keybinds safely!
             </p>
         </div>
     </div>
@@ -396,7 +384,7 @@
                                                 if (key) {
                                                     parsed[key] = {
                                                         action: this.formatActionName(action),
-                                                        category: category,
+                                                        category: this.getCategoryForAction(action),
                                                         pressType: pressType,
                                                         desc: desc
                                                     };
@@ -408,37 +396,36 @@
                             });
                         }
 
-                        // Process Move and Look axisBindings
+                        // Process directional axis movement pairs
                         if (Array.isArray(json.axisBindings)) {
-                            json.axisBindings.forEach(binding => {
-                                const axisName = binding.axisName;
-                                const category = "movement";
-                                const desc = `User configured movement axis binding.`;
-
-                                if (Array.isArray(binding.pairs)) {
-                                    binding.pairs.forEach(pair => {
+                            json.axisBindings.forEach(axis => {
+                                const axisName = axis.axisName;
+                                if (Array.isArray(axis.pairs)) {
+                                    axis.pairs.forEach(pair => {
+                                        // Positive Key Binding
                                         if (pair.positive && Array.isArray(pair.positive.keyCode)) {
                                             pair.positive.keyCode.forEach(rawK => {
                                                 const key = this.normalizeKeyName(rawK);
                                                 if (key) {
                                                     parsed[key] = {
                                                         action: `${this.formatActionName(axisName)} (Positive)`,
-                                                        category: category,
-                                                        pressType: "Continuous",
-                                                        desc: desc
+                                                        category: this.getCategoryForAction(axisName),
+                                                        pressType: 'Continuous',
+                                                        desc: `Tactical movement vector mapped to directional axis.`
                                                     };
                                                 }
                                             });
                                         }
+                                        // Negative Key Binding
                                         if (pair.negative && Array.isArray(pair.negative.keyCode)) {
                                             pair.negative.keyCode.forEach(rawK => {
                                                 const key = this.normalizeKeyName(rawK);
                                                 if (key) {
                                                     parsed[key] = {
                                                         action: `${this.formatActionName(axisName)} (Negative)`,
-                                                        category: category,
-                                                        pressType: "Continuous",
-                                                        desc: desc
+                                                        category: this.getCategoryForAction(axisName),
+                                                        pressType: 'Continuous',
+                                                        desc: `Tactical movement vector mapped to directional axis.`
                                                     };
                                                 }
                                             });
@@ -449,10 +436,10 @@
                         }
                     }
                 } catch (e) {
-                    console.log("File is not JSON. Falling back to line-by-line INI parser.");
+                    console.log("JSON parsing skipped or failed, trying standard fallback INI parser...", e);
                 }
 
-                // 2. Legacy Line-by-line INI parsing
+                // 2. Fallback standard flat INI layout parser
                 if (Object.keys(parsed).length === 0) {
                     const lines = rawText.split('\n');
                     let currentAction = null;
@@ -470,7 +457,7 @@
                                             action: this.formatActionName(currentAction),
                                             category: this.getCategoryForAction(currentAction),
                                             pressType: currentPressType,
-                                            desc: `Legacy ini configuration bind. press type: ${currentPressType}.`
+                                            desc: `User configured key binding parsed from flat legacy Control file.`
                                         };
                                     }
                                 });
@@ -496,7 +483,7 @@
                                     action: this.formatActionName(currentAction),
                                     category: this.getCategoryForAction(currentAction),
                                     pressType: currentPressType,
-                                    desc: `Legacy ini configuration bind.`
+                                    desc: `User configured key binding parsed from flat legacy Control file.`
                                 };
                             }
                         });
@@ -818,6 +805,7 @@
                 if (dropZone) {
                     // Automatically copy path on drop zone click to facilitate pasting inside browser native file picker dialog!
                     dropZone.addEventListener('click', () => {
+                        // Dynamically trigger copy config path on selection drop-zone interaction
                         const input = document.getElementById('config-path-input');
                         if (input) {
                             input.select();
