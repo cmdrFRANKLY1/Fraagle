@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fraagle Apps - Twitch Live Check</title>
-    <script src="https://cdn.tailwindcss.com">
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <script>
@@ -98,7 +97,6 @@
             border: 2px solid transparent;
             transition: border-color 0.3s;
             flex-shrink: 0;
-            background: #1e293b;
         }
         .avatar-sm.live-ring {
             border-color: #22c55e;
@@ -181,6 +179,10 @@
             color: #9ca3af;
             border-bottom-color: rgba(156, 163, 175, 0.15);
         }
+        .stat-icon {
+            font-size: 12px;
+            margin-right: 2px;
+        }
 
         .loading-hidden {
             opacity: 0 !important;
@@ -201,7 +203,7 @@
             </div>
             <div>
                 <h2 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 uppercase tracking-widest font-mono">Loading Streamer List</h2>
-                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase font-semibold tracking-wider">Fetching twitchStreamerList.txt ...</p>
+                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase font-semibold tracking-wider">Loading dashboard list...</p>
             </div>
         </div>
     </div>
@@ -223,7 +225,7 @@
                 </a>
                 <div>
                     <h1 class="header-title text-xs sm:text-sm font-bold tracking-tight bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent select-none uppercase">Twitch Live Check</h1>
-                    <p class="text-[7px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Live Dashboard</p>
+                    <p class="text-[7px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 whitespace-nowrap" id="dashboardSub">Live Dashboard</p>
                 </div>
             </div>
 
@@ -262,11 +264,11 @@
                 <span class="text-base font-extrabold tracking-tight text-zinc-950 dark:text-zinc-100" id="totalCount">0</span>
             </div>
             <div class="flex flex-col items-center justify-center p-1.5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-xl shadow-lg backdrop-blur-md text-center">
-                <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center justify-center gap-0.5"><span class="text-emerald-500 text-xs">?</span> Live</span>
+                <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center justify-center gap-0.5">Live</span>
                 <span class="text-base font-extrabold tracking-tight text-emerald-500" id="liveCount">0</span>
             </div>
             <div class="flex flex-col items-center justify-center p-1.5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-xl shadow-lg backdrop-blur-md text-center">
-                <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center justify-center gap-0.5"><span class="text-rose-500 text-xs">?</span> Offline</span>
+                <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center justify-center gap-0.5">Offline</span>
                 <span class="text-base font-extrabold tracking-tight text-rose-500" id="offlineCount">0</span>
             </div>
         </section>
@@ -279,12 +281,20 @@
                 <span class="text-zinc-300 dark:text-zinc-600">|</span>
                 <span class="font-mono text-[9px]">Last update: <span id="lastUpdate">--</span></span>
             </div>
-            <button id="refreshAllBtn" class="py-1 px-3.5 font-bold text-[9px] uppercase tracking-widest bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg shadow transition duration-200 cursor-pointer flex items-center gap-1.5">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Refresh All
-            </button>
+            <div class="flex items-center gap-2">
+                <button id="editListBtn" class="py-1 px-3.5 font-bold text-[9px] uppercase tracking-widest border border-lightBorder dark:border-darkBorder bg-white/70 hover:bg-zinc-100 dark:bg-darkCard/50 dark:hover:bg-darkCard text-zinc-700 dark:text-zinc-300 rounded-lg shadow transition duration-200 cursor-pointer flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                    Edit List
+                </button>
+                <button id="refreshAllBtn" class="py-1 px-3.5 font-bold text-[9px] uppercase tracking-widest bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg shadow transition duration-200 cursor-pointer flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refresh All
+                </button>
+            </div>
         </div>
 
         <!-- Grid Container -->
@@ -294,15 +304,50 @@
 
         <!-- Footer -->
         <footer class="text-center text-[8px] font-medium text-zinc-400 dark:text-zinc-500 tracking-wide select-none py-1.5 border-t border-lightBorder dark:border-darkBorder/30 mt-1">
-            <span>Fraagle Apps · Twitch Live Check · <span id="footerVersion">v2.5</span></span>
+            <span>Fraagle Apps • Twitch Live Check • <span id="footerVersion">v2.7</span></span>
         </footer>
 
     </div>
 
+    <!-- Edit List Modal -->
+    <div id="editListModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/70 backdrop-blur-sm hidden transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard border border-lightBorder dark:border-darkBorder rounded-2xl max-w-md w-full p-5 shadow-2xl flex flex-col gap-3 transform scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider font-mono text-zinc-900 dark:text-zinc-100">Manage Streamers</h3>
+                    <p class="text-[7px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5">Customize Your Dashboard</p>
+                </div>
+                <button id="closeModalBtn" class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <p class="text-[9px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                Group streamers with <code class="bg-zinc-100 dark:bg-zinc-800 px-1 py-0.5 rounded text-indigo-500"># Category Name</code>, then add their twitch links below.
+            </p>
+
+            <textarea id="listTextArea" class="w-full h-64 bg-zinc-50 dark:bg-zinc-900/40 border border-lightBorder dark:border-darkBorder rounded-xl p-3 text-[10px] font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500 text-zinc-800 dark:text-zinc-100 resize-none" placeholder="# Variety&#10;https://twitch.tv/shroud"></textarea>
+
+            <div class="flex items-center justify-between gap-2 mt-1">
+                <button id="resetDefaultBtn" class="px-3 py-1.5 rounded-lg border border-lightBorder dark:border-darkBorder text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-[8px] font-bold uppercase tracking-widest">
+                    Reset Defaults
+                </button>
+                <div class="flex items-center gap-2">
+                    <button id="saveListBtn" class="px-4 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-[8px] uppercase tracking-widest shadow transition duration-200">
+                        Save & Reload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ================================================================
-        //  TWITCH LIVE CHECK · v2.5 – Reliable Twitch avatars via twitch.center
+        //  TWITCH LIVE CHECK • v2.7
+        //  Optimized local fallback systems for sandbox runtimes
         // ================================================================
+
+        const DEFAULT_STREAMERS = `# Esports\nhttps://twitch.tv/shroud\nhttps://twitch.tv/tarik\nhttps://twitch.tv/pestily\n\n# Variety\nhttps://twitch.tv/ninja\nhttps://twitch.tv/ludwig\nhttps://twitch.tv/pokimane\nhttps://twitch.tv/xqcow`;
 
         const LiveDashboard = {
             LIST_URL: 'twitchStreamerList.txt',
@@ -324,6 +369,15 @@
                 statusText: document.getElementById('statusText'),
                 statusDot: document.getElementById('statusDot'),
                 loadingScreen: document.getElementById('app-loading-screen'),
+                dashboardSub: document.getElementById('dashboardSub'),
+                
+                // Modal
+                editListBtn: document.getElementById('editListBtn'),
+                editListModal: document.getElementById('editListModal'),
+                closeModalBtn: document.getElementById('closeModalBtn'),
+                listTextArea: document.getElementById('listTextArea'),
+                saveListBtn: document.getElementById('saveListBtn'),
+                resetDefaultBtn: document.getElementById('resetDefaultBtn')
             },
 
             init: function() {
@@ -338,6 +392,12 @@
                         this.stopAutoRefresh();
                     }
                 });
+
+                // Modal Event Handlers
+                this.el.editListBtn.addEventListener('click', () => this.openModal());
+                this.el.closeModalBtn.addEventListener('click', () => this.closeModal());
+                this.el.saveListBtn.addEventListener('click', () => this.saveCustomList());
+                this.el.resetDefaultBtn.addEventListener('click', () => this.resetToDefaults());
 
                 this.loadStreamerListAndFetch();
 
@@ -360,6 +420,10 @@
                 }
             },
 
+            retryLoadList: function() {
+                this.loadStreamerListAndFetch();
+            },
+
             loadStreamerListAndFetch: async function() {
                 if (this.isLoading) return;
                 this.isLoading = true;
@@ -368,41 +432,44 @@
                 this.el.refreshBtn.disabled = true;
 
                 try {
-                    const url = `${this.LIST_URL}?t=${Date.now()}`;
+                    // Prevent URL compilation crashes in Blob (sandbox) environments
+                    if (window.location.protocol === 'blob:') {
+                        throw new Error("Relative fetch disabled in sandbox (blob) preview.");
+                    }
+
+                    const url = new URL(this.LIST_URL, window.location.href);
+                    url.searchParams.set('t', Date.now().toString());
+                    
                     const response = await fetch(url, { cache: 'no-store' });
                     if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
                     const text = await response.text();
 
                     const parsed = this.parseStreamerList(text);
                     this.streamers = parsed;
-
-                    this.hideLoadingScreen();
-                    await this.fetchAllStatuses();
+                    
+                    // Keep a backup of the remote config
+                    localStorage.setItem('cachedRemoteList', text);
+                    this.el.dashboardSub.textContent = "Live Dashboard • File Mode";
 
                 } catch (err) {
-                    console.error('Failed to load streamer list:', err);
-                    this.setStatus('LIST ERROR', '');
-                    this.hideLoadingScreen();
-
-                    this.el.grid.innerHTML = `
-                        <div class="col-span-full text-center text-rose-500 dark:text-rose-400 text-sm py-8">
-                            ?? Could not load <code>twitchStreamerList.txt</code><br/>
-                            <span class="text-xs text-zinc-400">${err.message}</span>
-                            <br/>
-                            <button onclick="LiveDashboard.retryLoadList()" class="mt-2 px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs transition cursor-pointer">
-                                ? Retry
-                            </button>
-                        </div>
-                    `;
-                    this.updateStats([]);
+                    console.warn('Sandbox / Fetch Warning:', err.message);
+                    
+                    // Fallback to custom user list or pre-loaded defaults
+                    let listSource = localStorage.getItem('customStreamerList');
+                    if (!listSource) {
+                        listSource = DEFAULT_STREAMERS;
+                        localStorage.setItem('customStreamerList', listSource);
+                    }
+                    
+                    const parsed = this.parseStreamerList(listSource);
+                    this.streamers = parsed;
+                    this.el.dashboardSub.textContent = "Live Dashboard • Local List Mode";
                 } finally {
+                    this.hideLoadingScreen();
+                    await this.fetchAllStatuses();
                     this.isLoading = false;
                     this.el.refreshBtn.disabled = false;
                 }
-            },
-
-            retryLoadList: function() {
-                this.loadStreamerListAndFetch();
             },
 
             parseStreamerList: function(text) {
@@ -436,7 +503,7 @@
             fetchAllStatuses: async function() {
                 if (this.streamers.length === 0) {
                     this.el.grid.innerHTML =
-                        `<div class="col-span-full text-center text-zinc-400 dark:text-zinc-500 text-sm py-8">No streamers found in list.</div>`;
+                        `<div class="col-span-full text-center text-zinc-400 dark:text-zinc-500 text-sm py-8">No streamers found in list. Click "Edit List" to add some!</div>`;
                     this.updateStats([]);
                     return;
                 }
@@ -446,22 +513,37 @@
 
                 const promises = this.streamers.map(async (s) => {
                     try {
-                        const res = await fetch(`https://decapi.me/twitch/uptime/${s.name}`, { cache: 'no-store' });
-                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                        const text = await res.text();
-                        const trimmed = text.trim().toLowerCase();
+                        const [uptimeRes, avatarRes] = await Promise.all([
+                            fetch(`https://decapi.me/twitch/uptime/${s.name}`, { cache: 'no-store' }),
+                            fetch(`https://decapi.me/twitch/avatar/${s.name}`, { cache: 'no-store' })
+                        ]);
 
-                        const isOffline = trimmed === '' ||
-                            trimmed === 'offline' ||
-                            trimmed.includes('offline') ||
-                            trimmed.includes('error') ||
-                            trimmed.includes('not found');
+                        let isLive = false;
+                        let error = false;
+                        let avatarUrl = '';
 
-                        const isLive = !isOffline && trimmed.length > 0;
+                        if (uptimeRes.ok) {
+                            const text = await uptimeRes.text();
+                            const trimmed = text.trim().toLowerCase();
 
-                        return { ...s, isLive, error: false };
+                            const isOffline = trimmed === '' ||
+                                trimmed === 'offline' ||
+                                trimmed.includes('offline') ||
+                                trimmed.includes('error') ||
+                                trimmed.includes('not found');
+
+                            isLive = !isOffline && trimmed.length > 0;
+                        } else {
+                            error = true;
+                        }
+
+                        if (avatarRes.ok) {
+                            avatarUrl = (await avatarRes.text()).trim();
+                        }
+
+                        return { ...s, isLive, avatarUrl, error };
                     } catch (err) {
-                        return { ...s, isLive: false, error: true };
+                        return { ...s, isLive: false, avatarUrl: '', error: true };
                     }
                 });
 
@@ -506,17 +588,15 @@
                         const isLive = s.isLive === true;
                         const badgeClass = isLive ? 'badge-live' : 'badge-offline';
                         const ringClass = isLive ? 'live-ring' : '';
-                        // Use twitch.center for reliable avatars, fallback to ui-avatars
-                        const avatarUrl = `https://twitch.center/customapi/avatar?user=${s.name}`;
+                        
+                        const avatarUrl = s.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.display)}&background=random&size=32&rounded=true`;
 
                         html += `
                             <div class="card-hover bg-white/60 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-xl p-2 flex items-center gap-2 transition-all duration-200">
                                 <img class="avatar-sm ${ringClass}" 
                                      src="${avatarUrl}" 
                                      alt="${s.display}" 
-                                     loading="lazy"
-                                     crossorigin="anonymous"
-                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.display)}&background=random&size=32&rounded=true&bold=true';" />
+                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.display)}&background=random&size=32&rounded=true';" />
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-1">
                                         <span class="streamer-name truncate text-zinc-900 dark:text-zinc-100">${s.display}</span>
@@ -581,6 +661,36 @@
                     if (state === 'ready') this.el.statusDot.classList.add('bg-emerald-500',
                         'shadow-[0_0_8px_rgba(16,185,129,0.6)]');
                 }
+            },
+
+            // Modal Controls
+            openModal: function() {
+                let currentList = localStorage.getItem('customStreamerList') || DEFAULT_STREAMERS;
+                this.el.listTextArea.value = currentList;
+                this.el.editListModal.classList.remove('hidden');
+                setTimeout(() => {
+                    this.el.editListModal.classList.add('opacity-100');
+                    this.el.editListModal.querySelector('div').classList.remove('scale-95');
+                }, 10);
+            },
+
+            closeModal: function() {
+                this.el.editListModal.classList.remove('opacity-100');
+                this.el.editListModal.querySelector('div').classList.add('scale-95');
+                setTimeout(() => {
+                    this.el.editListModal.classList.add('hidden');
+                }, 300);
+            },
+
+            saveCustomList: function() {
+                const text = this.el.listTextArea.value;
+                localStorage.setItem('customStreamerList', text);
+                this.closeModal();
+                this.loadStreamerListAndFetch();
+            },
+
+            resetToDefaults: function() {
+                this.el.listTextArea.value = DEFAULT_STREAMERS;
             },
 
             setupThemeToggle: function() {
