@@ -258,18 +258,18 @@
             </div>
         </header>
 
-        <!-- Stats Summary -->
+        <!-- Stats Summary - hardcoded emojis, no "??" -->
         <section class="grid grid-cols-3 gap-2">
             <div class="flex flex-col items-center justify-center p-1.5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-xl shadow-lg backdrop-blur-md text-center">
                 <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">Tracked</span>
                 <span class="text-base font-extrabold tracking-tight text-zinc-950 dark:text-zinc-100" id="totalCount">0</span>
             </div>
             <div class="flex flex-col items-center justify-center p-1.5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-xl shadow-lg backdrop-blur-md text-center">
-                <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest"><span class="stat-icon">??</span> Live</span>
+                <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center justify-center gap-0.5"><span class="text-emerald-500 text-xs">¡ñ</span> Live</span>
                 <span class="text-base font-extrabold tracking-tight text-emerald-500" id="liveCount">0</span>
             </div>
             <div class="flex flex-col items-center justify-center p-1.5 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-xl shadow-lg backdrop-blur-md text-center">
-                <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest"><span class="stat-icon">??</span> Offline</span>
+                <span class="text-[7px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest flex items-center justify-center gap-0.5"><span class="text-rose-500 text-xs">¡ñ</span> Offline</span>
                 <span class="text-base font-extrabold tracking-tight text-rose-500" id="offlineCount">0</span>
             </div>
         </section>
@@ -297,16 +297,15 @@
 
         <!-- Footer -->
         <footer class="text-center text-[8px] font-medium text-zinc-400 dark:text-zinc-500 tracking-wide select-none py-1.5 border-t border-lightBorder dark:border-darkBorder/30 mt-1">
-            <span>Fraagle Apps ? Twitch Live Check ? <span id="footerVersion">v2.3</span></span>
+            <span>Fraagle Apps ? Twitch Live Check ? <span id="footerVersion">v2.4</span></span>
         </footer>
 
     </div>
 
     <script>
         // ================================================================
-        //  TWITCH LIVE CHECK ? Dynamically loads twitchStreamerList.txt
-        //  Groups by categories (# Category) and displays live status.
-        //  v2.3 ¨C fixed stats labels (no more "??")
+        //  TWITCH LIVE CHECK ? v2.4 ¨C Fixed stats labels & avatars
+        //  Uses ui-avatars.com as reliable fallback for avatars
         // ================================================================
 
         const LiveDashboard = {
@@ -511,11 +510,15 @@
                         const isLive = s.isLive === true;
                         const badgeClass = isLive ? 'badge-live' : 'badge-offline';
                         const ringClass = isLive ? 'live-ring' : '';
+                        // Use a reliable fallback: ui-avatars.com if unavatar fails
                         const avatarUrl = `https://unavatar.io/twitch/${s.name}`;
 
                         html += `
                             <div class="card-hover bg-white/60 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-xl p-2 flex items-center gap-2 transition-all duration-200">
-                                <img class="avatar-sm ${ringClass}" src="${avatarUrl}" alt="${s.display}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.display)}&background=random&size=32'" />
+                                <img class="avatar-sm ${ringClass}" 
+                                     src="${avatarUrl}" 
+                                     alt="${s.display}" 
+                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(s.display)}&background=random&size=32&rounded=true';" />
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-1">
                                         <span class="streamer-name truncate text-zinc-900 dark:text-zinc-100">${s.display}</span>
