@@ -28,9 +28,12 @@ https://www.twitch.tv/ariathome
 # Arts & Crafts
 https://www.twitch.tv/bobross
 # Science & Technology
+https://www.twitch.tv/nasa
+https://www.twitch.tv/nasaspacestream
 https://www.twitch.tv/dynamicearthcommunitylive
 https://www.twitch.tv/monitorsasmexoficial
 https://www.twitch.tv/brainstormwarning
 https://www.twitch.tv/decryptingelectrons
-# Podcasts
+# Podcasts & variety Streamer
 https://www.twitch.tv/whatever
+https://www.twitch.tv/asmongold
