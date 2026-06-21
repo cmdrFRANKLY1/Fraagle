@@ -226,12 +226,12 @@
                 <div id="preview-inspector-card" class="bg-white/70 dark:bg-darkCard/50 border border-[#cbd5e1] dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4 h-[256px]">
                     <h3 class="text-sm font-bold text-indigo-500 dark:text-indigo-400 flex items-center space-x-2 border-b border-[#cbd5e1] dark:border-darkBorder pb-3 uppercase tracking-wider">
                         <span>⚡</span>
-                        <span>Live Key Preview</span>
+                        <span id="preview-header-title">Live Key Preview</span>
                     </h3>
                     
                     <div id="preview-empty-state" class="text-center text-zinc-400 dark:text-zinc-500 text-xs leading-relaxed flex flex-col items-center justify-center h-full">
                         <span class="text-2xl mb-2">✨</span>
-                        <span>Hover over any key or binding to preview details instantly.</span>
+                        <span>Hover or physically press any key to inspect details instantly.</span>
                     </div>
 
                     <div id="preview-active-state" class="hidden flex flex-col space-y-4">
@@ -324,6 +324,8 @@
         const App = {
             activeKeybinds: {}, // Maps raw Key character to Action objects
             selectedKey: null,  // Tracks persistently clicked/locked key
+            currentlyHoveredKey: null, // Tracks currently hovered key character
+            physicallyPressedKey: null, // Tracks physical active key down
             isCustomFileLoaded: false, // Track if a custom Control.ini was imported
 
             // Default Tarkov Keybind sets (100% clean, ready-to-inspect demo database)
@@ -372,30 +374,21 @@
                 "rctrl": "w-12"
             },
 
-            // Helper to copy default configuration path programmatically
-            copyConfigPath: function() {
-                const tempInput = document.createElement('input');
-                tempInput.value = "C:\\Users\\<userName>\\AppData\\Roaming\\Battlestate Games\\Escape from Tarkov\\Settings\\Control.ini";
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                document.execCommand('copy');
-                document.body.removeChild(tempInput);
-            },
-
             // Maps raw control.ini keyCode string tags to standard virtual keys
             normalizeKeyName: function(rawKey) {
                 if (!rawKey) return null;
                 const low = rawKey.toLowerCase();
-                if (low === 'leftshift' || low === 'rightshift') return 'shift';
-                if (low === 'leftcontrol' || low === 'rightcontrol') return 'ctrl';
-                if (low === 'leftalt' || low === 'rightalt') return 'alt';
-                if (low === 'capslock') return 'caps';
+                if (low === 'shift' || low === 'leftshift' || low === 'rightshift') return 'shift';
+                if (low === 'control' || low === 'leftcontrol' || low === 'rightcontrol') return 'ctrl';
+                if (low === 'alt' || low === 'leftalt' || low === 'rightalt') return 'alt';
+                if (low === 'capslock' || low === 'caps') return 'caps';
+                if (low === 'meta' || low === 'win') return 'win';
                 if (low.startsWith('alpha')) return low.replace('alpha', ''); // Alpha1 -> 1
-                if (low === 'space') return 'space';
+                if (low === 'space' || low === ' ') return 'space';
                 if (low === 'tab') return 'tab';
                 if (low === 'escape' || low === 'esc') return 'esc';
-                if (low === 'backslash') return '\\';
-                if (low === 'tilde') return '~';
+                if (low === 'backslash' || low === '\\') return '\\';
+                if (low === 'tilde' || low === '`') return '~';
                 return low;
             },
 
@@ -542,20 +535,6 @@
                 return parsed;
             },
 
-            getCategoryForAction: function(actionName) {
-                const low = actionName.toLowerCase();
-                if (low.includes('move') || low.includes('strafe') || low.includes('lean') || low.includes('crouch') || low.includes('prone') || low.includes('walk') || low.includes('sprint') || low.includes('jump')) {
-                    return 'movement';
-                }
-                if (low.includes('fire') || low.includes('reload') || low.includes('aim') || low.includes('grenade') || low.includes('shoot') || low.includes('ammo') || low.includes('chamber') || low.includes('scope')) {
-                    return 'combat';
-                }
-                if (low.includes('inventory') || low.includes('bag') || low.includes('pocket') || low.includes('slot')) {
-                    return 'inventory';
-                }
-                return 'interactions';
-            },
-
             // --- RENDER KEYBOARD CHIPS ---
             renderKeyboard: function() {
                 const container = document.getElementById('virtual-keyboard-grid');
@@ -586,6 +565,7 @@
 
                         // Hover Inspector Trigger
                         btn.addEventListener('mouseenter', () => {
+                            this.currentlyHoveredKey = key;
                             this.inspectKey(key);
                             // Highlight corresponding bottom action list card
                             const rowElement = document.querySelector(`[data-bind-key="${key}"]`);
@@ -594,6 +574,7 @@
                             }
                         });
                         btn.addEventListener('mouseleave', () => {
+                            this.currentlyHoveredKey = null;
                             this.inspectKey(null);
                             // Remove highlight from corresponding bottom action list card
                             const rowElement = document.querySelector(`[data-bind-key="${key}"]`);
@@ -669,25 +650,42 @@
                 }
             },
 
-            // --- RENDER LIVE MOUSE-OVER PREVIEW CARD (CARD 1) ---
+            // --- RENDER LIVE PREVIEW CARD WITH PHYSICAL/HOVER PRECEDENCE (CARD 1) ---
             inspectKey: function(key) {
+                // Physical Key Press takes precedence, fallback to hover key, then null
+                const targetKey = this.physicallyPressedKey || key || this.currentlyHoveredKey;
+                
                 const empty = document.getElementById('preview-empty-state');
                 const active = document.getElementById('preview-active-state');
                 const label = document.getElementById('active-key-label');
+                const headerTitle = document.getElementById('preview-header-title');
 
-                if (!key || !this.activeKeybinds[key]) {
+                if (!targetKey || !this.activeKeybinds[targetKey]) {
                     if (empty) empty.classList.remove('hidden');
                     if (active) active.classList.add('hidden');
-                    if (label) label.textContent = 'Hover keys to inspect';
+                    if (label) label.textContent = 'Hover or physically press keys to inspect';
+                    if (headerTitle) headerTitle.textContent = 'Live Key Preview';
                     return;
                 }
 
-                const bind = this.activeKeybinds[key];
+                const bind = this.activeKeybinds[targetKey];
                 if (empty) empty.classList.add('hidden');
                 if (active) active.classList.remove('hidden');
 
                 if (label) {
-                    label.textContent = `Inspecting trigger: [${key.toUpperCase()}]`;
+                    if (this.physicallyPressedKey === targetKey) {
+                        label.textContent = `Physical Key Held: [${targetKey.toUpperCase()}]`;
+                    } else {
+                        label.textContent = `Inspecting trigger: [${targetKey.toUpperCase()}]`;
+                    }
+                }
+
+                if (headerTitle) {
+                    if (this.physicallyPressedKey === targetKey) {
+                        headerTitle.innerHTML = `<span class="text-rose-500 dark:text-rose-400">⚡ Physical Key Held</span>`;
+                    } else {
+                        headerTitle.textContent = 'Live Key Preview';
+                    }
                 }
 
                 const badge = document.getElementById('preview-key-badge');
@@ -697,7 +695,7 @@
                 const bindingDesc = document.getElementById('preview-binding-description');
                 const conflictEl = document.getElementById('preview-conflict-warning');
 
-                if (badge) badge.textContent = key;
+                if (badge) badge.textContent = targetKey;
                 if (actionName) actionName.textContent = bind.action;
                 if (actionCategory) actionCategory.textContent = bind.category;
                 if (pressType) pressType.textContent = bind.pressType;
@@ -768,6 +766,7 @@
                     `;
 
                     row.addEventListener('mouseenter', () => {
+                        this.currentlyHoveredKey = key;
                         const virtualKey = document.querySelector(`[data-key="${key}"]`);
                         if (virtualKey && !isSelected) {
                             virtualKey.classList.add('scale-110', 'border-indigo-500', 'bg-indigo-500/20', 'text-indigo-600', 'dark:text-indigo-400');
@@ -775,6 +774,7 @@
                         this.inspectKey(key);
                     });
                     row.addEventListener('mouseleave', () => {
+                        this.currentlyHoveredKey = null;
                         const virtualKey = document.querySelector(`[data-key="${key}"]`);
                         if (virtualKey && !isSelected) {
                             virtualKey.classList.remove('scale-110', 'border-indigo-500', 'bg-indigo-500/20', 'text-indigo-600', 'dark:text-indigo-400');
@@ -981,6 +981,49 @@
                         applyGradientState(nextGradient);
                     });
                 }
+
+                // --- 12. PHYSICAL KEYBOARD INPUT CAPTURING INTERACTIVE ENGINE ---
+                window.addEventListener('keydown', (e) => {
+                    // Ignore physical keys when focusing on search input
+                    if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT')) {
+                        return;
+                    }
+
+                    const normalized = this.normalizeKeyName(e.key);
+                    if (normalized && this.activeKeybinds[normalized] !== undefined) {
+                        e.preventDefault();
+                        this.physicallyPressedKey = normalized;
+
+                        // Visual flash highlight feedback on the virtual combat board
+                        const keyElement = document.querySelector(`[data-key="${normalized}"]`);
+                        if (keyElement) {
+                            keyElement.classList.add('ring-4', 'ring-rose-500/60', 'scale-105', 'z-20');
+                        }
+
+                        // Re-trigger live preview with absolute physical press precedence
+                        this.inspectKey(normalized);
+                    }
+                });
+
+                window.addEventListener('keyup', (e) => {
+                    if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT')) {
+                        return;
+                    }
+
+                    const normalized = this.normalizeKeyName(e.key);
+                    if (normalized) {
+                        const keyElement = document.querySelector(`[data-key="${normalized}"]`);
+                        if (keyElement) {
+                            keyElement.classList.remove('ring-4', 'ring-rose-500/60', 'scale-105', 'z-20');
+                        }
+
+                        if (this.physicallyPressedKey === normalized) {
+                            this.physicallyPressedKey = null;
+                            // Revert live preview safely back to hovered key, or empty state
+                            this.inspectKey(this.currentlyHoveredKey);
+                        }
+                    }
+                });
             }
         };
 
