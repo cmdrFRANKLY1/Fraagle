@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fraagle Apps - Willerz Live Check</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <script>
+        // Immediately inject correct theme class
+        (function() {
+            const userTheme = localStorage.getItem('theme') || 'dark';
+            if (userTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#09090b',
+                        darkCard: '#18181b',
+                        darkBorder: '#27272a',
+                        lightBg: '#f8f9fa',
+                        lightCard: '#ffffff',
+                        lightBorder: '#e2e8f0',
+                        fraagleBlue: '#3b82f6',
+                        fraagleRed: '#ef4444',
+                        fraagleYellow: '#f59e0b',
+                        fraagleGreen: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        h1,
+        .header-title {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.25);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.45);
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+        .float-anim {
+            animation: float 2.5s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+        }
+        .pulse-dot {
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: background-color 0.3s;
+        }
+        .dot-live {
+            background-color: #22c55e;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
+        }
+        .dot-offline {
+            background-color: #ef4444;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+        }
+        .dot-unknown {
+            background-color: #6b7280;
+        }
+        .avatar-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--border-color, #e2e8f0);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.3s;
+        }
+        .dark .avatar-container {
+            border-color: #27272a;
+        }
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .status-badge {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #09090b;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .dark .status-badge {
+            background: #1e293b;
+            border-color: #27272a;
+        }
+        .status-badge .status-dot {
+            width: 18px;
+            height: 18px;
+            border: none;
+        }
+        /* Loading shimmer */
+        .shimmer {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden p-6 select-none">
+
+    <!-- Loading Screen -->
+    <div id="app-loading-screen" class="fixed inset-0 bg-lightBg dark:bg-darkBg z-50 flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out">
+        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col items-center space-y-4 text-center">
+            <div class="relative w-16 h-16 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-4 border-zinc-200 dark:border-zinc-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+            <div>
+                <h2 class="font-bold text-sm text-zinc-900 dark:text-zinc-100 uppercase tracking-widest font-mono">Checking Willerz</h2>
+                <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 uppercase font-semibold tracking-wider">Fetching live status from Twitch...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ambient Glows -->
+    <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+    <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+
+    <!-- Main Container -->
+    <div class="max-w-4xl w-full mx-auto flex flex-col gap-6 relative z-10">
+
+        <!-- Header -->
+        <header class="flex items-center justify-between p-4 bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl backdrop-blur-md relative select-none z-20">
+            <div class="flex items-center space-x-3">
+                <a href="../index.html" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white hover:bg-zinc-50 dark:bg-darkCard/50 dark:hover:bg-darkCard transition-all duration-200 text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer shadow-sm" title="Back to Index">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="header-title text-sm sm:text-base font-bold tracking-tight bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent select-none uppercase">Live Check</h1>
+                    <p class="text-[9px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Willerz · Status</p>
+                </div>
+            </div>
+
+            <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex flex-col items-center justify-center text-center select-none z-0">
+                <span id="clock-time" class="text-xs sm:text-sm font-bold tracking-wider text-zinc-700 dark:text-zinc-200">00:00:00</span>
+                <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-0.5 whitespace-nowrap">Sunday, June 21, 2026</span>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-3 relative z-10">
+                <div class="hidden lg:flex items-center space-x-2 text-[9px] font-bold tracking-wider uppercase border border-lightBorder dark:border-darkBorder px-3 py-1.5 rounded-full bg-white/30 dark:bg-darkCard/30 text-zinc-500 dark:text-zinc-400">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-zinc-400 animate-pulse" id="statusDot"></span>
+                    <span id="statusText">INITIALIZING...</span>
+                </div>
+
+                <button id="gradient-toggle" class="p-2 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Glow Gradients">
+                    <svg class="w-4.5 h-4.5 text-zinc-600 dark:text-zinc-300 pointer-events-none transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
+                    </svg>
+                </button>
+
+                <button id="theme-toggle" class="p-2 rounded-lg border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard transition-all focus:outline-none flex items-center justify-center cursor-pointer shadow-sm" aria-label="Toggle Theme">
+                    <svg id="theme-toggle-sun-icon" class="hidden w-4.5 h-4.5 text-yellow-500 pointer-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    <svg id="theme-toggle-moon-icon" class="hidden w-4.5 h-4.5 text-zinc-100 pointer-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content: Live Check Card -->
+        <main class="bg-white/70 dark:bg-darkCard/50 border border-lightBorder dark:border-darkBorder rounded-3xl p-8 shadow-2xl backdrop-blur-md transition-all duration-300 relative overflow-hidden">
+            <div class="flex flex-col items-center justify-center gap-6 py-8">
+
+                <!-- Avatar with status badge -->
+                <div class="avatar-container relative" id="avatarContainer">
+                    <img id="avatarImg" src="https://unavatar.io/twitch/willerz" alt="Willerz" onerror="this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80'" />
+                    <div class="status-badge" id="statusBadge">
+                        <span class="status-dot dot-unknown" id="liveDot"></span>
+                    </div>
+                </div>
+
+                <!-- Channel Name -->
+                <h2 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                    <span>willerz</span>
+                    <span class="text-xs font-mono bg-zinc-200 dark:bg-zinc-800 px-2 py-0.5 rounded-full text-zinc-500 dark:text-zinc-400">twitch.tv</span>
+                </h2>
+
+                <!-- Status Text & Last Checked -->
+                <div class="flex flex-col items-center gap-2 text-sm">
+                    <div id="statusMessage" class="font-semibold text-zinc-600 dark:text-zinc-300 flex items-center gap-2">
+                        <span id="statusLabel">Checking...</span>
+                    </div>
+                    <div id="uptimeDisplay" class="text-xs font-mono text-zinc-400 dark:text-zinc-500 hidden">Uptime: <span id="uptimeText">--</span></div>
+                    <div class="text-[10px] text-zinc-400 dark:text-zinc-500">Last updated: <span id="lastUpdate">--</span></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 mt-2">
+                    <button id="refreshBtn" class="py-2 px-6 font-bold text-xs uppercase tracking-widest bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl shadow-lg transition duration-200 cursor-pointer flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh
+                    </button>
+                    <a href="https://www.twitch.tv/willerz" target="_blank" rel="noopener noreferrer" class="py-2 px-6 font-bold text-xs uppercase tracking-widest bg-[#9146ff] hover:bg-[#7a3bc0] text-white rounded-xl shadow-lg transition duration-200 cursor-pointer flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M11.64 5.93h1.43v4.28h-1.43m3.57-4.28h1.43v4.28h-1.43m-7.14 0H7.07v4.28h1.43m8.57-7.14L17.5 1H6.5L2 5.5v12.86h3.57V23l4.29-4.29h5.36L21 14.5V5.5l-2.5-2.5zm-13.57 2.5L9.5 2.43h9.43L21 5.5v7.5l-2.5 2.5H12.5l-3.57 3.57v-3.57H5.5V5.5z"/>
+                        </svg>
+                        Watch
+                    </a>
+                </div>
+
+                <!-- Auto-refresh toggle -->
+                <div class="flex items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500 mt-2">
+                    <input type="checkbox" id="autoRefreshCheck" checked class="w-3.5 h-3.5 accent-indigo-500 cursor-pointer" />
+                    <label for="autoRefreshCheck" class="cursor-pointer select-none">Auto-refresh every 60s</label>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center text-[9px] font-medium text-zinc-400 dark:text-zinc-500 tracking-wide select-none py-2 border-t border-lightBorder dark:border-darkBorder/30 mt-4">
+            <span>Fraagle Apps · Live Check · <span id="footerVersion">v1.0</span></span>
+        </footer>
+
+    </div>
+
+    <script>
+        // ================================================================
+        //  LIVE CHECK · Willerz Twitch Status
+        // ================================================================
+
+        const LiveCheck = {
+            CHANNEL: 'willerz',
+            STATUS_URL: 'https://decapi.me/twitch/uptime/willerz',
+            AVATAR_URL: 'https://unavatar.io/twitch/willerz',
+
+            el: {
+                statusDot: document.getElementById('liveDot'),
+                statusLabel: document.getElementById('statusLabel'),
+                statusMessage: document.getElementById('statusMessage'),
+                uptimeDisplay: document.getElementById('uptimeDisplay'),
+                uptimeText: document.getElementById('uptimeText'),
+                lastUpdate: document.getElementById('lastUpdate'),
+                refreshBtn: document.getElementById('refreshBtn'),
+                autoRefreshCheck: document.getElementById('autoRefreshCheck'),
+                avatarImg: document.getElementById('avatarImg'),
+                statusBadge: document.getElementById('statusBadge'),
+                statusText: document.getElementById('statusText'),
+                statusDotHeader: document.getElementById('statusDot'),
+            },
+
+            isLive: false,
+            lastChecked: null,
+            autoRefreshInterval: null,
+
+            init: function() {
+                // Set initial avatar
+                this.el.avatarImg.src = this.AVATAR_URL;
+
+                // Bind refresh
+                this.el.refreshBtn.addEventListener('click', () => this.checkStatus());
+
+                // Auto-refresh toggle
+                this.el.autoRefreshCheck.addEventListener('change', () => {
+                    if (this.el.autoRefreshCheck.checked) {
+                        this.startAutoRefresh();
+                    } else {
+                        this.stopAutoRefresh();
+                    }
+                });
+
+                // Initial check
+                this.checkStatus();
+
+                // Start auto-refresh if checked
+                if (this.el.autoRefreshCheck.checked) {
+                    this.startAutoRefresh();
+                }
+
+                // Setup theme, gradient, clock
+                this.setupThemeToggle();
+                this.setupGradientToggle();
+                this.setupClock();
+
+                // Hide loading screen
+                setTimeout(() => {
+                    const loader = document.getElementById('app-loading-screen');
+                    if (loader) {
+                        loader.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => loader.remove(), 500);
+                    }
+                }, 1000);
+            },
+
+            // --- STATUS CHECK ---
+            checkStatus: function() {
+                this.setStatus('CHECKING...', 'loading');
+                this.el.statusLabel.textContent = 'Checking...';
+                this.el.statusDot.className = 'status-dot dot-unknown';
+
+                fetch(this.STATUS_URL, {
+                        cache: 'no-store',
+                        headers: { 'Accept': 'text/plain' }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        return response.text();
+                    })
+                    .then(data => {
+                        const text = data.trim();
+                        const isLive = text !== 'offline' && text.length > 0;
+                        this.isLive = isLive;
+                        this.updateUI(isLive, text);
+                        this.lastChecked = new Date();
+                        this.updateLastUpdate();
+                        this.setStatus(isLive ? 'LIVE' : 'OFFLINE', isLive ? 'ready' : '');
+                        this.el.autoRefreshCheck.checked = true; // ensure it stays on
+                    })
+                    .catch(err => {
+                        console.error('Status fetch error:', err);
+                        this.el.statusLabel.textContent = 'Error fetching status';
+                        this.el.statusDot.className = 'status-dot dot-unknown';
+                        this.setStatus('ERROR', '');
+                        this.el.uptimeDisplay.classList.add('hidden');
+                    });
+            },
+
+            updateUI: function(isLive, uptime) {
+                const dot = this.el.statusDot;
+                const label = this.el.statusLabel;
+                const uptimeEl = this.el.uptimeDisplay;
+                const uptimeText = this.el.uptimeText;
+
+                if (isLive) {
+                    dot.className = 'status-dot dot-live pulse-dot';
+                    label.textContent = '🔴 LIVE NOW';
+                    label.className = 'text-emerald-500 dark:text-emerald-400 font-bold';
+                    uptimeEl.classList.remove('hidden');
+                    uptimeText.textContent = uptime; // decapi returns e.g. "2h 34m"
+                } else {
+                    dot.className = 'status-dot dot-offline';
+                    label.textContent = '⬤ OFFLINE';
+                    label.className = 'text-rose-500 dark:text-rose-400 font-bold';
+                    uptimeEl.classList.add('hidden');
+                }
+            },
+
+            updateLastUpdate: function() {
+                if (this.lastChecked) {
+                    this.el.lastUpdate.textContent = this.lastChecked.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit',
+                        second: '2-digit' });
+                }
+            },
+
+            setStatus: function(text, state) {
+                const el = this.el.statusText;
+                const dot = this.el.statusDotHeader;
+                if (el) el.textContent = text;
+                if (dot) {
+                    dot.className = 'w-1.5 h-1.5 rounded-full bg-zinc-400';
+                    if (state === 'loading') dot.classList.add('bg-[#107c41]', 'animate-pulse');
+                    if (state === 'ready') dot.classList.add('bg-emerald-500', 'shadow-[0_0_8px_rgba(16,185,129,0.6)]');
+                }
+            },
+
+            // --- AUTO REFRESH ---
+            startAutoRefresh: function() {
+                if (this.autoRefreshInterval) clearInterval(this.autoRefreshInterval);
+                this.autoRefreshInterval = setInterval(() => {
+                    this.checkStatus();
+                }, 60000);
+            },
+
+            stopAutoRefresh: function() {
+                if (this.autoRefreshInterval) {
+                    clearInterval(this.autoRefreshInterval);
+                    this.autoRefreshInterval = null;
+                }
+            },
+
+            // --- THEME TOGGLE ---
+            setupThemeToggle: function() {
+                const btn = document.getElementById('theme-toggle');
+                const sun = document.getElementById('theme-toggle-sun-icon');
+                const moon = document.getElementById('theme-toggle-moon-icon');
+
+                const applyTheme = (theme) => {
+                    if (theme === 'dark') {
+                        document.documentElement.classList.add('dark');
+                        sun.classList.add('hidden');
+                        moon.classList.remove('hidden');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        sun.classList.remove('hidden');
+                        moon.classList.add('hidden');
+                    }
+                    localStorage.setItem('theme', theme);
+                };
+
+                const current = localStorage.getItem('theme') || 'dark';
+                applyTheme(current);
+
+                btn.addEventListener('click', () => {
+                    const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                    applyTheme(next);
+                });
+            },
+
+            // --- GRADIENT TOGGLE ---
+            setupGradientToggle: function() {
+                const btn = document.getElementById('gradient-toggle');
+                const g1 = document.getElementById('ambient-glow-1');
+                const g2 = document.getElementById('ambient-glow-2');
+
+                const apply = (state) => {
+                    if (state === 'enabled') {
+                        g1.classList.remove('opacity-0', 'pointer-events-none');
+                        g2.classList.remove('opacity-0', 'pointer-events-none');
+                        btn.classList.remove('opacity-40');
+                    } else {
+                        g1.classList.add('opacity-0', 'pointer-events-none');
+                        g2.classList.add('opacity-0', 'pointer-events-none');
+                        btn.classList.add('opacity-40');
+                    }
+                };
+
+                const saved = localStorage.getItem('ambient-glow') || 'enabled';
+                apply(saved);
+
+                btn.addEventListener('click', () => {
+                    const current = localStorage.getItem('ambient-glow') || 'enabled';
+                    const next = current === 'enabled' ? 'disabled' : 'enabled';
+                    localStorage.setItem('ambient-glow', next);
+                    apply(next);
+                });
+            },
+
+            // --- CLOCK ---
+            setupClock: function() {
+                const update = () => {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit',
+                        hour12: false });
+                    const dateStr = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long',
+                        day: 'numeric' });
+                    const te = document.getElementById('clock-time');
+                    const de = document.getElementById('clock-date');
+                    if (te) te.textContent = timeStr;
+                    if (de) de.textContent = dateStr;
+                };
+                setInterval(update, 1000);
+                update();
+            }
+        };
+
+        // --- BOOT ---
+        document.addEventListener('DOMContentLoaded', () => LiveCheck.init());
+    </script>
+</body>
+</html>

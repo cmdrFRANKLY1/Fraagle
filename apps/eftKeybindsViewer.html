@@ -73,8 +73,8 @@
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden p-6 select-none">
 
     <!-- Interactive Permission & Sync Request Overlay Screen -->
-    <div id="permission-screen" class="fixed inset-0 bg-lightBg/95 dark:bg-darkBg/95 z-50 flex flex-col items-center justify-center transition-all duration-500 ease-in-out">
-        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none"></div>
+    <div id="permission-screen" class="fixed inset-0 bg-lightBg/95 dark:bg-darkBg/95 z-50 flex flex-col items-center justify-center transition-opacity duration-500 ease-in-out">
+        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none font-sans"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none"></div>
         
         <div class="relative z-10 w-full max-w-lg mx-4 p-6 bg-white dark:bg-darkCard border border-lightBorder dark:border-darkBorder rounded-3xl shadow-2xl backdrop-blur-md flex flex-col gap-5 text-center animate-fade-in">
@@ -374,6 +374,16 @@
                 "rctrl": "w-12"
             },
 
+            // Helper to copy default configuration path programmatically
+            copyConfigPath: function() {
+                const tempInput = document.createElement('input');
+                tempInput.value = "C:\\Users\\<userName>\\AppData\\Roaming\\Battlestate Games\\Escape from Tarkov\\Settings\\Control.ini";
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+            },
+
             // Maps raw control.ini keyCode string tags to standard virtual keys
             normalizeKeyName: function(rawKey) {
                 if (!rawKey) return null;
@@ -415,18 +425,18 @@
                             json.keyBindings.forEach(binding => {
                                 const action = binding.keyName;
                                 const pressType = binding.pressType || "Press";
-                                const category = this.getCategoryForAction(action);
+                                const category = App.getCategoryForAction(action);
                                 const desc = `User key binding. Configured Press Trigger type: ${pressType}.`;
 
                                 if (Array.isArray(binding.variants)) {
                                     binding.variants.forEach(variant => {
                                         if (Array.isArray(variant.keyCode)) {
                                             variant.keyCode.forEach(rawK => {
-                                                const key = this.normalizeKeyName(rawK);
+                                                const key = App.normalizeKeyName(rawK);
                                                 if (key) {
                                                     parsed[key] = {
-                                                        action: this.formatActionName(action),
-                                                        category: this.getCategoryForAction(action),
+                                                        action: App.formatActionName(action),
+                                                        category: App.getCategoryForAction(action),
                                                         pressType: pressType,
                                                         desc: desc
                                                     };
@@ -447,11 +457,11 @@
                                         // Positive Key Binding
                                         if (pair.positive && Array.isArray(pair.positive.keyCode)) {
                                             pair.positive.keyCode.forEach(rawK => {
-                                                const key = this.normalizeKeyName(rawK);
+                                                const key = App.normalizeKeyName(rawK);
                                                 if (key) {
                                                     parsed[key] = {
-                                                        action: `${this.formatActionName(axisName)} (Positive)`,
-                                                        category: this.getCategoryForAction(axisName),
+                                                        action: `${App.formatActionName(axisName)} (Positive)`,
+                                                        category: App.getCategoryForAction(axisName),
                                                         pressType: 'Continuous',
                                                         desc: `Tactical movement vector mapped to directional axis.`
                                                     };
@@ -461,11 +471,11 @@
                                         // Negative Key Binding
                                         if (pair.negative && Array.isArray(pair.negative.keyCode)) {
                                             pair.negative.keyCode.forEach(rawK => {
-                                                const key = this.normalizeKeyName(rawK);
+                                                const key = App.normalizeKeyName(rawK);
                                                 if (key) {
                                                     parsed[key] = {
-                                                        action: `${this.formatActionName(axisName)} (Negative)`,
-                                                        category: this.getCategoryForAction(axisName),
+                                                        action: `${App.formatActionName(axisName)} (Negative)`,
+                                                        category: App.getCategoryForAction(axisName),
                                                         pressType: 'Continuous',
                                                         desc: `Tactical movement vector mapped to directional axis.`
                                                     };
@@ -493,11 +503,11 @@
                         if (clean.startsWith('[') && clean.endsWith(']')) {
                             if (currentAction && currentKeys.length > 0) {
                                 currentKeys.forEach(rawK => {
-                                    const k = this.normalizeKeyName(rawK);
+                                    const k = App.normalizeKeyName(rawK);
                                     if (k) {
                                         parsed[k] = {
-                                            action: this.formatActionName(currentAction),
-                                            category: this.getCategoryForAction(currentAction),
+                                            action: App.formatActionName(currentAction),
+                                            category: App.getCategoryForAction(currentAction),
                                             pressType: currentPressType,
                                             desc: `User configured key binding parsed from flat legacy Control file.`
                                         };
@@ -519,11 +529,11 @@
 
                     if (currentAction && currentKeys.length > 0) {
                         currentKeys.forEach(rawK => {
-                            const k = this.normalizeKeyName(rawK);
+                            const k = App.normalizeKeyName(rawK);
                             if (k) {
                                 parsed[k] = {
-                                    action: this.formatActionName(currentAction),
-                                    category: this.getCategoryForAction(currentAction),
+                                    action: App.formatActionName(currentAction),
+                                    category: App.getCategoryForAction(currentAction),
                                     pressType: currentPressType,
                                     desc: `User configured key binding parsed from flat legacy Control file.`
                                 };
@@ -535,19 +545,33 @@
                 return parsed;
             },
 
+            getCategoryForAction: function(actionName) {
+                const low = actionName.toLowerCase();
+                if (low.includes('move') || low.includes('strafe') || low.includes('lean') || low.includes('crouch') || low.includes('prone') || low.includes('walk') || low.includes('sprint') || low.includes('jump')) {
+                    return 'movement';
+                }
+                if (low.includes('fire') || low.includes('reload') || low.includes('aim') || low.includes('grenade') || low.includes('shoot') || low.includes('ammo') || low.includes('chamber') || low.includes('scope')) {
+                    return 'combat';
+                }
+                if (low.includes('inventory') || low.includes('bag') || low.includes('pocket') || low.includes('slot')) {
+                    return 'inventory';
+                }
+                return 'interactions';
+            },
+
             // --- RENDER KEYBOARD CHIPS ---
             renderKeyboard: function() {
                 const container = document.getElementById('virtual-keyboard-grid');
                 container.innerHTML = '';
 
-                this.KEYBOARD_LAYOUT.forEach(row => {
+                App.KEYBOARD_LAYOUT.forEach(row => {
                     const rowDiv = document.createElement('div');
                     rowDiv.className = 'flex gap-1.5 w-full justify-center';
                     
                     row.forEach(key => {
-                        const widthClass = this.KEY_WIDTHS[key] || "w-8.5 sm:w-10";
-                        const isBound = this.activeKeybinds[key] !== undefined;
-                        const isSelected = this.selectedKey === key;
+                        const widthClass = App.KEY_WIDTHS[key] || "w-8.5 sm:w-10";
+                        const isBound = App.activeKeybinds[key] !== undefined;
+                        const isSelected = App.selectedKey === key;
 
                         const btn = document.createElement('div');
                         btn.className = `keyboard-key ${widthClass} h-10 border rounded-lg flex items-center justify-center font-bold text-[10px] uppercase shadow-sm relative cursor-pointer select-none `;
@@ -565,8 +589,8 @@
 
                         // Hover Inspector Trigger
                         btn.addEventListener('mouseenter', () => {
-                            this.currentlyHoveredKey = key;
-                            this.inspectKey(key);
+                            App.currentlyHoveredKey = key;
+                            App.inspectKey(key);
                             // Highlight corresponding bottom action list card
                             const rowElement = document.querySelector(`[data-bind-key="${key}"]`);
                             if (rowElement && !rowElement.dataset.isSelectedRow) {
@@ -574,8 +598,8 @@
                             }
                         });
                         btn.addEventListener('mouseleave', () => {
-                            this.currentlyHoveredKey = null;
-                            this.inspectKey(null);
+                            App.currentlyHoveredKey = null;
+                            App.inspectKey(null);
                             // Remove highlight from corresponding bottom action list card
                             const rowElement = document.querySelector(`[data-bind-key="${key}"]`);
                             if (rowElement && !rowElement.dataset.isSelectedRow) {
@@ -586,7 +610,7 @@
                         // Permanent selection click handler
                         btn.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            this.toggleKeySelection(key);
+                            App.toggleKeySelection(key);
                         });
 
                         rowDiv.appendChild(btn);
@@ -598,30 +622,30 @@
 
             // --- TOGGLE KEY PERMANENT SELECTION ---
             toggleKeySelection: function(key) {
-                if (this.selectedKey === key) {
-                    this.selectedKey = null; // Toggle Off
+                if (App.selectedKey === key) {
+                    App.selectedKey = null; // Toggle Off
                 } else {
-                    this.selectedKey = key; // Toggle On
+                    App.selectedKey = key; // Toggle On
                 }
-                this.renderKeyboard();
-                this.renderBindingsList();
-                this.inspectKey(null); // Refreshes Live Preview Card (Card 1)
-                this.updatePinnedInspector(); // Refreshes Pinned Selection Card (Card 2)
+                App.renderKeyboard();
+                App.renderBindingsList();
+                App.inspectKey(null); // Refreshes Live Preview Card (Card 1)
+                App.updatePinnedInspector(); // Refreshes Pinned Selection Card (Card 2)
             },
 
             // --- RECONCILE & RENDER PINNED SELECTION CARD (CARD 2) ---
             updatePinnedInspector: function() {
-                const key = this.selectedKey;
+                const key = App.selectedKey;
                 const empty = document.getElementById('pinned-empty-state');
                 const active = document.getElementById('pinned-active-state');
 
-                if (!key || !this.activeKeybinds[key]) {
+                if (!key || !App.activeKeybinds[key]) {
                     if (empty) empty.classList.remove('hidden');
                     if (active) active.classList.add('hidden');
                     return;
                 }
 
-                const bind = this.activeKeybinds[key];
+                const bind = App.activeKeybinds[key];
                 if (empty) empty.classList.add('hidden');
                 if (active) active.classList.remove('hidden');
 
@@ -639,7 +663,7 @@
                 if (bindingDesc) bindingDesc.textContent = bind.desc;
 
                 if (conflictEl) {
-                    const isConflict = Object.values(this.activeKeybinds).filter(b => b.action === bind.action).length > 1;
+                    const isConflict = Object.values(App.activeKeybinds).filter(b => b.action === bind.action).length > 1;
                     if (isConflict) {
                         conflictEl.textContent = 'Potential Conflict';
                         conflictEl.className = 'font-bold text-rose-500 animate-pulse';
@@ -653,14 +677,14 @@
             // --- RENDER LIVE PREVIEW CARD WITH PHYSICAL/HOVER PRECEDENCE (CARD 1) ---
             inspectKey: function(key) {
                 // Physical Key Press takes precedence, fallback to hover key, then null
-                const targetKey = this.physicallyPressedKey || key || this.currentlyHoveredKey;
+                const targetKey = App.physicallyPressedKey || key || App.currentlyHoveredKey;
                 
                 const empty = document.getElementById('preview-empty-state');
                 const active = document.getElementById('preview-active-state');
                 const label = document.getElementById('active-key-label');
                 const headerTitle = document.getElementById('preview-header-title');
 
-                if (!targetKey || !this.activeKeybinds[targetKey]) {
+                if (!targetKey || !App.activeKeybinds[targetKey]) {
                     if (empty) empty.classList.remove('hidden');
                     if (active) active.classList.add('hidden');
                     if (label) label.textContent = 'Hover or physically press keys to inspect';
@@ -668,12 +692,12 @@
                     return;
                 }
 
-                const bind = this.activeKeybinds[targetKey];
+                const bind = App.activeKeybinds[targetKey];
                 if (empty) empty.classList.add('hidden');
                 if (active) active.classList.remove('hidden');
 
                 if (label) {
-                    if (this.physicallyPressedKey === targetKey) {
+                    if (App.physicallyPressedKey === targetKey) {
                         label.textContent = `Physical Key Held: [${targetKey.toUpperCase()}]`;
                     } else {
                         label.textContent = `Inspecting trigger: [${targetKey.toUpperCase()}]`;
@@ -681,7 +705,7 @@
                 }
 
                 if (headerTitle) {
-                    if (this.physicallyPressedKey === targetKey) {
+                    if (App.physicallyPressedKey === targetKey) {
                         headerTitle.innerHTML = `<span class="text-rose-500 dark:text-rose-400">⚡ Physical Key Held</span>`;
                     } else {
                         headerTitle.textContent = 'Live Key Preview';
@@ -702,7 +726,7 @@
                 if (bindingDesc) bindingDesc.textContent = bind.desc;
 
                 if (conflictEl) {
-                    const isConflict = Object.values(this.activeKeybinds).filter(b => b.action === bind.action).length > 1;
+                    const isConflict = Object.values(App.activeKeybinds).filter(b => b.action === bind.action).length > 1;
                     if (isConflict) {
                         conflictEl.textContent = 'Potential Conflict';
                         conflictEl.className = 'font-bold text-rose-500 animate-pulse';
@@ -721,7 +745,7 @@
                 const searchVal = document.getElementById('binds-search').value.toLowerCase().trim();
                 const catVal = document.getElementById('binds-category-filter').value;
 
-                let entries = Object.entries(this.activeKeybinds);
+                let entries = Object.entries(App.activeKeybinds);
 
                 if (catVal !== 'all') {
                     entries = entries.filter(([key, bind]) => bind.category === catVal);
@@ -744,7 +768,7 @@
 
                 entries.forEach(([key, bind]) => {
                     const row = document.createElement('div');
-                    const isSelected = this.selectedKey === key;
+                    const isSelected = App.selectedKey === key;
 
                     if (isSelected) {
                         row.className = 'flex items-center justify-between p-3 border-2 border-indigo-600 dark:border-indigo-400 bg-indigo-50/10 dark:bg-indigo-950/20 scale-[1.01] shadow-lg rounded-xl transition-all';
@@ -766,26 +790,26 @@
                     `;
 
                     row.addEventListener('mouseenter', () => {
-                        this.currentlyHoveredKey = key;
+                        App.currentlyHoveredKey = key;
                         const virtualKey = document.querySelector(`[data-key="${key}"]`);
                         if (virtualKey && !isSelected) {
                             virtualKey.classList.add('scale-110', 'border-indigo-500', 'bg-indigo-500/20', 'text-indigo-600', 'dark:text-indigo-400');
                         }
-                        this.inspectKey(key);
+                        App.inspectKey(key);
                     });
                     row.addEventListener('mouseleave', () => {
-                        this.currentlyHoveredKey = null;
+                        App.currentlyHoveredKey = null;
                         const virtualKey = document.querySelector(`[data-key="${key}"]`);
                         if (virtualKey && !isSelected) {
                             virtualKey.classList.remove('scale-110', 'border-indigo-500', 'bg-indigo-500/20', 'text-indigo-600', 'dark:text-indigo-400');
                         }
-                        this.inspectKey(null);
+                        App.inspectKey(null);
                     });
 
                     // Direct list row click permanent selector
                     row.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        this.toggleKeySelection(key);
+                        App.toggleKeySelection(key);
                     });
 
                     container.appendChild(row);
@@ -806,11 +830,11 @@
             },
 
             loadDemoDatabase: function() {
-                this.activeKeybinds = { ...this.DEMO_DATABASE };
-                this.renderKeyboard();
-                this.renderBindingsList();
-                this.updatePinnedInspector();
-                this.setStatus('DEMO SYNCED', 'ready');
+                App.activeKeybinds = { ...App.DEMO_DATABASE };
+                App.renderKeyboard();
+                App.renderBindingsList();
+                App.updatePinnedInspector();
+                App.setStatus('DEMO SYNCED', 'ready');
 
                 const overlay = document.getElementById('permission-screen');
                 if (overlay) {
@@ -821,11 +845,11 @@
 
             init: function() {
                 // Initialize default triggers and load demo database immediately
-                this.setStatus('AWAITING FILE...', 'loading');
-                this.activeKeybinds = { ...this.DEMO_DATABASE };
-                this.renderKeyboard();
-                this.renderBindingsList();
-                this.updatePinnedInspector();
+                App.setStatus('AWAITING FILE...', 'loading');
+                App.activeKeybinds = { ...App.DEMO_DATABASE };
+                App.renderKeyboard();
+                App.renderBindingsList();
+                App.updatePinnedInspector();
 
                 // Clipboard copy button
                 const copyBtn = document.getElementById('copy-path-btn');
@@ -865,24 +889,24 @@
 
                 const handleFiles = (files) => {
                     const file = files[0];
-                    if (!file || !file.name.endsWith('.ini')) return;
+                    if (!file) return;
 
-                    this.setStatus('DECRYPTING CONTROL.INI...', 'loading');
+                    App.setStatus('DECRYPTING CONTROL.INI...', 'loading');
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        this.activeKeybinds = this.parseControlIni(e.target.result);
+                        App.activeKeybinds = App.parseControlIni(e.target.result);
 
                         // If parsing returned empty, load demo fallback safely
-                        if (Object.keys(this.activeKeybinds).length === 0) {
-                            this.activeKeybinds = { ...this.DEMO_DATABASE };
+                        if (Object.keys(App.activeKeybinds).length === 0) {
+                            App.activeKeybinds = { ...App.DEMO_DATABASE };
                         } else {
                             App.isCustomFileLoaded = true; // Mark as successfully synchronized!
                         }
 
-                        this.renderKeyboard();
-                        this.renderBindingsList();
-                        this.updatePinnedInspector();
-                        this.setStatus('SYNC SECURED', 'ready');
+                        App.renderKeyboard();
+                        App.renderBindingsList();
+                        App.updatePinnedInspector();
+                        App.setStatus('SYNC SECURED', 'ready');
 
                         const overlay = document.getElementById('permission-screen');
                         if (overlay) {
@@ -931,12 +955,12 @@
                 // Search filtering keybinds input listeners
                 const bindsSearch = document.getElementById('binds-search');
                 if (bindsSearch) {
-                    bindsSearch.addEventListener('input', () => this.renderBindingsList());
+                    bindsSearch.addEventListener('input', () => App.renderBindingsList());
                 }
 
                 const bindsCategoryFilter = document.getElementById('binds-category-filter');
                 if (bindsCategoryFilter) {
-                    bindsCategoryFilter.addEventListener('change', () => this.renderBindingsList());
+                    bindsCategoryFilter.addEventListener('change', () => App.renderBindingsList());
                 }
 
                 // --- CLOCK CONTROLLER ---
@@ -989,10 +1013,10 @@
                         return;
                     }
 
-                    const normalized = this.normalizeKeyName(e.key);
-                    if (normalized && this.activeKeybinds[normalized] !== undefined) {
+                    const normalized = App.normalizeKeyName(e.key);
+                    if (normalized && App.activeKeybinds[normalized] !== undefined) {
                         e.preventDefault();
-                        this.physicallyPressedKey = normalized;
+                        App.physicallyPressedKey = normalized;
 
                         // Visual flash highlight feedback on the virtual combat board
                         const keyElement = document.querySelector(`[data-key="${normalized}"]`);
@@ -1001,7 +1025,7 @@
                         }
 
                         // Re-trigger live preview with absolute physical press precedence
-                        this.inspectKey(normalized);
+                        App.inspectKey(normalized);
                     }
                 });
 
@@ -1010,17 +1034,17 @@
                         return;
                     }
 
-                    const normalized = this.normalizeKeyName(e.key);
+                    const normalized = App.normalizeKeyName(e.key);
                     if (normalized) {
                         const keyElement = document.querySelector(`[data-key="${normalized}"]`);
                         if (keyElement) {
                             keyElement.classList.remove('ring-4', 'ring-rose-500/60', 'scale-105', 'z-20');
                         }
 
-                        if (this.physicallyPressedKey === normalized) {
-                            this.physicallyPressedKey = null;
+                        if (App.physicallyPressedKey === normalized) {
+                            App.physicallyPressedKey = null;
                             // Revert live preview safely back to hovered key, or empty state
-                            this.inspectKey(this.currentlyHoveredKey);
+                            App.inspectKey(App.currentlyHoveredKey);
                         }
                     }
                 });
