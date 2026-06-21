@@ -184,6 +184,11 @@
             font-size: 12px;
             margin-right: 2px;
         }
+
+        .loading-hidden {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
     </style>
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col relative overflow-x-hidden p-3 sm:p-5 select-none">
@@ -292,7 +297,7 @@
 
         <!-- Footer -->
         <footer class="text-center text-[8px] font-medium text-zinc-400 dark:text-zinc-500 tracking-wide select-none py-1.5 border-t border-lightBorder dark:border-darkBorder/30 mt-1">
-            <span>Fraagle Apps ? Twitch Live Check ? <span id="footerVersion">v2.1</span></span>
+            <span>Fraagle Apps ? Twitch Live Check ? <span id="footerVersion">v2.2</span></span>
         </footer>
 
     </div>
@@ -301,15 +306,17 @@
         // ================================================================
         //  TWITCH LIVE CHECK ? Dynamically loads twitchStreamerList.txt
         //  Groups by categories (# Category) and displays live status.
+        //  FIX: Single fetch, cache-busting, loading screen hides on error.
         // ================================================================
 
         const LiveDashboard = {
-            LIST_URL: 'twitchStreamerList.txt', // same directory
+            LIST_URL: 'twitchStreamerList.txt',
 
-            streamers: [], // will be populated as { name, display, category }
+            streamers: [],
             statusData: [],
             lastChecked: null,
             refreshInterval: null,
+            isLoading: false, // prevent concurrent fetches
 
             el: {
                 grid: document.getElementById('streamerGrid'),
@@ -321,10 +328,14 @@
                 autoRefreshCheck: document.getElementById('autoRefreshCheck'),
                 statusText: document.getElementById('statusText'),
                 statusDot: document.getElementById('statusDot'),
+                loadingScreen: document.getElementById('app-loading-screen'),
             },
 
             init: function() {
-                this.el.refreshBtn.addEventListener('click', () => this.loadStreamerListAndFetch());
+                this.el.refreshBtn.addEventListener('click', () => {
+                    // Refresh statuses only (don't reload the list)
+                    this.fetchAllStatuses();
+                });
 
                 this.el.autoRefreshCheck.addEventListener('change', () => {
                     if (this.el.autoRefreshCheck.checked) {
@@ -334,7 +345,7 @@
                     }
                 });
 
-                // Load list and then fetch statuses
+                // Load list once on init
                 this.loadStreamerListAndFetch();
 
                 // Start auto-refresh if checked
@@ -345,31 +356,39 @@
                 this.setupThemeToggle();
                 this.setupGradientToggle();
                 this.setupClock();
-
-                // Hide loading screen after first load
-                // (will be hidden after list is loaded)
             },
 
-            // --- Load twitchStreamerList.txt ---
+            // --- Hide loading screen ---
+            hideLoadingScreen: function() {
+                const loader = this.el.loadingScreen;
+                if (loader && !loader.classList.contains('loading-hidden')) {
+                    loader.classList.add('loading-hidden');
+                    setTimeout(() => {
+                        if (loader.parentNode) loader.remove();
+                    }, 600);
+                }
+            },
+
+            // --- Load twitchStreamerList.txt (ONCE) ---
             loadStreamerListAndFetch: async function() {
+                if (this.isLoading) return;
+                this.isLoading = true;
+
                 this.setStatus('LOADING LIST...', 'loading');
                 this.el.refreshBtn.disabled = true;
 
                 try {
-                    const response = await fetch(this.LIST_URL, { cache: 'no-store' });
+                    // Add cache-busting timestamp
+                    const url = `${this.LIST_URL}?t=${Date.now()}`;
+                    const response = await fetch(url, { cache: 'no-store' });
                     if (!response.ok) throw new Error(`HTTP ${response.status} - ${response.statusText}`);
                     const text = await response.text();
 
-                    // Parse the file
                     const parsed = this.parseStreamerList(text);
                     this.streamers = parsed;
 
-                    // Hide loading screen (first time)
-                    const loader = document.getElementById('app-loading-screen');
-                    if (loader && loader.style.opacity !== '0') {
-                        loader.classList.add('opacity-0', 'pointer-events-none');
-                        setTimeout(() => loader.remove(), 500);
-                    }
+                    // Hide loading screen on success
+                    this.hideLoadingScreen();
 
                     // Now fetch statuses for these streamers
                     await this.fetchAllStatuses();
@@ -377,16 +396,28 @@
                 } catch (err) {
                     console.error('Failed to load streamer list:', err);
                     this.setStatus('LIST ERROR', '');
+                    this.hideLoadingScreen();
+
                     this.el.grid.innerHTML = `
                         <div class="col-span-full text-center text-rose-500 dark:text-rose-400 text-sm py-8">
                             ?? Could not load <code>twitchStreamerList.txt</code><br/>
                             <span class="text-xs text-zinc-400">${err.message}</span>
-                            <br/><button onclick="LiveDashboard.loadStreamerListAndFetch()" class="mt-2 px-4 py-1 bg-indigo-500 text-white rounded-lg text-xs">Retry</button>
+                            <br/>
+                            <button onclick="LiveDashboard.retryLoadList()" class="mt-2 px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs transition cursor-pointer">
+                                ? Retry
+                            </button>
                         </div>
                     `;
+                    this.updateStats([]);
                 } finally {
+                    this.isLoading = false;
                     this.el.refreshBtn.disabled = false;
                 }
+            },
+
+            // --- Retry function (exposed globally) ---
+            retryLoadList: function() {
+                this.loadStreamerListAndFetch();
             },
 
             parseStreamerList: function(text) {
@@ -398,17 +429,14 @@
                     line = line.trim();
                     if (!line) continue;
 
-                    // Check for category header: starts with '#'
                     if (line.startsWith('#')) {
                         currentCategory = line.substring(1).trim();
                         continue;
                     }
 
-                    // Extract username from URL (twitch.tv/username)
                     const match = line.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
                     if (match) {
                         const username = match[1];
-                        // Display name: capitalize first letter, but keep as is
                         const display = username.charAt(0).toUpperCase() + username.slice(1);
                         result.push({
                             name: username,
@@ -420,7 +448,7 @@
                 return result;
             },
 
-            // --- FETCH ALL STATUSES ---
+            // --- FETCH ALL STATUSES (re?fetch only, no list reload) ---
             fetchAllStatuses: async function() {
                 if (this.streamers.length === 0) {
                     this.el.grid.innerHTML =
@@ -468,7 +496,7 @@
                 }
             },
 
-            // --- RENDER GRID (grouped by category) ---
+            // --- RENDER GRID ---
             renderGrid: function(data) {
                 const grid = this.el.grid;
                 if (!grid) return;
@@ -479,7 +507,6 @@
                     return;
                 }
 
-                // Group by category
                 const groups = {};
                 data.forEach(s => {
                     const cat = s.category || 'General';
@@ -488,7 +515,6 @@
                 });
 
                 let html = '';
-                // Sort categories alphabetically
                 const sortedCategories = Object.keys(groups).sort();
                 for (const cat of sortedCategories) {
                     const items = groups[cat];
@@ -528,7 +554,6 @@
                 grid.innerHTML = html;
             },
 
-            // --- UPDATE STATS ---
             updateStats: function(data) {
                 const total = data.length;
                 const live = data.filter(s => s.isLive === true).length;
@@ -538,7 +563,6 @@
                 this.el.offlineCount.textContent = offline;
             },
 
-            // --- LAST UPDATE ---
             updateLastUpdate: function() {
                 if (this.lastChecked) {
                     this.el.lastUpdate.textContent = this.lastChecked.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit',
@@ -546,7 +570,6 @@
                 }
             },
 
-            // --- AUTO REFRESH ---
             startAutoRefresh: function() {
                 if (this.refreshInterval) clearInterval(this.refreshInterval);
                 this.refreshInterval = setInterval(() => {
@@ -561,7 +584,6 @@
                 }
             },
 
-            // --- HEADER STATUS ---
             setStatus: function(text, state) {
                 if (this.el.statusText) this.el.statusText.textContent = text;
                 if (this.el.statusDot) {
@@ -646,6 +668,9 @@
                 update();
             }
         };
+
+        // Expose retry function globally
+        LiveDashboard.retryLoadList = LiveDashboard.retryLoadList.bind(LiveDashboard);
 
         document.addEventListener('DOMContentLoaded', () => LiveDashboard.init());
     </script>
