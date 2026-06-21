@@ -41,7 +41,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&family=Space+Grotesk:wght=500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -325,6 +325,75 @@
         </div>
 
     </main>
+
+    <!-- Unified Impressum & Credits Footer -->
+    <footer class="w-full text-center py-6 text-xs text-zinc-400 dark:text-zinc-500 relative z-10 select-none">
+        <button id="impressum-btn" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium cursor-pointer focus:outline-none">
+            Impressum / Credits
+        </button>
+    </footer>
+
+    <!-- Impressum Popup Modal Overlay -->
+    <div id="impressum-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+        <!-- Modal Card Box -->
+        <div class="bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl max-w-md w-full shadow-2xl backdrop-blur-xl p-6 relative transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+            
+            <!-- Close Button Icon -->
+            <button id="close-impressum-btn" class="absolute top-4 right-4 p-1.5 rounded-xl text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-200 transition focus:outline-none cursor-pointer" aria-label="Close Modal">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <!-- Modal Header -->
+            <div class="mb-5 select-none">
+                <h2 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                    ℹ️ Impressum & Credits
+                </h2>
+                <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Project reference data and technical attributes.</p>
+            </div>
+
+            <!-- Modal Credits Body -->
+            <div class="space-y-4 text-sm text-zinc-600 dark:text-zinc-300">
+                <!-- tarkov.dev credit -->
+                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-lightBg/50 dark:bg-darkBg/30 flex items-start gap-3">
+                    <span class="text-lg mt-0.5 select-none">🌐</span>
+                    <div>
+                        <h3 class="font-semibold text-zinc-800 dark:text-zinc-200">API Gateway</h3>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Powered by the interactive open-source metadata architecture at:</p>
+                        <a href="https://tarkov.dev/" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium inline-block mt-1">tarkov.dev</a>
+                    </div>
+                </div>
+
+                <!-- this-person-does-not-exist credit -->
+                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-lightBg/50 dark:bg-darkBg/30 flex items-start gap-3">
+                    <span class="text-lg mt-0.5 select-none">👤</span>
+                    <div>
+                        <h3 class="font-semibold text-zinc-800 dark:text-zinc-200">Profile Avatars</h3>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Generative realism synthetic styling face vectors sourced via AI networks from:</p>
+                        <a href="https://this-person-does-not-exist.com/en" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium inline-block mt-1">this-person-does-not-exist.com</a>
+                    </div>
+                </div>
+
+                <!-- tarkovquestie credit -->
+                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-lightBg/50 dark:bg-darkBg/30 flex items-start gap-3">
+                    <span class="text-lg mt-0.5 select-none">🧭</span>
+                    <div>
+                        <h3 class="font-semibold text-zinc-800 dark:text-zinc-200">General Information</h3>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">General strategic tactical task blueprints and interactive guidance support tools:</p>
+                        <a href="https://tarkovquestie.com/" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium inline-block mt-1">tarkovquestie.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Footnote Close Button -->
+            <div class="mt-6 pt-4 border-t border-lightBorder dark:border-darkBorder flex justify-end">
+                <button id="close-impressum-ok-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 transition focus:outline-none cursor-pointer">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scroll to Top ("Up" Arrow) floating button -->
     <button id="scroll-to-top" class="fixed bottom-6 right-6 p-3 rounded-full bg-white/80 dark:bg-darkCard/80 border border-lightBorder dark:border-darkBorder shadow-xl backdrop-blur-md text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center justify-center cursor-pointer" aria-label="Scroll to Top">
@@ -1413,9 +1482,11 @@
                 }
 
                 element.innerHTML = `
-                    <div class="flex items-center space-x-3 truncate">
-                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500/40 flex-shrink-0"></div>
-                        <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">${item.title || 'Untitled'}</span>
+                    <div class="flex items-center justify-between truncate">
+                        <div class="flex items-center space-x-3 truncate">
+                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500/40 flex-shrink-0"></div>
+                            <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">${item.title || 'Untitled'}</span>
+                        </div>
                     </div>
                     <span class="text-[10px] font-semibold border ${badgeColor} uppercase tracking-wider px-2 py-0.5 rounded-full select-none max-w-[120px] truncate">
                         ${item.category || 'General'}
@@ -1532,6 +1603,35 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
+
+        // --- 5. IMPRESSUM POPUP MODAL ENGINE ---
+        const impressumBtn = document.getElementById('impressum-btn');
+        const impressumModal = document.getElementById('impressum-modal');
+        const closeImpressumBtn = document.getElementById('close-impressum-btn');
+        const closeImpressumOkBtn = document.getElementById('close-impressum-ok-btn');
+
+        function openImpressum() {
+            impressumModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // Locks page scroll
+        }
+
+        function closeImpressum() {
+            impressumModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden'); // Restores page scroll
+        }
+
+        impressumBtn.addEventListener('click', openImpressum);
+        closeImpressumBtn.addEventListener('click', closeImpressum);
+        closeImpressumOkBtn.addEventListener('click', closeImpressum);
+
+        // Close when clicking outside of the active modal card on the backdrop
+        impressumModal.addEventListener('click', (e) => {
+            if (e.target === impressumModal) {
+                closeImpressum();
+            }
+        });
+
+
         // Global key shortcut commands
         window.addEventListener('keydown', (e) => {
             if (e.key === '/' && document.activeElement !== searchInput) {
@@ -1544,6 +1644,7 @@
                 }
                 dropdownResults.classList.add('hidden');
                 cancelHoverPreview();
+                closeImpressum(); // Close impressum on Escape
             }
         });
     </script>

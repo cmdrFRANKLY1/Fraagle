@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fraagle Sheets – Escape from Tarkov DB</title>
+    <title>Tarkov Item Database</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -323,11 +323,18 @@
             </a>
             <div class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-1 rounded-lg font-bold text-xs tracking-tighter flex items-center justify-center w-6 h-6">田</div>
             <div>
-                <h1 class="header-title text-xs sm:text-sm font-bold tracking-tight bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent select-none uppercase">Fraagle Sheets</h1>
+                <h1 class="header-title text-xs sm:text-sm font-bold tracking-tight bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent select-none uppercase">Tarkov Item Database</h1>
                 <p class="text-[7px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Escape from Tarkov DB</p>
             </div>
         </div>
         <div class="flex items-center space-x-2 text-xs">
+            <!-- Color Gradient Toggle Button -->
+            <button id="gradient-toggle" class="p-1.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm flex items-center justify-center cursor-pointer text-zinc-600 dark:text-zinc-300">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
+                </svg>
+            </button>
+
             <button id="theme-toggle" class="p-1.5 rounded-lg border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard transition-all focus:outline-none flex items-center justify-center cursor-pointer shadow-sm" aria-label="Toggle Theme">
                 <svg id="theme-toggle-sun-icon" class="hidden w-3.5 h-3.5 text-yellow-500 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -349,16 +356,6 @@
                 <input type="text" id="grid-search-input" placeholder="Filter item rows..." class="search-input bg-transparent border-none outline-none w-full text-zinc-800 dark:text-zinc-100 pr-6 text-xs font-medium placeholder-zinc-400" />
                 <button id="search-clear-btn" class="search-clear" title="Clear search">✕</button>
             </div>
-        </div>
-    </section>
-
-    <!-- ===== FORMULA BAR ===== -->
-    <section class="bg-white/50 dark:bg-darkCard/30 border border-lightBorder dark:border-darkBorder rounded-xl h-9 mt-3 flex items-center px-2 shrink-0 text-xs font-mono backdrop-blur-sm">
-        <div id="active-cell-indicator" class="w-12 bg-white dark:bg-darkBg/80 h-6 border border-lightBorder dark:border-darkBorder rounded-lg text-center flex items-center justify-center text-zinc-600 dark:text-zinc-400 font-bold select-all">A1</div>
-        <div class="text-zinc-300 dark:text-zinc-700 mx-2 text-sm select-none">|</div>
-        <span class="text-zinc-400 select-none mr-2 font-semibold">fx</span>
-        <div class="flex-grow bg-white dark:bg-darkBg/80 h-6 border border-lightBorder dark:border-darkBorder rounded-lg flex items-center px-2">
-            <input type="text" id="excel-formula-input" readonly value="=TarkovSpreadsheet.Index()" class="w-full bg-transparent border-none outline-none select-all text-zinc-600 dark:text-zinc-400 font-semibold" />
         </div>
     </section>
 
@@ -488,39 +485,8 @@
 
     <!-- ===== FOOTER ===== -->
     <footer class="text-center text-[8px] font-medium text-zinc-400 dark:text-zinc-500 tracking-wide select-none py-2 border-t border-lightBorder/40 dark:border-darkBorder/30 mt-3 shrink-0">
-        <span>Fraagle Apps • Tarkov Spreadsheet Database • Data provided by live tarkov.dev GraphQL API</span>
+        <span>Fraagle Apps • Tarkov Item Database • Data provided by live tarkov.dev GraphQL API</span>
     </footer>
-
-    <!-- ===== EXPORT MODAL ===== -->
-    <div id="export-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-darkCard border border-lightBorder dark:border-darkBorder rounded-2xl w-full max-w-md p-5 shadow-2xl flex flex-col gap-3 transform scale-95 transition-transform duration-300">
-            <h3 class="category-title text-sm font-bold text-indigo-500 flex items-center space-x-2 uppercase tracking-wide">
-                <span>📥</span><span>Export Settings</span>
-            </h3>
-            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Choose scope and format.</p>
-            <div class="space-y-4 my-2">
-                <div class="space-y-1.5">
-                    <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-outfit">Scope</label>
-                    <select id="export-scope" class="w-full text-xs p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-zinc-50 dark:bg-darkBg/60 text-zinc-700 dark:text-zinc-300 outline-none focus:border-indigo-500 transition-colors">
-                        <option value="current">Current Filter</option>
-                        <option value="all">Full Dataset</option>
-                    </select>
-                </div>
-                <div class="space-y-1.5">
-                    <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider font-outfit">Format</label>
-                    <select id="export-format" class="w-full text-xs p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-zinc-50 dark:bg-darkBg/60 text-zinc-700 dark:text-zinc-300 outline-none focus:border-indigo-500 transition-colors">
-                        <option value="csv">CSV (*.csv)</option>
-                        <option value="txt">Tabbed TXT (*.txt)</option>
-                        <option value="markdown">Markdown (*.md)</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex items-center justify-end space-x-3 mt-4">
-                <button id="export-modal-cancel" class="px-4 py-2 border border-lightBorder dark:border-darkBorder text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer">Cancel</button>
-                <button id="export-modal-confirm" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer shadow-sm">Export</button>
-            </div>
-        </div>
-    </div>
 
     <!-- ============================================================ -->
     <!--  SCRIPT                                                      -->
@@ -537,7 +503,6 @@
         let activeSortCol = '';
         let activeSortAsc = true;
         let searchDebounceTimer = null;
-        const activeSheetTab = 'items'; // Fallback added to prevent dynamic exports from failing
 
         const loadingOverlay = document.getElementById('loading-overlay');
 
@@ -751,6 +716,7 @@
             filterAndRender();
         }
 
+        // Cleaned up unused class variable sorting indicators references
         function updateSortUI() {
             ['name', 'shortName', 'category', 'basePrice', 'avg24hPrice', 'weight', 'caliber', 'ergonomics', 'recoilVertical',
                 'class', 'durability'
@@ -1066,7 +1032,6 @@
             });
 
             grid.appendChild(frag);
-            document.getElementById('excel-formula-input').value = `=ROWS(${rows.length})`;
         }
 
         // ============================================================
@@ -1090,86 +1055,17 @@
         searchClearBtn.style.display = 'none';
 
         // ============================================================
-        //  12. EXPORT & MODAL CONTROL
-        // ============================================================
-        const exportModal = document.getElementById('export-modal');
-        const headerRight = document.querySelector('header .flex.items-center.space-x-2');
-        const exportBtn = document.createElement('button');
-        exportBtn.innerHTML = '📤';
-        exportBtn.className = 'p-1.5 rounded-lg border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 hover:bg-white dark:hover:bg-darkCard transition-all focus:outline-none flex items-center justify-center cursor-pointer shadow-sm text-zinc-600 dark:text-zinc-300';
-        exportBtn.title = 'Export Data';
-        exportBtn.addEventListener('click', () => { exportModal.classList.remove('hidden'); });
-        headerRight.insertBefore(exportBtn, headerRight.querySelector('#theme-toggle'));
-
-        document.getElementById('export-modal-cancel').addEventListener('click', () => { exportModal.classList.add('hidden'); });
-        document.getElementById('export-modal-confirm').addEventListener('click', () => {
-            const scope = document.getElementById('export-scope').value;
-            const format = document.getElementById('export-format').value;
-            let src = [...itemsIndex];
-            if (scope === 'current') {
-                if (selectedCategories.size > 0) {
-                    src = src.filter(i => selectedCategories.has(i.category));
-                }
-                const q = document.getElementById('grid-search-input').value.toLowerCase().trim();
-                if (q) {
-                    src = src.filter(r =>
-                        r.name.toLowerCase().includes(q) ||
-                        r.shortName.toLowerCase().includes(q) ||
-                        r.category.toLowerCase().includes(q)
-                    );
-                }
-            }
-
-            let content = '',
-                ext = '.csv';
-            if (format === 'csv') {
-                content += 'Name,Short Name,Category,Base Price,Avg 24h,Weight,Caliber,Ergonomics,Recoil,Class,Durability,Wiki\n';
-                src.forEach(r => {
-                    content +=
-                        `"${r.name.replace(/"/g,'""')}","${r.shortName.replace(/"/g,'""')}","${r.category}",${r.basePrice},${r.avg24hPrice},${r.weight},"${r.caliber||''}",${r.ergonomics!==null?r.ergonomics:''},${r.recoilVertical!==null?r.recoilVertical:''},${r.class!==null?r.class:''},${r.durability!==null?r.durability:''},"${buildWikiUrl(r)}"\n`;
-                });
-                ext = '.csv';
-            } else if (format === 'txt') {
-                content +=
-                    'Name\tShort Name\tCategory\tBase Price\tAvg 24h\tWeight\tCaliber\tErgonomics\tRecoil\tClass\tDurability\tWiki\n';
-                src.forEach(r => {
-                    content +=
-                        `${r.name}\t${r.shortName}\t${r.category}\t${r.basePrice}\t${r.avg24hPrice}\t${r.weight}\t${r.caliber||''}\t${r.ergonomics!==null?r.ergonomics:''}\t${r.recoilVertical!==null?r.recoilVertical:''}\t${r.class!==null?r.class:''}\t${r.durability!==null?r.durability:''}\t${buildWikiUrl(r)}\n`;
-                });
-                ext = '.txt';
-            } else if (format === 'markdown') {
-                content +=
-                    '| Name | Short Name | Category | Base Price | Avg 24h | Weight | Caliber | Ergo | Recoil | Class | Durability | Wiki |\n';
-                content +=
-                    '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n';
-                src.forEach(r => {
-                    content +=
-                        `| ${r.name} | ${r.shortName} | ${r.category} | ${r.basePrice>0?r.basePrice.toLocaleString()+' ₽':'-'} | ${r.avg24hPrice>0?r.avg24hPrice.toLocaleString()+' ₽':'-'} | ${r.weight} kg | ${r.caliber||'-'} | ${r.ergonomics!==null?r.ergonomics:'-'} | ${r.recoilVertical!==null?r.recoilVertical:'-'} | ${r.class!==null?r.class:'-'} | ${r.durability!==null?r.durability:'-'} | [Wiki](${buildWikiUrl(r)}) |\n`;
-                });
-                ext = '.md';
-            }
-
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `fraagle_export_${activeSheetTab || 'all'}${ext}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            exportModal.classList.add('hidden');
-        });
-
-        // ============================================================
-        //  13. KEYBOARD SHORTCUTS
+        //  12. KEYBOARD SHORTCUTS
         // ============================================================
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') { exportModal.classList.add('hidden'); }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault();
-                searchInput.focus(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') { 
+                e.preventDefault();
+                searchInput.focus(); 
+            }
         });
 
         // ============================================================
-        //  14. PANE DIVIDERS
+        //  13. PANE DIVIDERS
         // ============================================================
         function setupDivider(dividerId, targetPanelId, minWidth, maxWidth, reverse = false) {
             const divider = document.getElementById(dividerId);
@@ -1201,7 +1097,7 @@
         setupDivider('detail-divider', 'detail-panel', 200, 500, false);
 
         // ============================================================
-        //  15. GRADIENT TOGGLE METHOD SYNC
+        //  14. GRADIENT TOGGLE METHOD SYNC
         // ============================================================
         function setupGradientToggle() {
             const btn = document.getElementById('gradient-toggle');
@@ -1234,7 +1130,7 @@
         }
 
         // ============================================================
-        //  16. BOOT
+        //  15. BOOT
         // ============================================================
         setupGradientToggle();
         loadTarkovData();
