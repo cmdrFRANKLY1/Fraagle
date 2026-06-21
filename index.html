@@ -443,18 +443,36 @@
         ];
 
         function getAppTitle(fileName) {
-            let name = fileName.replace('.html', '');
+            // Case-insensitive removal of .html extension at the end
+            let name = fileName.replace(/\.html$/i, '');
             
+            // Strip duplicate prefixes case-insensitively, e.g., twitchTwitch... -> Twitch...
+            const prefixes = ['eft', 'twitch', 'youtube'];
+            for (const pref of prefixes) {
+                if (name.toLowerCase().startsWith(pref)) {
+                    let rest = name.slice(pref.length);
+                    if (rest.toLowerCase().startsWith(pref)) {
+                        name = rest;
+                    }
+                }
+            }
+
             // Check if it starts with "eft" (case-insensitive) and strip it
             if (name.toLowerCase().startsWith('eft')) {
                 name = name.slice(3);
             }
             
             // Add spaces before single uppercase letters (ignore consecutive capitals like DB)
-            return name
+            let spaced = name
                 .replace(/([a-z])([A-Z])/g, '$1 $2') // e.g., "TarkovKit" -> "Tarkov Kit"
                 .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2') // e.g., "DBKit" -> "DB Kit"
                 .trim();
+
+            // Capitalize the first letter of the result for a premium look
+            if (spaced.length > 0) {
+                spaced = spaced.charAt(0).toUpperCase() + spaced.slice(1);
+            }
+            return spaced;
         }
 
         function updateUIVisibility() {
