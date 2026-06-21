@@ -220,42 +220,81 @@
                 </div>
             </div>
 
-            <!-- Right-Side Selected Key / Action Inspector Card Panel -->
+            <!-- Right-Side Inspector Card Panels -->
             <aside class="flex flex-col gap-6">
-                <!-- Selected Key & Action Inspector Card -->
-                <div class="bg-white/70 dark:bg-darkCard/50 border border-[#cbd5e1] dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
-                    <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2 border-b border-[#cbd5e1] dark:border-darkBorder pb-3 uppercase tracking-wider">
-                        <span>🔍</span>
-                        <span>Selected Key & Action</span>
+                <!-- Panel 1: Live Key Preview (Hover state) -->
+                <div id="preview-inspector-card" class="bg-white/70 dark:bg-darkCard/50 border border-[#cbd5e1] dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+                    <h3 class="text-sm font-bold text-indigo-500 dark:text-indigo-400 flex items-center space-x-2 border-b border-[#cbd5e1] dark:border-darkBorder pb-3 uppercase tracking-wider">
+                        <span>⚡</span>
+                        <span>Live Key Preview</span>
                     </h3>
                     
-                    <div id="inspector-empty-state" class="text-center py-12 text-zinc-400 dark:text-zinc-500 text-xs leading-relaxed flex flex-col items-center">
-                        <span class="text-3xl mb-2">⌨️</span>
-                        <span>Hover or click any key on the visualizer board to inspect bound triggers. Click to lock selection.</span>
+                    <div id="preview-empty-state" class="text-center py-6 text-zinc-400 dark:text-zinc-500 text-xs leading-relaxed flex flex-col items-center">
+                        <span class="text-2xl mb-2">✨</span>
+                        <span>Hover over any key or binding to preview details instantly.</span>
                     </div>
 
-                    <div id="inspector-active-state" class="hidden flex flex-col space-y-4">
+                    <div id="preview-active-state" class="hidden flex flex-col space-y-4">
                         <div class="flex items-center space-x-3">
-                            <div id="inspector-key-badge" class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-bold text-sm flex items-center justify-center shadow-inner uppercase">
-                                G
+                            <div id="preview-key-badge" class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-bold text-sm flex items-center justify-center shadow-inner uppercase">
+                                -
                             </div>
                             <div class="truncate">
-                                <h4 id="inspector-action-name" class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">Throw Grenade</h4>
-                                <span id="inspector-action-category" class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Combat</span>
+                                <h4 id="preview-action-name" class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">-</h4>
+                                <span id="preview-action-category" class="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">-</span>
                             </div>
                         </div>
 
                         <div class="border-t border-[#cbd5e1] dark:border-darkBorder pt-3.5 space-y-2.5 text-xs text-zinc-600 dark:text-zinc-300">
                             <div class="flex justify-between">
                                 <span class="text-zinc-400 dark:text-zinc-500">Press Type:</span>
-                                <span id="inspector-press-type" class="font-bold">Double Click</span>
+                                <span id="preview-press-type" class="font-bold">-</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-zinc-400 dark:text-zinc-500">Conflict Warning:</span>
-                                <span id="inspector-conflict-warning" class="font-bold text-emerald-500">No Conflict</span>
+                                <span id="preview-conflict-warning" class="font-bold text-emerald-500">-</span>
                             </div>
-                            <p id="inspector-binding-description" class="text-[11px] text-zinc-400 leading-relaxed pt-1.5 border-t border-dashed border-[#cbd5e1] dark:border-darkBorder">
-                                Launches any equipped explosive ordnances immediately using dynamic double click configuration.
+                            <p id="preview-binding-description" class="text-[11px] text-zinc-400 leading-relaxed pt-1.5 border-t border-dashed border-[#cbd5e1] dark:border-darkBorder">
+                                -
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Pinned Selection Inspector (Persistent clicked/locked key) -->
+                <div id="pinned-inspector-card" class="bg-white/70 dark:bg-darkCard/50 border border-[#cbd5e1] dark:border-darkBorder rounded-3xl p-5 shadow-xl backdrop-blur-md flex flex-col gap-4">
+                    <h3 class="text-sm font-bold text-[#107c41] flex items-center space-x-2 border-b border-[#cbd5e1] dark:border-darkBorder pb-3 uppercase tracking-wider">
+                        <span>📌</span>
+                        <span>Pinned Selection</span>
+                    </h3>
+                    
+                    <div id="pinned-empty-state" class="text-center py-12 text-zinc-400 dark:text-zinc-500 text-xs leading-relaxed flex flex-col items-center">
+                        <span class="text-2xl mb-2">🔒</span>
+                        <span>Click any key or binding on the board to pin its details persistently.</span>
+                    </div>
+
+                    <div id="pinned-active-state" class="hidden flex flex-col space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div id="pinned-key-badge" class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold text-sm flex items-center justify-center shadow-inner uppercase">
+                                -
+                            </div>
+                            <div class="truncate">
+                                <h4 id="pinned-action-name" class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">-</h4>
+                                <span id="pinned-action-category" class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">-</span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-[#cbd5e1] dark:border-darkBorder pt-3.5 space-y-2.5 text-xs text-zinc-600 dark:text-zinc-300">
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Press Type:</span>
+                                <span id="pinned-press-type" class="font-bold">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Conflict Warning:</span>
+                                <span id="pinned-conflict-warning" class="font-bold text-emerald-500">-</span>
+                            </div>
+                            <p id="pinned-binding-description" class="text-[11px] text-zinc-400 leading-relaxed pt-1.5 border-t border-dashed border-[#cbd5e1] dark:border-darkBorder">
+                                -
                             </p>
                         </div>
                     </div>
@@ -331,6 +370,16 @@
                 "ralt": "w-10",
                 "fn": "w-10",
                 "rctrl": "w-12"
+            },
+
+            // Helper to copy default configuration path programmatically
+            copyConfigPath: function() {
+                const tempInput = document.createElement('input');
+                tempInput.value = "C:\\Users\\<userName>\\AppData\\Roaming\\Battlestate Games\\Escape from Tarkov\\Settings\\Control.ini";
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
             },
 
             // Maps raw control.ini keyCode string tags to standard virtual keys
@@ -575,51 +624,94 @@
                 }
                 this.renderKeyboard();
                 this.renderBindingsList();
-                this.inspectKey(null); // Refreshes to show the permanently selected key details or empty state
+                this.inspectKey(null); // Refreshes Live Preview Card (Card 1)
+                this.updatePinnedInspector(); // Refreshes Pinned Selection Card (Card 2)
             },
 
-            // --- DETAILED KEY INPSECTOR ---
-            inspectKey: function(key) {
-                // Prioritize active hovered key, fallback to permanently selected key
-                const targetKey = key || this.selectedKey;
-                const empty = document.getElementById('inspector-empty-state');
-                const active = document.getElementById('inspector-active-state');
-                const label = document.getElementById('active-key-label');
+            // --- RECONCILE & RENDER PINNED SELECTION CARD (CARD 2) ---
+            updatePinnedInspector: function() {
+                const key = this.selectedKey;
+                const empty = document.getElementById('pinned-empty-state');
+                const active = document.getElementById('pinned-active-state');
 
-                if (!targetKey || !this.activeKeybinds[targetKey]) {
-                    empty.classList.remove('hidden');
-                    active.classList.add('hidden');
-                    if (label) label.textContent = 'Hover or click keys to inspect';
+                if (!key || !this.activeKeybinds[key]) {
+                    if (empty) empty.classList.remove('hidden');
+                    if (active) active.classList.add('hidden');
                     return;
                 }
 
-                const bind = this.activeKeybinds[targetKey];
-                empty.classList.add('hidden');
-                active.classList.remove('hidden');
+                const bind = this.activeKeybinds[key];
+                if (empty) empty.classList.add('hidden');
+                if (active) active.classList.remove('hidden');
 
-                if (label) {
-                    if (this.selectedKey === targetKey) {
-                        label.textContent = `Selected Trigger Locked: [${targetKey.toUpperCase()}]`;
+                const badge = document.getElementById('pinned-key-badge');
+                const actionName = document.getElementById('pinned-action-name');
+                const actionCategory = document.getElementById('pinned-action-category');
+                const pressType = document.getElementById('pinned-press-type');
+                const bindingDesc = document.getElementById('pinned-binding-description');
+                const conflictEl = document.getElementById('pinned-conflict-warning');
+
+                if (badge) badge.textContent = key;
+                if (actionName) actionName.textContent = bind.action;
+                if (actionCategory) actionCategory.textContent = bind.category;
+                if (pressType) pressType.textContent = bind.pressType;
+                if (bindingDesc) bindingDesc.textContent = bind.desc;
+
+                if (conflictEl) {
+                    const isConflict = Object.values(this.activeKeybinds).filter(b => b.action === bind.action).length > 1;
+                    if (isConflict) {
+                        conflictEl.textContent = 'Potential Conflict';
+                        conflictEl.className = 'font-bold text-rose-500 animate-pulse';
                     } else {
-                        label.textContent = `Inspecting trigger: [${targetKey.toUpperCase()}]`;
+                        conflictEl.textContent = 'No Conflict';
+                        conflictEl.className = 'font-bold text-emerald-500';
                     }
                 }
+            },
 
-                document.getElementById('inspector-key-badge').textContent = targetKey;
-                document.getElementById('inspector-action-name').textContent = bind.action;
-                document.getElementById('inspector-action-category').textContent = bind.category;
-                document.getElementById('inspector-press-type').textContent = bind.pressType;
-                document.getElementById('inspector-binding-description').textContent = bind.desc;
+            // --- RENDER LIVE MOUSE-OVER PREVIEW CARD (CARD 1) ---
+            inspectKey: function(key) {
+                const empty = document.getElementById('preview-empty-state');
+                const active = document.getElementById('preview-active-state');
+                const label = document.getElementById('active-key-label');
 
-                const conflictEl = document.getElementById('inspector-conflict-warning');
-                // Detect conflicts (keys bound to multiple actions)
-                const isConflict = Object.values(this.activeKeybinds).filter(b => b.action === bind.action).length > 1;
-                if (isConflict) {
-                    conflictEl.textContent = 'Potential Conflict';
-                    conflictEl.className = 'font-bold text-rose-500 animate-pulse';
-                } else {
-                    conflictEl.textContent = 'No Conflict';
-                    conflictEl.className = 'font-bold text-emerald-500';
+                if (!key || !this.activeKeybinds[key]) {
+                    if (empty) empty.classList.remove('hidden');
+                    if (active) active.classList.add('hidden');
+                    if (label) label.textContent = 'Hover keys to inspect';
+                    return;
+                }
+
+                const bind = this.activeKeybinds[key];
+                if (empty) empty.classList.add('hidden');
+                if (active) active.classList.remove('hidden');
+
+                if (label) {
+                    label.textContent = `Inspecting trigger: [${key.toUpperCase()}]`;
+                }
+
+                const badge = document.getElementById('preview-key-badge');
+                const actionName = document.getElementById('preview-action-name');
+                const actionCategory = document.getElementById('preview-action-category');
+                const pressType = document.getElementById('preview-press-type');
+                const bindingDesc = document.getElementById('preview-binding-description');
+                const conflictEl = document.getElementById('preview-conflict-warning');
+
+                if (badge) badge.textContent = key;
+                if (actionName) actionName.textContent = bind.action;
+                if (actionCategory) actionCategory.textContent = bind.category;
+                if (pressType) pressType.textContent = bind.pressType;
+                if (bindingDesc) bindingDesc.textContent = bind.desc;
+
+                if (conflictEl) {
+                    const isConflict = Object.values(this.activeKeybinds).filter(b => b.action === bind.action).length > 1;
+                    if (isConflict) {
+                        conflictEl.textContent = 'Potential Conflict';
+                        conflictEl.className = 'font-bold text-rose-500 animate-pulse';
+                    } else {
+                        conflictEl.textContent = 'No Conflict';
+                        conflictEl.className = 'font-bold text-emerald-500';
+                    }
                 }
             },
 
@@ -732,6 +824,7 @@
                 this.activeKeybinds = { ...this.DEMO_DATABASE };
                 this.renderKeyboard();
                 this.renderBindingsList();
+                this.updatePinnedInspector();
 
                 // Clipboard copy button
                 const copyBtn = document.getElementById('copy-path-btn');
@@ -787,6 +880,7 @@
 
                         this.renderKeyboard();
                         this.renderBindingsList();
+                        this.updatePinnedInspector();
                         this.setStatus('SYNC SECURED', 'ready');
 
                         const overlay = document.getElementById('permission-screen');
@@ -805,12 +899,7 @@
                 if (dropZone) {
                     // Automatically copy path on drop zone click to facilitate pasting inside browser native file picker dialog!
                     dropZone.addEventListener('click', () => {
-                        // Dynamically trigger copy config path on selection drop-zone interaction
-                        const input = document.getElementById('config-path-input');
-                        if (input) {
-                            input.select();
-                            document.execCommand('copy');
-                        }
+                        App.copyConfigPath();
                     });
 
                     dropZone.addEventListener('dragover', (e) => {
