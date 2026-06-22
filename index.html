@@ -192,15 +192,9 @@
         <!-- Logo Header -->
         <div class="mb-6 select-none flex flex-col items-center justify-center w-full relative">
             <div class="relative inline-flex items-center justify-center">
-                <!-- Title is strictly centered by wrapper -->
-                <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm z-10">
-                    <span class="text-fraagleBlue">F</span>
-                    <span class="text-fraagleRed">r</span>
-                    <span class="text-fraagleYellow">a</span>
-                    <span class="text-fraagleBlue">a</span>
-                    <span class="text-fraagleGreen">g</span>
-                    <span class="text-fraagleRed">l</span>
-                    <span class="text-fraagleBlue">e</span>
+                <!-- Title is strictly centered by wrapper. Min-height prevents layout shift while waiting for load -->
+                <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm z-10 min-h-[48px] sm:min-h-[72px]">
+                    <!-- Text dynamically decrypted into this container -->
                 </h1>
                 <!-- Version tag is absolute to the right boundary of the inline-flex wrapper so it never offsets the main title -->
                 <span id="version-tag" class="absolute left-full ml-3 text-xs sm:text-sm font-mono font-bold tracking-wider text-emerald-600 dark:text-emerald-500 whitespace-nowrap top-1/2 -translate-y-1/2 drop-shadow-[0_0_6px_rgba(16,185,129,0.35)]"></span>
@@ -550,15 +544,6 @@
             return `${intro} ${adj} ${subject} ${ending}`;
         }
 
-        function colorizeText(text) {
-            const colors = ['text-fraagleBlue', 'text-fraagleRed', 'text-fraagleYellow', 'text-fraagleBlue', 'text-fraagleGreen', 'text-fraagleRed'];
-            return text.split('').map((char, index) => {
-                if (char === ' ') return '&nbsp;';
-                const colorClass = colors[index % colors.length];
-                return `<span class="${colorClass}">${char}</span>`;
-            }).join('');
-        }
-
         function setRandomFavicon(title) {
             const letter = title ? title.charAt(0) : 'F';
             const colors = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6'];
@@ -580,17 +565,78 @@
         }
 
         function loadDynamicTitleAndSubtitle() {
-            const logoTitle = document.getElementById('logo-title');
             const logoSubtitle = document.getElementById('logo-subtitle');
             
             const finalTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)] || "Fraagle";
             
-            if (logoTitle) logoTitle.innerHTML = colorizeText(finalTitle);
             document.title = finalTitle + " Hub";
             if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
             
             setRandomFavicon(finalTitle);
             applyRandomGlowColors();
+
+            // Trigger the title's unique decrypt animation
+            triggerTitleDecrypt(finalTitle);
+        }
+
+        // --- 3.5 TACTICAL HUD DECRYPT ANIMATION ENGINE ---
+
+        // Decrypt the Title branding (with native fraagle colors)
+        function triggerTitleDecrypt(targetText) {
+            const titleTag = document.getElementById('logo-title');
+            if (!titleTag) return;
+            
+            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
+            const colors = ['text-fraagleBlue', 'text-fraagleRed', 'text-fraagleYellow', 'text-fraagleBlue', 'text-fraagleGreen', 'text-fraagleRed'];
+            let iterations = 0;
+            
+            clearInterval(titleTag.decryptInterval);
+            
+            titleTag.decryptInterval = setInterval(() => {
+                let displayText = targetText.split("").map((char, index) => {
+                    if (char === " ") return "&nbsp;";
+                    
+                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                    const colorClass = colors[index % colors.length];
+                    return `<span class="${colorClass}">${displayChar}</span>`;
+                }).join("");
+                
+                titleTag.innerHTML = displayText;
+                
+                if (iterations >= targetText.length) {
+                    clearInterval(titleTag.decryptInterval);
+                }
+                
+                iterations += 1 / 3;
+            }, 25);
+        }
+
+        // Decrypt the Version Number tag
+        function triggerVersionDecrypt() {
+            const versionTag = document.getElementById('version-tag');
+            if (!versionTag) return;
+            
+            const targetText = currentVersion;
+            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
+            let iterations = 0;
+            
+            clearInterval(versionTag.decryptInterval);
+            
+            versionTag.decryptInterval = setInterval(() => {
+                let displayText = targetText.split("").map((char, index) => {
+                    if (char === " ") return " ";
+                    if (index < iterations) return targetText[index];
+                    return possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                }).join("");
+                
+                versionTag.textContent = displayText;
+                
+                if (iterations >= targetText.length) {
+                    clearInterval(versionTag.decryptInterval);
+                }
+                
+                iterations += 1 / 3;
+            }, 25);
         }
 
         async function fetchTarkovGraphQL(query) {
@@ -788,34 +834,6 @@
                     minPlayerLevel: task.minPlayerLevel || 1
                 });
             });
-        }
-
-        // --- TACTICAL HUD DECRYPT ANIMATION ENGINE ---
-        function triggerVersionDecrypt() {
-            const versionTag = document.getElementById('version-tag');
-            if (!versionTag) return;
-            
-            const targetText = currentVersion;
-            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
-            let iterations = 0;
-            
-            clearInterval(versionTag.decryptInterval);
-            
-            versionTag.decryptInterval = setInterval(() => {
-                let displayText = targetText.split("").map((char, index) => {
-                    if (char === " ") return " ";
-                    if (index < iterations) return targetText[index];
-                    return possibleChars[Math.floor(Math.random() * possibleChars.length)];
-                }).join("");
-                
-                versionTag.textContent = displayText;
-                
-                if (iterations >= targetText.length) {
-                    clearInterval(versionTag.decryptInterval);
-                }
-                
-                iterations += 1 / 3;
-            }, 25);
         }
 
         // --- BOOTSTRAP INITIALIZATION ---
