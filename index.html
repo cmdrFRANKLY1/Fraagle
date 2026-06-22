@@ -274,15 +274,52 @@
         let dndPlaces = [];
         let dndAttributes = [];
 
+        // Universal File Fetcher with helpful CORS logging
+        async function fetchFileJSON(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (e) {
+                // Ignore the logging of normal fallback checks failing, but we log the attempt for debugging
+            }
+            return null;
+        }
+
+        // Smart Array Extractor: Checks multiple paths & extracts arrays if wrapped inside a JSON object
+        async function loadResourceArray(paths) {
+            for (let path of paths) {
+                const data = await fetchFileJSON(path);
+                if (data) {
+                    // Scenario A: It's a standard Array JSON -> [ "Warrior", "Mage" ]
+                    if (Array.isArray(data)) {
+                        return data;
+                    }
+                    
+                    // Scenario B: It's wrapped in an object -> { "classes": ["Warrior", "Mage"] }
+                    if (typeof data === 'object') {
+                        for (let key in data) {
+                            if (Array.isArray(data[key])) {
+                                return data[key];
+                            }
+                        }
+                    }
+                }
+            }
+            console.warn(`Could not load array from paths starting with: ${paths[0]}. Are you using a local web server (http://localhost) or opening file:/// directly? Browser CORS blocks file:/// fetches.`);
+            return []; // Fail gracefully
+        }
+
         async function loadResourceData() {
             // Fetch titles JSON
-            const titlesData = await fetchFileJSON('resources/rndTitles.json') || await fetchFileJSON('rndTitles.json') || await fetchFileJSON('/resources/rndTitles.json');
+            const titlesData = await fetchFileJSON('./resources/rndTitles.json') || await fetchFileJSON('resources/rndTitles.json') || await fetchFileJSON('rndTitles.json') || await fetchFileJSON('/resources/rndTitles.json');
             if (titlesData && Array.isArray(titlesData)) {
                 generalSearchTitles = titlesData;
             }
 
             // Fetch subtitles JSON
-            const subsData = await fetchFileJSON('resources/rndSubtitles.json') || await fetchFileJSON('rndSubtitles.json') || await fetchFileJSON('/resources/rndSubtitles.json');
+            const subsData = await fetchFileJSON('./resources/rndSubtitles.json') || await fetchFileJSON('resources/rndSubtitles.json') || await fetchFileJSON('rndSubtitles.json') || await fetchFileJSON('/resources/rndSubtitles.json');
             if (subsData && typeof subsData === 'object') {
                 if (subsData.intros) subtitleIntros = subsData.intros;
                 if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
@@ -291,7 +328,7 @@
             }
 
             // Fetch version number JSON
-            const versionData = await fetchFileJSON('currentVersionNr.json') || await fetchFileJSON('/currentVersionNr.json') || await fetchFileJSON('resources/currentVersionNr.json');
+            const versionData = await fetchFileJSON('./resources/currentVersionNr.json') || await fetchFileJSON('currentVersionNr.json') || await fetchFileJSON('/currentVersionNr.json');
             if (versionData) {
                 if (typeof versionData === 'object' && versionData.version) {
                     currentVersion = versionData.version;
@@ -301,13 +338,14 @@
             }
 
             // --- D&D MODULE DYNAMIC DATASETS RESOLUTION ---
-            dndNames = await fetchFileJSON('resources/dnd/listNames.json') || await fetchFileJSON('dnd/listNames.json') || await fetchFileJSON('/resources/dnd/listNames.json') || [];
-            dndProfessions = await fetchFileJSON('resources/dnd/listProfession.json') || await fetchFileJSON('dnd/listProfession.json') || await fetchFileJSON('/resources/dnd/listProfession.json') || [];
-            dndRaces = await fetchFileJSON('resources/dnd/listRace.json') || await fetchFileJSON('dnd/listRace.json') || await fetchFileJSON('/resources/dnd/listRace.json') || [];
-            dndPlaces = await fetchFileJSON('resources/dnd/listPlace.json') || await fetchFileJSON('dnd/listPlace.json') || await fetchFileJSON('/resources/dnd/listPlace.json') || [];
+            // Utilizing loadResourceArray to automatically handle relative paths and nested object arrays
+            dndNames = await loadResourceArray(['./resources/dnd/listNames.json', 'resources/dnd/listNames.json', '/resources/dnd/listNames.json', 'dnd/listNames.json']);
+            dndProfessions = await loadResourceArray(['./resources/dnd/listProfession.json', 'resources/dnd/listProfession.json', '/resources/dnd/listProfession.json', 'dnd/listProfession.json']);
+            dndRaces = await loadResourceArray(['./resources/dnd/listRace.json', 'resources/dnd/listRace.json', '/resources/dnd/listRace.json', 'dnd/listRace.json']);
+            dndPlaces = await loadResourceArray(['./resources/dnd/listPlace.json', 'resources/dnd/listPlace.json', '/resources/dnd/listPlace.json', 'dnd/listPlace.json']);
 
-            const dndAttributesData = await fetchFileJSON('resources/dnd/listAttributes.json') || await fetchFileJSON('dnd/listAttributes.json') || await fetchFileJSON('/resources/dnd/listAttributes.json') || [];
-            if (dndAttributesData && Array.isArray(dndAttributesData)) {
+            const dndAttributesData = await loadResourceArray(['./resources/dnd/listAttributes.json', 'resources/dnd/listAttributes.json', '/resources/dnd/listAttributes.json', 'dnd/listAttributes.json']);
+            if (dndAttributesData && dndAttributesData.length > 0) {
                 dndAttributes = dndAttributesData.map((attr, index) => {
                     const presetColors = [
                         "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5",
@@ -326,16 +364,6 @@
                     };
                 });
             }
-        }
-
-        async function fetchFileJSON(url) {
-            try {
-                const response = await fetch(url);
-                if (response.ok) {
-                    return await response.json();
-                }
-            } catch (e) {}
-            return null;
         }
 
         function generatePermutatedSubtitle() {
@@ -645,12 +673,12 @@
 
         // --- D&D HERO SYSTEM LOGIC ---
         function generateHeroIdentity() {
-            // Guard clause if data hasn't arrived/resolved from the JSON streams
+            // Guard clause with UI feedback if data hasn't arrived/resolved from the JSON streams
             if (!dndNames.length || !dndProfessions.length || !dndRaces.length || !dndPlaces.length) {
-                document.getElementById('char-name').textContent = "Unknown Identity";
-                document.getElementById('char-race').textContent = "Pending Fetch";
-                document.getElementById('char-profession').textContent = "Pending Fetch";
-                document.getElementById('char-location').textContent = "System Offline";
+                document.getElementById('char-name').textContent = "Data Not Found";
+                document.getElementById('char-race').textContent = "Server Needed";
+                document.getElementById('char-profession').textContent = "CORS Blocked?";
+                document.getElementById('char-location').textContent = "Please serve via HTTP to read JSONs";
                 return;
             }
 

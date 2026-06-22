@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prapor Quest Flowchart - Escape from Tarkov</title>
+    <title>Prapor Quest Flowchart – Multi‑View</title>
     <style>
-        /* ===== minimal layout – same style as the converter ===== */
+        /* ===== minimal layout – same style ===== */
         * {
             margin: 0;
             padding: 0;
@@ -37,6 +37,7 @@
         .btn-group {
             display: flex;
             gap: 0.4rem;
+            flex-wrap: wrap;
         }
         .btn {
             border: 1px solid #ccc;
@@ -57,6 +58,14 @@
             font-size: 0.8rem;
             margin-left: auto;
             opacity: 0.7;
+            white-space: nowrap;
+        }
+        .view-select {
+            border: 1px solid #ccc;
+            background: transparent;
+            padding: 0.1rem 0.4rem;
+            font-family: inherit;
+            font-size: 0.85rem;
         }
 
         .main-content {
@@ -69,7 +78,6 @@
             background: #fff;
         }
 
-        /* ===== panels ===== */
         .panel {
             display: flex;
             flex-direction: column;
@@ -99,7 +107,6 @@
             line-height: 1.5;
         }
 
-        /* ===== splitter ===== */
         .splitter-h {
             flex: 0 0 1px;
             cursor: ew-resize;
@@ -114,7 +121,42 @@
             background: #666;
         }
 
-        /* ===== tree styles ===== */
+        /* ===== shared node styles ===== */
+        .quest-node {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.1s, border-color 0.1s, box-shadow 0.1s;
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .quest-node:hover {
+            background: #f0f4ff;
+            border-color: #8899bb;
+        }
+        .quest-node.active {
+            background: #e0e8f5;
+            border-color: #4466aa;
+            box-shadow: 0 0 0 2px rgba(68, 102, 170, 0.2);
+        }
+        .quest-node .node-name {
+            font-weight: 500;
+        }
+        .quest-node .node-badge {
+            font-size: 0.65rem;
+            opacity: 0.6;
+            margin-left: 0.4rem;
+            font-weight: 300;
+        }
+
+        /* ===== tree view ===== */
         .tree-root {
             padding: 0.5rem 0;
         }
@@ -138,7 +180,6 @@
             padding: 0.3rem 0 0.3rem 1.2rem;
             margin: 0;
         }
-        /* vertical line connecting to parent */
         .tree-root li::before {
             content: '';
             position: absolute;
@@ -150,7 +191,6 @@
             border-bottom: 1px solid #ccc;
             border-radius: 0 0 0 4px;
         }
-        /* horizontal line for last child */
         .tree-root li:last-child::before {
             border-bottom: 1px solid #ccc;
             height: 1.2rem;
@@ -161,56 +201,102 @@
             height: 1.2rem;
             top: 0;
         }
-        /* remove vertical line for root-level li */
-        .tree-root > ul > li::before {
+        .tree-root>ul>li::before {
             border-left: none;
             border-bottom: none;
         }
-        .tree-root > ul > li::after {
-            display: none;
-        }
-        .tree-root > ul::before {
+        .tree-root>ul::before {
             display: none;
         }
 
-        /* node card */
-        .quest-node {
-            display: inline-block;
-            padding: 0.2rem 0.8rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background: #fff;
+        /* ===== accordion view ===== */
+        .accordion-root {
+            padding: 0.2rem 0;
+        }
+        .accordion-root details {
+            margin: 0.2rem 0;
+            padding-left: 0.5rem;
+            border-left: 2px solid #eee;
+        }
+        .accordion-root details summary {
             cursor: pointer;
-            font-size: 0.85rem;
-            transition: background 0.1s, border-color 0.1s, box-shadow 0.1s;
-            position: relative;
-            z-index: 1;
-            max-width: 100%;
-            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.1rem 0;
+            outline: none;
         }
-        .quest-node:hover {
-            background: #f0f4ff;
-            border-color: #8899bb;
+        .accordion-root details summary::-webkit-details-marker {
+            color: #888;
         }
-        .quest-node.active {
-            background: #e0e8f5;
-            border-color: #4466aa;
-            box-shadow: 0 0 0 2px rgba(68, 102, 170, 0.2);
+        .accordion-root details summary .quest-node {
+            white-space: normal;
         }
-        .quest-node .node-name {
-            font-weight: 500;
+        .accordion-root details[open] {
+            border-left-color: #aaa;
         }
-        .quest-node .node-badge {
-            font-size: 0.65rem;
+        .accordion-root details .child-container {
+            padding-left: 1.2rem;
+        }
+
+        /* ===== flat view ===== */
+        .flat-root {
+            padding: 0.2rem 0;
+        }
+        .flat-root ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .flat-root li {
+            padding: 0.15rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .flat-root li .meta {
+            font-size: 0.75rem;
             opacity: 0.6;
-            margin-left: 0.4rem;
-            font-weight: 300;
+        }
+
+        /* ===== chain view ===== */
+        .chain-root {
+            padding: 0.5rem 0;
+        }
+        .chain-root .path {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.2rem 0.4rem;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 0.5rem;
+        }
+        .chain-root .path .arrow {
+            opacity: 0.4;
+        }
+        .chain-root .path .quest-node {
+            font-size: 0.8rem;
+            padding: 0.1rem 0.5rem;
+        }
+        .chain-root .children-section {
+            margin-top: 0.5rem;
+        }
+        .chain-root .children-section h4 {
+            font-weight: 400;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-bottom: 0.2rem;
+        }
+        .chain-root .children-section .child-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
         }
 
         /* ===== detail panel ===== */
-        #detailPanel .panel-body {
-            padding: 1rem;
-        }
         .detail-empty {
             color: #999;
             font-style: italic;
@@ -235,9 +321,8 @@
         }
         .detail-section p {
             font-size: 0.9rem;
-            padding-left: 0.5rem;
-            border-left: 2px solid #ddd;
             padding-left: 0.75rem;
+            border-left: 2px solid #ddd;
         }
         .detail-rewards ul {
             list-style: none;
@@ -253,7 +338,6 @@
             opacity: 0.6;
         }
 
-        /* ===== responsive ===== */
         @media (max-width: 800px) {
             .main-content {
                 flex-wrap: wrap;
@@ -273,7 +357,6 @@
             }
         }
 
-        /* scrollbar styling (minimal) */
         .panel-body::-webkit-scrollbar {
             width: 4px;
             height: 4px;
@@ -297,25 +380,28 @@
             <button class="btn" id="collapseAllBtn">[ collapse all ]</button>
             <button class="btn" id="resetViewBtn">[ reset view ]</button>
         </div>
+        <select class="view-select" id="viewType">
+            <option value="tree">Tree</option>
+            <option value="accordion">Accordion</option>
+            <option value="flat">Flat List</option>
+            <option value="chain">Chain (selected)</option>
+        </select>
         <span class="stats" id="stats">0 nodes</span>
     </div>
 
     <div class="main-content" id="mainContent">
-        <!-- left panel: flowchart -->
         <div class="panel" id="flowchartPanel">
             <div class="panel-header">
                 <span>quest tree</span>
                 <span class="badge" id="nodeCount">0</span>
             </div>
             <div class="panel-body" id="treeContainer">
-                <!-- tree will be rendered here -->
+                <!-- rendered by JS -->
             </div>
         </div>
 
-        <!-- splitter -->
         <div class="splitter-h" id="splitter"></div>
 
-        <!-- right panel: details -->
         <div class="panel" id="detailPanel">
             <div class="panel-header">
                 <span>quest details</span>
@@ -331,7 +417,7 @@
 <script>
     (function() {
         // ================================================================
-        //  DATA – Prapor quest tree (official EFT wiki)
+        //  DATA – Prapor quest tree
         // ================================================================
         const questData = {
             name: "Debut",
@@ -398,120 +484,288 @@
         // ================================================================
         //  STATE
         // ================================================================
-        let selectedNode = null; // stores the node data object
+        let selectedNode = null;       // reference to node object
+        let selectedNodeName = null;   // for highlighting
+        let currentView = 'tree';
         const treeContainer = document.getElementById('treeContainer');
         const detailBody = document.getElementById('detailBody');
         const nodeCountSpan = document.getElementById('nodeCount');
         const statsSpan = document.getElementById('stats');
+        const viewSelect = document.getElementById('viewType');
 
         // ================================================================
-        //  RENDER TREE
+        //  HELPERS
         // ================================================================
-        function renderTree(node, isRoot = true) {
-            const ul = document.createElement('ul');
+        function countAllNodes(node) {
+            let count = 1;
+            if (node.children) {
+                for (const child of node.children) {
+                    count += countAllNodes(child);
+                }
+            }
+            return count;
+        }
 
-            // if root, we just render children directly without an extra <li> wrapper for the root itself
-            if (isRoot) {
+        // collect all nodes with parent references (for flat list)
+        function collectNodesWithParent(node, parent = null) {
+            const list = [];
+            list.push({ node, parent });
+            if (node.children) {
+                for (const child of node.children) {
+                    list.push(...collectNodesWithParent(child, node));
+                }
+            }
+            return list;
+        }
+
+        // find node by name (deep search)
+        function findNodeByName(root, name) {
+            if (root.name === name) return root;
+            if (root.children) {
+                for (const child of root.children) {
+                    const found = findNodeByName(child, name);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        // get path from root to node
+        function getPath(root, target) {
+            function search(node, path) {
+                path.push(node);
+                if (node === target) return path;
                 if (node.children) {
                     for (const child of node.children) {
-                        ul.appendChild(createListItem(child));
+                        const result = search(child, path.slice());
+                        if (result) return result;
+                    }
+                }
+                return null;
+            }
+            return search(root, []);
+        }
+
+        // ================================================================
+        //  RENDER FUNCTIONS (each returns DOM element)
+        // ================================================================
+
+        // --- shared: create a clickable quest node ---
+        function createNodeElement(node, highlight = false) {
+            const span = document.createElement('span');
+            span.className = 'quest-node' + (highlight ? ' active' : '');
+            span.dataset.quest = node.name;
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'node-name';
+            nameSpan.textContent = node.name;
+            span.appendChild(nameSpan);
+            if (node.children && node.children.length > 0) {
+                const badge = document.createElement('span');
+                badge.className = 'node-badge';
+                badge.textContent = `(${node.children.length})`;
+                span.appendChild(badge);
+            }
+            span.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectNode(node);
+                // highlight in current view (will re-render on selection)
+                // We'll re-render the whole view on select to update highlights.
+                renderView(currentView);
+            });
+            return span;
+        }
+
+        // --- Tree view ---
+        function renderTreeView(root, selectedName) {
+            const container = document.createElement('div');
+            container.className = 'tree-root';
+
+            function buildTree(node) {
+                const ul = document.createElement('ul');
+                if (node.children) {
+                    for (const child of node.children) {
+                        const li = document.createElement('li');
+                        const el = createNodeElement(child, child.name === selectedName);
+                        li.appendChild(el);
+                        // children
+                        if (child.children && child.children.length > 0) {
+                            const childUl = buildTree(child);
+                            childUl.className = 'child-list';
+                            childUl.style.display = 'block';
+                            li.appendChild(childUl);
+                        }
+                        ul.appendChild(li);
                     }
                 }
                 return ul;
             }
 
-            // for non-root, we wrap in <li>
-            const li = createListItem(node);
-            return li;
+            // root itself is not shown as a node, but we can show it? We'll show the root as a special heading.
+            // Actually we'll display the root as a node at the top? Better to show it as a header.
+            const rootHeader = document.createElement('div');
+            rootHeader.style.padding = '0.2rem 0.5rem';
+            rootHeader.style.fontWeight = '500';
+            rootHeader.style.borderBottom = '1px solid #ddd';
+            rootHeader.style.marginBottom = '0.5rem';
+            const rootEl = createNodeElement(root, root.name === selectedName);
+            rootHeader.appendChild(rootEl);
+            container.appendChild(rootHeader);
+
+            const childrenUl = buildTree(root);
+            container.appendChild(childrenUl);
+            return container;
         }
 
-        function createListItem(node) {
-            const li = document.createElement('li');
-
-            // --- node button ---
-            const btn = document.createElement('span');
-            btn.className = 'quest-node';
-            btn.dataset.quest = node.name;
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'node-name';
-            nameSpan.textContent = node.name;
-            btn.appendChild(nameSpan);
-
-            // count children badge
-            if (node.children && node.children.length > 0) {
-                const badge = document.createElement('span');
-                badge.className = 'node-badge';
-                badge.textContent = `(${node.children.length})`;
-                btn.appendChild(badge);
-            }
-
-            // click to select
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                selectNode(node);
-                // update active class
-                document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
-            });
-
-            li.appendChild(btn);
-
-            // --- children ---
-            if (node.children && node.children.length > 0) {
-                const childUl = document.createElement('ul');
-                // by default collapsed? We'll make it expanded for clarity, but add toggle?
-                // let's make it expanded by default, and the "expand/collapse all" buttons will handle toggling.
-                // we need to store reference for collapse/expand.
-                childUl.className = 'child-list';
-                childUl.style.display = 'block';
-                for (const child of node.children) {
-                    const childLi = createListItem(child);
-                    childUl.appendChild(childLi);
-                }
-                li.appendChild(childUl);
-
-                // double-click on node to toggle children
-                btn.addEventListener('dblclick', function(e) {
-                    e.stopPropagation();
-                    const ul = this.parentElement.querySelector('ul.child-list');
-                    if (ul) {
-                        ul.style.display = (ul.style.display === 'none') ? 'block' : 'none';
-                    }
-                });
-            }
-
-            return li;
-        }
-
-        function buildTree(data) {
+        // --- Accordion view ---
+        function renderAccordionView(root, selectedName) {
             const container = document.createElement('div');
-            container.className = 'tree-root';
-            const rootUl = renderTree(data, true);
-            container.appendChild(rootUl);
+            container.className = 'accordion-root';
 
-            // count total nodes (including root and all children)
-            let count = 0;
-            function countNodes(node) {
-                count++;
-                if (node.children) {
+            function buildAccordion(node, depth = 0) {
+                const details = document.createElement('details');
+                if (depth === 0) details.open = true; // root expanded
+                const summary = document.createElement('summary');
+                const el = createNodeElement(node, node.name === selectedName);
+                summary.appendChild(el);
+                details.appendChild(summary);
+
+                if (node.children && node.children.length > 0) {
+                    const childContainer = document.createElement('div');
+                    childContainer.className = 'child-container';
                     for (const child of node.children) {
-                        countNodes(child);
+                        childContainer.appendChild(buildAccordion(child, depth + 1));
+                    }
+                    details.appendChild(childContainer);
+                }
+                return details;
+            }
+
+            // We'll show root as accordion
+            const rootAcc = buildAccordion(root, 0);
+            container.appendChild(rootAcc);
+            return container;
+        }
+
+        // --- Flat List view ---
+        function renderFlatView(root, selectedName) {
+            const container = document.createElement('div');
+            container.className = 'flat-root';
+            const all = collectNodesWithParent(root);
+            const ul = document.createElement('ul');
+            for (const { node, parent } of all) {
+                const li = document.createElement('li');
+                const el = createNodeElement(node, node.name === selectedName);
+                li.appendChild(el);
+                const meta = document.createElement('span');
+                meta.className = 'meta';
+                const parentName = parent ? parent.name : '(root)';
+                const childCount = (node.children && node.children.length) || 0;
+                meta.textContent = `← ${parentName} · ${childCount} unlocks`;
+                li.appendChild(meta);
+                ul.appendChild(li);
+            }
+            container.appendChild(ul);
+            return container;
+        }
+
+        // --- Chain view (selected node path + children) ---
+        function renderChainView(root, selectedNodeObj) {
+            const container = document.createElement('div');
+            container.className = 'chain-root';
+
+            if (!selectedNodeObj) {
+                container.innerHTML = '<div style="opacity:0.6;font-style:italic;">select a quest to see its chain</div>';
+                return container;
+            }
+
+            // Path
+            const path = getPath(root, selectedNodeObj);
+            if (path) {
+                const pathDiv = document.createElement('div');
+                pathDiv.className = 'path';
+                for (let i = 0; i < path.length; i++) {
+                    const node = path[i];
+                    const el = createNodeElement(node, node.name === selectedNodeObj.name);
+                    pathDiv.appendChild(el);
+                    if (i < path.length - 1) {
+                        const arrow = document.createElement('span');
+                        arrow.className = 'arrow';
+                        arrow.textContent = '→';
+                        pathDiv.appendChild(arrow);
                     }
                 }
+                container.appendChild(pathDiv);
             }
-            countNodes(data);
-            nodeCountSpan.textContent = count;
-            statsSpan.textContent = `${count} quests`;
+
+            // Children of selected
+            const childrenSection = document.createElement('div');
+            childrenSection.className = 'children-section';
+            const header = document.createElement('h4');
+            header.textContent = 'Unlocked quests:';
+            childrenSection.appendChild(header);
+            const childList = document.createElement('div');
+            childList.className = 'child-list';
+            if (selectedNodeObj.children && selectedNodeObj.children.length > 0) {
+                for (const child of selectedNodeObj.children) {
+                    const el = createNodeElement(child, child.name === selectedNodeObj.name);
+                    childList.appendChild(el);
+                }
+            } else {
+                const none = document.createElement('span');
+                none.style.opacity = '0.5';
+                none.textContent = 'none';
+                childList.appendChild(none);
+            }
+            childrenSection.appendChild(childList);
+            container.appendChild(childrenSection);
 
             return container;
         }
 
         // ================================================================
-        //  SELECT / DETAILS
+        //  RENDER DISPATCHER
+        // ================================================================
+        function renderView(viewType) {
+            const root = questData;
+            const selectedName = selectedNode ? selectedNode.name : null;
+
+            let viewElement;
+            switch (viewType) {
+                case 'tree':
+                    viewElement = renderTreeView(root, selectedName);
+                    break;
+                case 'accordion':
+                    viewElement = renderAccordionView(root, selectedName);
+                    break;
+                case 'flat':
+                    viewElement = renderFlatView(root, selectedName);
+                    break;
+                case 'chain':
+                    viewElement = renderChainView(root, selectedNode);
+                    break;
+                default:
+                    viewElement = renderTreeView(root, selectedName);
+            }
+
+            // Clear and append
+            treeContainer.innerHTML = '';
+            treeContainer.appendChild(viewElement);
+
+            // Update node count
+            const total = countAllNodes(root);
+            nodeCountSpan.textContent = total;
+            statsSpan.textContent = `${total} quests · ${viewType} view`;
+        }
+
+        // ================================================================
+        //  SELECTION & DETAILS
         // ================================================================
         function selectNode(node) {
             selectedNode = node;
+            selectedNodeName = node.name;
             renderDetails(node);
+            // Re-render view to update highlights
+            renderView(currentView);
         }
 
         function renderDetails(node) {
@@ -519,12 +773,9 @@
                 detailBody.innerHTML = `<div class="detail-empty">← click a quest node</div>`;
                 return;
             }
-
             let html = '';
             html += `<div class="detail-title">${node.name}</div>`;
-
             html += `<div class="detail-section"><h4>requirements</h4><p>${node.requirements || 'none'}</p></div>`;
-
             if (node.rewards && node.rewards.length > 0) {
                 html += `<div class="detail-section detail-rewards"><h4>rewards</h4><ul>`;
                 for (const reward of node.rewards) {
@@ -532,8 +783,6 @@
                 }
                 html += `</ul></div>`;
             }
-
-            // show children count
             const childCount = (node.children && node.children.length) || 0;
             html += `<div class="detail-section" style="margin-top:1rem;opacity:0.6;font-size:0.8rem;">`;
             html += `unlocks ${childCount} quest${childCount !== 1 ? 's' : ''}`;
@@ -541,33 +790,60 @@
                 html += `: ${node.children.map(c => c.name).join(', ')}`;
             }
             html += `</div>`;
-
             detailBody.innerHTML = html;
         }
 
         // ================================================================
-        //  EXPAND / COLLAPSE ALL
+        //  VIEW SWITCHING
+        // ================================================================
+        function setView(view) {
+            currentView = view;
+            renderView(view);
+            // Adjust expand/collapse behaviour for the view
+            // For tree/accordion we can support expand/collapse
+        }
+
+        // ================================================================
+        //  EXPAND / COLLAPSE (works for tree and accordion)
         // ================================================================
         function expandAll() {
-            document.querySelectorAll('.child-list').forEach(ul => ul.style.display = 'block');
+            if (currentView === 'tree') {
+                document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'block');
+            } else if (currentView === 'accordion') {
+                document.querySelectorAll('.accordion-root details').forEach(d => d.open = true);
+            }
+            // For flat and chain, no expand/collapse needed.
         }
 
         function collapseAll() {
-            document.querySelectorAll('.child-list').forEach(ul => ul.style.display = 'none');
+            if (currentView === 'tree') {
+                document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'none');
+            } else if (currentView === 'accordion') {
+                // collapse all except root? we can collapse all details.
+                document.querySelectorAll('.accordion-root details').forEach(d => d.open = false);
+                // open root
+                const rootDetails = document.querySelector('.accordion-root details');
+                if (rootDetails) rootDetails.open = true;
+            }
         }
 
         function resetView() {
-            expandAll();
-            // deselect
-            document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
+            // reset selection
             selectedNode = null;
+            selectedNodeName = null;
             renderDetails(null);
-            // scroll to top
-            treeContainer.scrollTop = 0;
+            // expand all (or default state)
+            if (currentView === 'tree' || currentView === 'accordion') {
+                expandAll();
+            }
+            // For chain, we need to show the default empty state
+            renderView(currentView);
+            // clear active highlights
+            document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
         }
 
         // ================================================================
-        //  SPLITTER (same as converter)
+        //  SPLITTER (same)
         // ================================================================
         function initSplitter() {
             const splitter = document.getElementById('splitter');
@@ -610,7 +886,6 @@
                 }
             });
 
-            // double-click reset
             splitter.addEventListener('dblclick', function() {
                 leftPanel.style.flex = '';
                 rightPanel.style.flex = '';
@@ -621,14 +896,12 @@
         //  INIT
         // ================================================================
         function init() {
-            // render tree
-            const treeEl = buildTree(questData);
-            treeContainer.appendChild(treeEl);
+            // set up view selector
+            viewSelect.addEventListener('change', function() {
+                setView(this.value);
+            });
 
-            // auto-select root? No, let user click.
-            // select first node? Better not, show empty details.
-
-            // set up buttons
+            // buttons
             document.getElementById('expandAllBtn').addEventListener('click', expandAll);
             document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
             document.getElementById('resetViewBtn').addEventListener('click', resetView);
@@ -636,19 +909,17 @@
             // splitter
             initSplitter();
 
-            // select root by default? Let's select root to show something.
-            // Actually, let's select the first node (Debut) so the user sees details right away.
-            const rootNode = questData;
-            // We need to highlight the root node. Since root is not rendered as a clickable node, we skip.
-            // We'll just show details for the root.
-            selectNode(rootNode);
-            // Highlight the first child (Bad Rep Evidence) or just show root details without highlight.
-            // Let's highlight the root visually? Not rendered. So we'll just show details.
-            // To make it intuitive, we'll auto-select the first child? No, let's just show root details.
-            renderDetails(rootNode);
+            // initial view: tree
+            currentView = 'tree';
+            viewSelect.value = 'tree';
+            // select root? We'll show root details, but not highlight (root not clickable as node)
+            // We'll select the root as a default selection so details show.
+            selectedNode = questData;
+            selectedNodeName = questData.name;
+            renderDetails(questData);
+            renderView('tree');
         }
 
-        // wait for DOM
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
