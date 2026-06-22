@@ -805,7 +805,7 @@
                     category: "Quest Tracker",
                     tags: ["Progression Tracker", "Hideout List", "Quest Trees"]
                 },
-				{
+                {
                     id: "web-mapgenie",
                     title: "MapGenie Tarkov (Map-Genie / Map Genie)",
                     shortName: "mapgenie.io map-genie map genie maps customs streets reserve woods interchange shoreline ground zero lighthouse factory labs",
@@ -1525,7 +1525,8 @@
             matches.slice(0, 10).forEach((item) => {
                 if (!item) return;
                 const element = document.createElement('div');
-                element.className = "flex items-center justify-between px-4 py-3 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/70 transition duration-150 cursor-pointer border-l-2 border-transparent hover:border-indigo-600 dark:hover:border-indigo-400";
+                // Aligned layout using gap-3 and flexible item sizing
+                element.className = "flex items-center justify-between gap-3 px-4 py-3 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/70 transition duration-150 cursor-pointer border-l-2 border-transparent hover:border-indigo-600 dark:hover:border-indigo-400";
                 
                 let badgeColor = 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 dark:border-indigo-500/30';
                 if (item.type === 'tarkov') {
@@ -1534,12 +1535,13 @@
                     badgeColor = 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20 dark:border-blue-500/30';
                 }
 
+                // Fixed: The badge now utilizes flex-shrink-0 and whitespace-nowrap, ensuring tags never break or get cut off
                 element.innerHTML = `
-                    <div class="flex items-center space-x-3 truncate">
+                    <div class="flex items-center space-x-2.5 min-w-0 flex-1">
                         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500/40 flex-shrink-0"></div>
                         <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">${item.title.split(' (')[0] || 'Untitled'}</span>
                     </div>
-                    <span class="text-[10px] font-semibold border ${badgeColor} uppercase tracking-wider px-2 py-0.5 rounded-full select-none max-w-[120px] truncate">
+                    <span class="text-[10px] font-semibold border ${badgeColor} uppercase tracking-wider px-2 py-0.5 rounded-full select-none flex-shrink-0 whitespace-nowrap">
                         ${item.category || 'General'}
                     </span>
                 `;
