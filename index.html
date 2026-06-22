@@ -139,11 +139,11 @@
 
     </main>
 
-    <!-- Side-Drawer Character Sheet -->
-    <div id="character-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-darkCard/95 border-l border-darkBorder backdrop-blur-lg shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <!-- Premium Floating Side-Drawer Character Sheet -->
+    <div id="character-drawer" class="fixed top-4 bottom-4 right-4 left-4 sm:left-auto w-auto sm:w-[380px] md:w-[420px] bg-darkCard/95 border border-darkBorder rounded-2xl backdrop-blur-xl shadow-2xl z-50 transform translate-x-[calc(100%+2rem)] transition-transform duration-300 ease-in-out flex flex-col">
         <!-- Drawer Header -->
-        <div class="p-6 border-b border-darkBorder flex items-center justify-end">
-            <button id="close-drawer-btn" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none">
+        <div class="p-5 border-b border-darkBorder flex items-center justify-end">
+            <button id="close-drawer-btn" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-850 hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -151,7 +151,7 @@
         </div>
 
         <!-- Drawer Content -->
-        <div class="flex-grow overflow-y-auto p-6 space-y-6">
+        <div class="flex-grow overflow-y-auto p-5 space-y-6">
             <!-- CORS Notice Help Panel -->
             <div id="cors-notice" class="hidden p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-200 space-y-1.5">
                 <span class="font-bold font-mono block text-amber-400">⚠️ CORS/LOCAL SECURITY BLOCK</span>
@@ -167,11 +167,12 @@
                     <div class="relative w-16 h-16 rounded-xl overflow-hidden">
                         <img id="char-avatar" src="https://thispersondoesnotexist.com" alt="Character Avatar" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'">
                     </div>
-                    <div>
-                        <h3 id="char-name" class="text-xl font-bold text-zinc-100 tracking-tight">Loading...</h3>
-                        <div class="flex flex-wrap items-center gap-2 mt-1">
-                            <span id="char-race" class="text-xs px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded font-semibold border border-zinc-700">Race</span>
-                            <span id="char-profession" class="text-xs px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded font-semibold border border-zinc-700">Profession</span>
+                    <div class="min-w-0 flex-1">
+                        <h3 id="char-name" class="text-lg md:text-xl font-bold text-zinc-100 tracking-tight truncate">Loading...</h3>
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            <span id="char-race" class="text-[10px] px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded font-semibold border border-zinc-700 whitespace-nowrap">Race</span>
+                            <span id="char-profession" class="text-[10px] px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded font-semibold border border-zinc-700 font-medium">Profession</span>
+                            <span id="char-gender" class="text-[10px] px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded font-semibold border border-zinc-700 font-medium">Gender</span>
                         </div>
                     </div>
                 </div>
@@ -277,6 +278,9 @@
         let bioBackgrounds = ["they spent their formative years decoding ancient cyphers in hidden archives,", "they once guarded the outer boundary of a forgotten sky-citadel,", "they survived by outwitting rival guilds in the deepest subterranean alleys,", "they dedicated half a lifetime to charting wild, unmappable magical anomalies,"];
         let bioMotivations = ["driven by a relentless quest to find a legendary lost chronometer.", "constantly searching for the missing piece of a shattered family heirloom.", "seeking to restore balance to the chaotic magic flowing through the local ley lines.", "quietly working to pay off an old debt to a mysterious guild patron."];
         let bioSecrets = ["They are rumored to carry a compass that points only to what they fear most.", "They secretly keep a mechanical pocket watch that ticks backwards.", "Some say their shadow occasionally moves half a second slower than they do.", "They carry a sealed letter that they have sworn never to open."];
+
+        // Fallback gender list
+        let dndGenders = ["Male", "Female", "Non-Binary", "Genderfluid", "Agender", "Androgynous"];
 
         // Dynamic target variables - Populated natively by folder fetch
         let dndNames = [];
@@ -416,6 +420,17 @@
 
             // Load Attribute descriptor mapping
             dndAttributes = await loadAttributesData();
+
+            // Load dynamic gender resource
+            const genderData = await loadResourceArray([
+                './resources/dnd/rndGender.json',
+                'resources/dnd/rndGender.json',
+                '/resources/dnd/rndGender.json',
+                'rndGender.json'
+            ]);
+            if (genderData && genderData.length > 0) {
+                dndGenders = genderData;
+            }
         }
 
         function generatePermutatedSubtitle() {
@@ -758,11 +773,13 @@
             const randomProfession = dndProfessions[Math.floor(Math.random() * dndProfessions.length)];
             const randomRace = dndRaces[Math.floor(Math.random() * dndRaces.length)];
             const randomPlace = dndPlaces[Math.floor(Math.random() * dndPlaces.length)];
+            const randomGender = dndGenders[Math.floor(Math.random() * dndGenders.length)];
 
             document.getElementById('char-name').textContent = randomName;
             document.getElementById('char-race').textContent = randomRace;
             document.getElementById('char-profession').textContent = randomProfession;
             document.getElementById('char-location').textContent = randomPlace;
+            document.getElementById('char-gender').textContent = randomGender;
 
             // Generate procedural tactical bio sentence
             const intro = bioIntros[Math.floor(Math.random() * bioIntros.length)];
