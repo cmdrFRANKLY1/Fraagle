@@ -10,7 +10,7 @@
         // Force dark mode context always
         document.documentElement.classList.add('dark');
 
-        // Tailwind configuration for premium stealth dark mode with colorful brand accents
+        // Tailwind configuration for premium stealth dark mode with colorful brand accents on the logo
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -70,9 +70,10 @@
 
     <!-- Top Navigation Bar -->
     <header class="flex items-center justify-between p-5 relative z-10 w-full select-none">
-        <!-- Left Side: Mini Brand Indicator -->
+        <!-- Left Side: Mini Brand Indicator & Creator Credit -->
         <div class="flex items-center space-x-2">
             <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">T.</span>
+            <span class="text-xs text-zinc-500 font-medium">by <a href="https://steamcommunity.com/id/hellomynameisfrankly/" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-tarkoogleBlue transition-colors font-semibold">cmdrFRANKLY</a></span>
         </div>
 
         <!-- Center: Modern Live Clock & Date -->
@@ -141,9 +142,9 @@
 
     <!-- Premium Floating Side-Drawer Character Sheet -->
     <div id="character-drawer" class="fixed top-4 bottom-4 right-4 w-[calc(100%-2rem)] sm:w-[380px] md:w-[420px] bg-darkCard/95 border border-darkBorder rounded-2xl backdrop-blur-xl shadow-2xl z-50 translate-x-[120%] transition-transform duration-300 ease-in-out flex flex-col">
-        <!-- Compact Drawer Header -->
-        <div class="py-2 px-4 border-b border-darkBorder flex items-center justify-end">
-            <button id="close-drawer-btn" class="p-1.5 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none">
+        <!-- Compact Drawer Header (Lowered in height) -->
+        <div class="py-1 px-3 border-b border-darkBorder flex items-center justify-end">
+            <button id="close-drawer-btn" class="p-1 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -206,14 +207,6 @@
                 </p>
             </div>
         </div>
-    </div>
-
-    <!-- Bottom Left HUD Performance Metric Overlay -->
-    <div class="fixed bottom-6 left-6 flex flex-col items-start justify-start select-none z-20 h-12 w-[320px] sm:w-[400px]">
-        <!-- Load time tag -->
-        <span id="load-time-tag" class="text-[9px] sm:text-xs font-mono font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_3px_rgba(255,255,255,0.1)] h-5 inline-block"></span>
-        <!-- Stats tag (LOW/AVG/HIGH performance telemetry log) -->
-        <span id="stats-tag" class="text-[8px] sm:text-[10px] font-mono font-bold tracking-widest text-zinc-600 opacity-0 drop-shadow-[0_0_2px_rgba(255,255,255,0.05)] h-5 mt-1 inline-block"></span>
     </div>
 
     <!-- Unified Impressum & Credits Footer -->
@@ -282,6 +275,9 @@
         // Fallback gender list
         let dndGenders = ["Male", "Female", "Non-Binary", "Genderfluid", "Agender", "Androgynous"];
 
+        // Fallback color palette
+        let logoColorPalette = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+
         // Dynamic target variables - Populated natively by folder fetch
         let dndNames = [];
         let dndProfessions = [];
@@ -341,109 +337,10 @@
             return null;
         }
 
-        async function loadResourceData() {
-            // Fetch titles JSON
-            const titlesData = await fetchFileJSON('./resources/rndTitles.json') || await fetchFileJSON('resources/rndTitles.json') || await fetchFileJSON('rndTitles.json') || await fetchFileJSON('/resources/rndTitles.json');
-            if (titlesData && Array.isArray(titlesData)) {
-                generalSearchTitles = titlesData;
-            }
-
-            // Fetch subtitles JSON
-            const subsData = await fetchFileJSON('./resources/rndSubtitles.json') || await fetchFileJSON('resources/rndSubtitles.json') || await fetchFileJSON('rndSubtitles.json') || await fetchFileJSON('/resources/rndSubtitles.json');
-            if (subsData && typeof subsData === 'object') {
-                if (subsData.intros) subtitleIntros = subsData.intros;
-                if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
-                if (subsData.subjects) subtitleSubjects = subsData.subjects;
-                if (subsData.endings) subtitleEndings = subsData.endings;
-            }
-
-            // Fetch procedural bio categories JSON cleanly from multiple local path candidates
-            const bioData = await fetchFileJSON('./resources/dnd/rndCharacterBio.json') || 
-                            await fetchFileJSON('resources/dnd/rndCharacterBio.json') || 
-                            await fetchFileJSON('rndCharacterBio.json') || 
-                            await fetchFileJSON('/resources/dnd/rndCharacterBio.json') ||
-                            await fetchFileJSON('resources/dnd/listCharacterBio.json');
-            if (bioData && typeof bioData === 'object') {
-                if (bioData.intros) bioIntros = bioData.intros;
-                if (bioData.backgrounds) bioBackgrounds = bioData.backgrounds;
-                if (bioData.motivations) bioMotivations = bioData.motivations;
-                if (bioData.secrets) bioSecrets = bioData.secrets;
-            }
-
-            // Fetch version number JSON
-            const versionData = await fetchFileJSON('./resources/currentVersionNr.json') || await fetchFileJSON('currentVersionNr.json') || await fetchFileJSON('/currentVersionNr.json');
-            if (versionData) {
-                if (typeof versionData === 'object' && versionData.version) {
-                    currentVersion = versionData.version;
-                } else if (typeof versionData === 'string') {
-                    currentVersion = versionData;
-                }
-            }
-
-            // --- D&D MODULE DYNAMIC DATASETS RESOLUTION (Plural-first filenames check) ---
-            dndNames = await loadResourceArray([
-                './resources/dnd/listNames.json', 
-                'resources/dnd/listNames.json', 
-                '/resources/dnd/listNames.json', 
-                'listNames.json'
-            ]);
-            dndProfessions = await loadResourceArray([
-                './resources/dnd/listProfessions.json', 
-                'resources/dnd/listProfessions.json', 
-                '/resources/dnd/listProfessions.json', 
-                'listProfessions.json',
-                './resources/dnd/listProfession.json', 
-                'resources/dnd/listProfession.json', 
-                '/resources/dnd/listProfession.json', 
-                'listProfession.json'
-            ]);
-            dndRaces = await loadResourceArray([
-                './resources/dnd/listRaces.json', 
-                'resources/dnd/listRaces.json', 
-                '/resources/dnd/listRaces.json', 
-                'listRaces.json',
-                './resources/dnd/listRace.json', 
-                'resources/dnd/listRace.json', 
-                '/resources/dnd/listRace.json', 
-                'listRace.json'
-            ]);
-            dndPlaces = await loadResourceArray([
-                './resources/dnd/listPlaces.json', 
-                'resources/dnd/listPlaces.json', 
-                '/resources/dnd/listPlaces.json', 
-                'listPlaces.json',
-                './resources/dnd/listPlace.json', 
-                'resources/dnd/listPlace.json', 
-                '/resources/dnd/listPlace.json', 
-                'listPlace.json'
-            ]);
-
-            // Load Attribute descriptor mapping
-            dndAttributes = await loadAttributesData();
-
-            // Load dynamic gender resource
-            const genderData = await loadResourceArray([
-                './resources/dnd/rndGender.json',
-                'resources/dnd/rndGender.json',
-                '/resources/dnd/rndGender.json',
-                'rndGender.json'
-            ]);
-            if (genderData && genderData.length > 0) {
-                dndGenders = genderData;
-            }
-        }
-
-        function generatePermutatedSubtitle() {
-            const intro = subtitleIntros[Math.floor(Math.random() * subtitleIntros.length)];
-            const adj = subtitleAdjectives[Math.floor(Math.random() * subtitleAdjectives.length)];
-            const subject = subtitleSubjects[Math.floor(Math.random() * subtitleSubjects.length)];
-            const ending = subtitleEndings[Math.floor(Math.random() * subtitleEndings.length)];
-            return `${intro} ${adj} ${subject} ${ending}`;
-        }
-
+        // Helper: Generates a custom dynamic favicon based on character name
         function setRandomFavicon(title) {
             const letter = title ? title.charAt(0) : 'F';
-            const colors = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+            const colors = logoColorPalette;
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             const svg = `
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -459,6 +356,119 @@
                 document.head.appendChild(link);
             }
             link.href = `data:image/svg+xml,${svg.trim()}`;
+        }
+
+        // Helper: Generates a permutated subtitle
+        function generatePermutatedSubtitle() {
+            const intro = subtitleIntros[Math.floor(Math.random() * subtitleIntros.length)];
+            const adj = subtitleAdjectives[Math.floor(Math.random() * subtitleAdjectives.length)];
+            const subject = subtitleSubjects[Math.floor(Math.random() * subtitleSubjects.length)];
+            const ending = subtitleEndings[Math.floor(Math.random() * subtitleEndings.length)];
+            return `${intro} ${adj} ${subject} ${ending}`;
+        }
+
+        async function loadResourceData() {
+            // Fetch dynamic color palette array
+            const colorsData = await loadResourceArray([
+                './resources/colors/indexColorPalette.json',
+                'resources/colors/indexColorPalette.json',
+                '/resources/colors/indexColorPalette.json',
+                'indexColorPalette.json'
+            ]);
+            if (colorsData && colorsData.length > 0) {
+                logoColorPalette = colorsData;
+            }
+
+            // Fetch titles JSON
+            const titlesData = await fetchFileJSON('./resources/text/indexTitles.json') || await fetchFileJSON('resources/text/indexTitles.json') || await fetchFileJSON('indexTitles.json') || await fetchFileJSON('/resources/text/indexTitles.json');
+            if (titlesData && Array.isArray(titlesData)) {
+                generalSearchTitles = titlesData;
+            } else if (titlesData && typeof titlesData === 'object') {
+                for (let key in titlesData) {
+                    if (Array.isArray(titlesData[key])) {
+                        generalSearchTitles = titlesData[key];
+                        break;
+                    }
+                }
+            }
+
+            // Fetch subtitles JSON
+            const subsData = await fetchFileJSON('./resources/text/listSubtitles.json') || await fetchFileJSON('resources/text/listSubtitles.json') || await fetchFileJSON('listSubtitles.json') || await fetchFileJSON('/resources/text/listSubtitles.json');
+            if (subsData && typeof subsData === 'object') {
+                if (subsData.intros) subtitleIntros = subsData.intros;
+                if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
+                if (subsData.subjects) subtitleSubjects = subsData.subjects;
+                if (subsData.endings) subtitleEndings = subsData.endings;
+            }
+
+            // Fetch procedural bio categories JSON cleanly from multiple local path candidates
+            const bioData = await fetchFileJSON('./resources/dnd/listBiography.json') || 
+                            await fetchFileJSON('resources/dnd/listBiography.json') || 
+                            await fetchFileJSON('listBiography.json') || 
+                            await fetchFileJSON('/resources/dnd/listBiography.json');
+            if (bioData && typeof bioData === 'object') {
+                if (bioData.intros) bioIntros = bioData.intros;
+                if (bioData.backgrounds) bioBackgrounds = bioData.backgrounds;
+                if (bioData.motivations) bioMotivations = bioData.motivations;
+                if (bioData.secrets) bioSecrets = bioData.secrets;
+            }
+
+            // Fetch version number JSON
+            const versionData = await fetchFileJSON('./resources/text/indexVersion.json') || await fetchFileJSON('resources/text/indexVersion.json') || await fetchFileJSON('/resources/text/indexVersion.json') || await fetchFileJSON('indexVersion.json');
+            if (versionData) {
+                if (typeof versionData === 'object' && versionData.version) {
+                    currentVersion = versionData.version;
+                } else if (typeof versionData === 'string') {
+                    currentVersion = versionData;
+                } else if (typeof versionData === 'object') {
+                    for (let key in versionData) {
+                        if (typeof versionData[key] === 'string') {
+                            currentVersion = versionData[key];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // --- D&D MODULE DYNAMIC DATASETS RESOLUTION (Plural-first filenames check) ---
+            dndNames = await loadResourceArray([
+                './resources/dnd/listNames.json', 
+                'resources/dnd/listNames.json', 
+                '/resources/dnd/listNames.json', 
+                'listNames.json'
+            ]);
+            dndProfessions = await loadResourceArray([
+                './resources/dnd/listProfessions.json', 
+                'resources/dnd/listProfessions.json', 
+                '/resources/dnd/listProfessions.json', 
+                'listProfessions.json'
+            ]);
+            dndRaces = await loadResourceArray([
+                './resources/dnd/listRaces.json', 
+                'resources/dnd/listRaces.json', 
+                '/resources/dnd/listRaces.json', 
+                'listRaces.json'
+            ]);
+            dndPlaces = await loadResourceArray([
+                './resources/dnd/listPlaces.json', 
+                'resources/dnd/listPlaces.json', 
+                '/resources/dnd/listPlaces.json', 
+                'listPlaces.json'
+            ]);
+
+            // Load Attribute descriptor mapping
+            dndAttributes = await loadAttributesData();
+
+            // Load dynamic gender resource
+            const genderData = await loadResourceArray([
+                './resources/dnd/listGender.json',
+                'resources/dnd/listGender.json',
+                '/resources/dnd/listGender.json',
+                'listGender.json'
+            ]);
+            if (genderData && genderData.length > 0) {
+                dndGenders = genderData;
+            }
         }
 
         // --- DECRYPT VERSION NUMBER ONLY ---
@@ -582,8 +592,8 @@
                     const attrBlock = document.createElement('div');
                     attrBlock.className = `p-2 bg-zinc-900/60 rounded-xl border ${colorClasses.split(' ')[0]} ${colorClasses.split(' ')[1]} transition-all duration-300 flex items-center justify-between select-none`;
                     attrBlock.innerHTML = `
-                        <div class="flex flex-col min-w-0">
-                            <span class="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider truncate">${attrName}</span>
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider">${attrName}</span>
                             <span class="text-[8px] font-semibold text-zinc-400 font-mono italic truncate max-w-[110px]" title="${chosenDesc}">${chosenDesc}</span>
                         </div>
                         <div class="text-right flex-shrink-0 pl-1">
@@ -611,19 +621,24 @@
             
             setRandomFavicon(currentTitle);
 
-            // Title decryption removed: display colorized letters directly
+            // Title display: Letters are picked at random from indexColorPalette.json
             const titleTag = document.getElementById('logo-title');
             if (titleTag) {
-                const colorPool = ['text-tarkoogleBlue', 'text-tarkoogleRed', 'text-tarkoogleYellow', 'text-tarkoogleGreen'];
                 const titleColors = [];
                 for (let i = 0; i < currentTitle.length; i++) {
                     const prevColor = i > 0 ? titleColors[i - 1] : null;
-                    const filteredPool = colorPool.filter(c => c !== prevColor);
-                    titleColors.push(filteredPool[Math.floor(Math.random() * filteredPool.length)]);
+                    const filteredPool = logoColorPalette.filter(c => c !== prevColor);
+                    titleColors.push(filteredPool[Math.floor(Math.random() * filteredPool.length)] || logoColorPalette[0]);
                 }
                 titleTag.innerHTML = currentTitle.split("").map((char, index) => {
                     if (char === " ") return "&nbsp;";
-                    return `<span class="${titleColors[index]}">${char}</span>`;
+                    const col = titleColors[index];
+                    // Check if color is hex or Tailwind text class
+                    if (col.startsWith('#')) {
+                        return `<span style="color: ${col};">${char}</span>`;
+                    } else {
+                        return `<span class="${col}">${char}</span>`;
+                    }
                 }).join("");
             }
 
@@ -631,7 +646,7 @@
             triggerVersionDecrypt();
         }
 
-        // Send calculated boot load speed cleanly to the serverless function
+        // Send calculated boot load speed cleanly to the serverless function (kept for logging purposes)
         async function saveLoadTimeToServer(timeMs) {
             try {
                 await fetch('/api/loadingTimesLogging', {
@@ -644,85 +659,8 @@
                     })
                 });
             } catch (err) {
-                console.warn('Unable to log metric to Vercel Serverless Function.', err);
+                // Silently drop logging errors to keep console pristine
             }
-        }
-
-        // Compute performance stats directly and render instantly
-        async function calculateAndRenderStats(currentMs) {
-            let times = [];
-
-            // 1. Try pulling log registry arrays from Serverless Endpoint (GET or file fetch)
-            try {
-                const response = await fetch('/api/loadingTimesLogging');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (Array.isArray(data)) {
-                        times = data.map(item => item.timeMs);
-                    } else if (data.success && Array.isArray(data.logs)) {
-                        times = data.logs.map(item => item.timeMs);
-                    }
-                }
-            } catch (err) {
-                console.warn('Could not pull stats from Vercel API, applying localized fallback calculations.');
-            }
-
-            // 2. Load LocalStorage client logs registry backup to guarantee calculations
-            try {
-                let localLogs = [];
-                const saved = localStorage.getItem('tarkoogle_load_times');
-                if (saved) {
-                    localLogs = JSON.parse(saved);
-                }
-                localLogs.push(currentMs);
-                localStorage.setItem('tarkoogle_load_times', JSON.stringify(localLogs));
-
-                // If Serverless metrics are empty or unreachable, fall back to localStorage pool
-                if (times.length === 0) {
-                    times = localLogs;
-                }
-            } catch (e) {
-                if (times.length === 0) {
-                    times = [currentMs];
-                }
-            }
-
-            // 3. Compute metric boundaries
-            const low = Math.min(...times);
-            const high = Math.max(...times);
-            const sum = times.reduce((a, b) => a + b, 0);
-            const avg = Math.round(sum / times.length);
-
-            // Determine load speed status color
-            let finalColorClass = 'text-amber-400'; 
-            if (currentMs <= avg * 0.95) {
-                finalColorClass = 'text-emerald-400'; 
-            } else if (currentMs >= avg * 1.15) {
-                finalColorClass = 'text-rose-400'; 
-            }
-
-            // Render LOADED IN tag directly with speed-coded color
-            const loadTimeTag = document.getElementById('load-time-tag');
-            if (loadTimeTag) {
-                loadTimeTag.classList.remove('opacity-0');
-                loadTimeTag.classList.add('opacity-100');
-                loadTimeTag.innerHTML = `<span class="${finalColorClass} font-semibold">LOADED IN</span>: <span class="text-zinc-500">${currentMs}ms</span>`;
-            }
-
-            // Render telemetry logs directly without decryption scrambling
-            const statsTag = document.getElementById('stats-tag');
-            if (statsTag) {
-                statsTag.classList.remove('opacity-0');
-                statsTag.classList.add('opacity-100');
-                statsTag.innerHTML = `
-                    <span class="text-emerald-500 dark:text-emerald-400 font-semibold">LOW</span><span class="text-zinc-500">: ${low}ms </span>
-                    <span class="text-amber-500 dark:text-amber-400 font-semibold">AVG</span><span class="text-zinc-500">: ${avg}ms </span>
-                    <span class="text-rose-500 dark:text-rose-400 font-semibold">HIGH</span><span class="text-zinc-500">: ${high}ms</span>
-                `;
-            }
-
-            // Send performance metric payload to Vercel Serverless API
-            await saveLoadTimeToServer(currentMs);
         }
 
         // --- BOOTSTRAP INITIALIZATION ---
@@ -731,9 +669,9 @@
             loadDynamicTitleAndSubtitle();
             generateHeroIdentity();
 
-            // Calculate metrics and show them directly
+            // Calculate metrics and send log payload silently (removed UI renderers)
             const finalLoadTime = Math.round(performance.now() - loadStartTimestamp);
-            await calculateAndRenderStats(finalLoadTime);
+            await saveLoadTimeToServer(finalLoadTime);
         }
 
         document.addEventListener('DOMContentLoaded', initializeHubData);
@@ -808,13 +746,15 @@
 
         function toggleCharacterDrawer() {
             if (charDrawer) {
-                const isOpen = !charDrawer.classList.contains('translate-x-[calc(100%+2rem)]');
+                const isOpen = !charDrawer.classList.contains('translate-x-[120%]');
                 if (isOpen) {
-                    charDrawer.classList.add('translate-x-[calc(100%+2rem)]');
+                    charDrawer.classList.remove('translate-x-0');
+                    charDrawer.classList.add('translate-x-[120%]');
                 } else {
                     // Re-roll dynamically whenever the drawer is toggled open
                     generateHeroIdentity();
-                    charDrawer.classList.remove('translate-x-[calc(100%+2rem)]');
+                    charDrawer.classList.remove('translate-x-[120%]');
+                    charDrawer.classList.add('translate-x-0');
                 }
             }
         }
@@ -830,17 +770,21 @@
         if (closeDrawerBtn) {
             closeDrawerBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (charDrawer) charDrawer.classList.add('translate-x-[calc(100%+2rem)]');
+                if (charDrawer) {
+                    charDrawer.classList.remove('translate-x-0');
+                    charDrawer.classList.add('translate-x-[120%]');
+                }
             });
         }
 
         // Close character panel drawer if clicked outside of it
         document.addEventListener('click', (e) => {
-            if (charDrawer && !charDrawer.classList.contains('translate-x-[calc(100%+2rem)]')) {
+            if (charDrawer && charDrawer.classList.contains('translate-x-0')) {
                 const isClickInsideDrawer = charDrawer.contains(e.target);
                 const isClickOnTrigger = profileTrigger && profileTrigger.contains(e.target);
                 if (!isClickInsideDrawer && !isClickOnTrigger) {
-                    charDrawer.classList.add('translate-x-[calc(100%+2rem)]');
+                    charDrawer.classList.remove('translate-x-0');
+                    charDrawer.classList.add('translate-x-[120%]');
                 }
             }
         });
@@ -855,7 +799,10 @@
                     searchInput.blur();
                 }
                 closeImpressum();
-                if (charDrawer) charDrawer.classList.add('translate-x-[calc(100%+2rem)]');
+                if (charDrawer) {
+                    charDrawer.classList.remove('translate-x-0');
+                    charDrawer.classList.add('translate-x-[120%]');
+                }
             }
         });
     </script>
