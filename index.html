@@ -203,8 +203,8 @@
     <main id="main-container" class="flex-grow flex flex-col items-center justify-start px-4 pt-16 sm:pt-24 relative z-10 w-full max-w-3xl mx-auto transition-all duration-300">
         
         <!-- Logo Header -->
-        <div class="mb-6 select-none text-center flex flex-col items-center">
-            <div class="inline-flex items-end justify-center gap-3">
+        <div class="mb-6 select-none text-center flex flex-col items-center justify-center relative w-full">
+            <div class="relative inline-flex items-center justify-center">
                 <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm">
                     <span class="text-fraagleBlue">F</span>
                     <span class="text-fraagleRed">r</span>
@@ -214,11 +214,11 @@
                     <span class="text-fraagleRed">l</span>
                     <span class="text-fraagleBlue">e</span>
                 </h1>
-                <!-- Dynamic Typing Decrypting Version Indicator -->
-                <span id="version-tag" class="text-xs sm:text-sm font-mono font-bold tracking-wider text-emerald-600 dark:text-emerald-500 select-none pb-1.5 sm:pb-2.5 min-w-[120px] text-left drop-shadow-[0_0_6px_rgba(16,185,129,0.35)]"></span>
+                <!-- Dynamic typing-style decrypting version tag - positioned absolutely so title remains perfectly centered -->
+                <span id="version-tag" class="absolute left-full ml-3 top-1/2 -translate-y-1/2 text-xs sm:text-sm font-mono font-bold tracking-wider text-emerald-600 dark:text-emerald-500 select-none drop-shadow-[0_0_6px_rgba(16,185,129,0.35)] whitespace-nowrap"></span>
             </div>
             <!-- Dynamic Permutated Subtitle -->
-            <p id="logo-subtitle" class="text-xs sm:text-sm font-medium tracking-wider text-zinc-500 dark:text-zinc-500 mt-2 min-h-[1.25rem]"></p>
+            <p id="logo-subtitle" class="text-xs sm:text-sm font-medium tracking-wider text-zinc-500 dark:text-zinc-500 mt-2 min-h-[1.25rem] max-w-lg text-center"></p>
         </div>
 
         <!-- Sleek Search Box Wrapper with Ambient Shadows (z-30 added to stack above footer & credits) -->
@@ -610,128 +610,207 @@
             }
         }
 
-        // Expanded list of general random titles for dynamic exploration
-        const generalSearchTitles = [
+        // Standard default titles backup list (fallback in case of load issues)
+        let generalSearchTitles = [
             "Fraagle", "Seeker", "Nexus", "Portal", "Horizon", "Discover", "Sleek", "Explore",
             "Infinity", "Orbit", "Unified", "Clarity", "Apex", "Vortex", "Stellar", "Cosmos",
             "Zenith", "Aether", "Pulse", "Catalyst", "Nova", "Beacon", "Chronos", "Elysium",
-            "Solace", "Summit", "Enigma", "Quantum", "Prism", "Echo", "Mirage", "Aura",
-            "Helix", "Vector", "Fable", "Spire", "Zephyr", "Rift", "Glow", "Ascent",
-            "Spectra", "Stratis", "Altis", "Focus", "Radiant", "Odyssey", "Lumina", "Oasis",
-            "Pinnacle", "Aegis", "Vanguard", "Genesis", "Haven", "Equinox", "Paradigm", "Flux",
-            "Saga", "Propel", "Vertex", "Solstice", "Apex", "Exalt", "Quasar", "Nucleus"
+            "Solace", "Summit", "Enigma", "Quantum", "Prism", "Echo", "Mirage", "Aura"
         ];
+
+        // Standard default subtitles backup sections (fallback in case of load issues)
+        let subtitleIntros = [
+            "Your friendly guide to", "Instantly teleporting through", "A whimsical window into",
+            "An optimized catalyst for", "The premier launchpad for", "Gently navigating the",
+            "A hyper-dimensional key to", "Your daily dose of", "A customized springboard toward",
+            "A cozy digital hammock for", "A futuristic portal serving", "The most reliable source for",
+            "A secret garden full of", "The ultimate playground of", "An astronomical orbit around",
+            "Crafting high-quality queries for", "The legendary archives of", "Delving fearlessly into",
+            "Sailing the cybernetic seas of", "Unlocking the mysteries of", "A sanctuary dedicated to",
+            "The definitive roadmap for", "Orbiting the dynamic realms of", "An elegant gateway into"
+        ];
+        
+        let subtitleAdjectives = [
+            "wobbly", "bubbly", "quantum-entangled", "neomorphic", "retro-futuristic",
+            "gravity-defying", "fluffy", "hyper-threaded", "pixel-perfect", "sub-atomic",
+            "cyber-organic", "laser-focused", "stellar", "glowing", "cloud-native",
+            "whimsical", "magnetic", "kaleidoscopic", "polychromatic", "giggle-powered"
+        ];
+        
+        let subtitleSubjects = [
+            "bubble-tea recipes", "robotic penguin blueprints", "neomorphic button shadows",
+            "clandestine cookie jars", "cosmic potato logic", "gravity-free space socks",
+            "digital dandelion dreams", "underwater firefly networks", "secret hamster space programs"
+        ];
+        
+        let subtitleEndings = [
+            "using pure imagination.", "while drinking warm cocoa.", "powered by friendly space sloths.",
+            "at the speed of a startled twilight turtle.", "inside a comfortable pocket dimension.",
+            "approved by intergalactic wizards."
+        ];
+
+        // Load titles and subtitles from resources/ files dynamically, with cascading fallbacks
+        async function loadResourceData() {
+            // Fetch titles
+            const titlesData = await fetchFileLines('resources/rndTitles.txt') || await fetchFileLines('rndTitles.txt');
+            if (titlesData && titlesData.length > 0) {
+                // Filter comments and empty lines
+                generalSearchTitles = titlesData.filter(line => !line.startsWith('#') && line.length > 0);
+            }
+
+            // Fetch subtitles
+            const subsData = await fetchFileText('resources/rndSubtitles.txt') || await fetchFileText('rndSubtitles.txt');
+            if (subsData) {
+                parseSubtitlesText(subsData);
+            }
+        }
+
+        async function fetchFileLines(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const text = await response.text();
+                    return text.split(/\r?\n/).map(line => line.trim());
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        async function fetchFileText(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    return await response.text();
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function parseSubtitlesText(text) {
+            const lines = text.split(/\r?\n/).map(line => line.trim());
+            let currentSection = null;
+            
+            const tempIntros = [];
+            const tempAdjectives = [];
+            const tempSubjects = [];
+            const tempEndings = [];
+
+            for (const line of lines) {
+                if (line.startsWith('#')) {
+                    const lower = line.toLowerCase();
+                    if (lower.includes('intro')) currentSection = 'intro';
+                    else if (lower.includes('adjective')) currentSection = 'adjective';
+                    else if (lower.includes('subject')) currentSection = 'subject';
+                    else if (lower.includes('ending')) currentSection = 'ending';
+                    continue;
+                }
+                if (line.length === 0) continue;
+
+                if (currentSection === 'intro') tempIntros.push(line);
+                else if (currentSection === 'adjective') tempAdjectives.push(line);
+                else if (currentSection === 'subject') tempSubjects.push(line);
+                else if (currentSection === 'ending') tempEndings.push(line);
+            }
+
+            if (tempIntros.length > 0) subtitleIntros = tempIntros;
+            if (tempAdjectives.length > 0) subtitleAdjectives = tempAdjectives;
+            if (tempSubjects.length > 0) subtitleSubjects = tempSubjects;
+            if (tempEndings.length > 0) subtitleEndings = tempEndings;
+        }
 
         // Advanced Combinatorial Subtitle Builder with rich permutations
         function generatePermutatedSubtitle() {
-            const intros = [
-                "Your friendly guide to", "Instantly teleporting through", "A whimsical window into",
-                "An optimized catalyst for", "The premier launchpad for", "Gently navigating the",
-                "A hyper-dimensional key to", "A pristine, logic-free path into", "Your daily dose of",
-                "A customized springboard toward", "A cozy digital hammock for", "A futuristic portal serving",
-                "The most reliable source for", "A secret garden full of", "The ultimate playground of",
-                "An astronomical orbit around", "Crafting high-quality queries for", "The legendary archives of",
-                "Delving fearlessly into", "Sailing the cybernetic seas of", "Unlocking the mysteries of",
-                "A sanctuary dedicated to", "The definitive roadmap for", "Orbiting the dynamic realms of",
-                "An elegant gateway into", "Sifting through the cosmic dust of", "Unraveling the deep syntax of",
-                "Peering through the multi-threaded looking glass of"
-            ];
-            
-            const adjectives = [
-                "wobbly", "bubbly", "quantum-entangled", "neomorphic", "retro-futuristic",
-                "gravity-defying", "fluffy", "hyper-threaded", "pixel-perfect", "sub-atomic",
-                "cyber-organic", "laser-focused", "stellar", "glowing", "cloud-native",
-                "whimsical", "magnetic", "kaleidoscopic", "polychromatic", "giggle-powered",
-                "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", 
-                "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful",
-                "gravitationally-skewed", "helium-filled", "neon-bathed", "spark-emitting",
-                "strictly-static", "polymorphic", "exquisite"
-            ];
-            
-            const subjects = [
-                "bubble-tea recipes", "robotic penguin blueprints", "neomorphic button shadows",
-                "clandestine cookie jars", "cosmic potato logic", "gravity-free space socks",
-                "digital dandelion dreams", "underwater firefly networks", "secret hamster space programs",
-                "virtual origami instructions", "sentient marshmallow algorithms", "quantum pancake configurations",
-                "acoustic pizza vibrations", "sub-aquatic bicycle repair guides", "hovercraft cat grooming manuals",
-                "invisible ink ingredient lists", "philosophical donut holes", "nebulous cloud formations",
-                "digital jellyfish orchestras", "interdimensional coffee brewing", "time-traveling toasters",
-                "tactical rubber ducks", "cybernetic cheese wheels", "sub-atomic particle salads",
-                "galactic map coordinates", "advanced bubblewrap physics", "glowing microchip ecosystems",
-                "neon-tinted matrix indexes"
-            ];
-            
-            const endings = [
-                "using pure imagination.", "while drinking warm cocoa.", "powered by friendly space sloths.",
-                "at the speed of a startled twilight twilight turtle.", "inside a comfortable pocket dimension.",
-                "approved by intergalactic wizards.", "optimized for maximum coziness.",
-                "with a gentle sprinkle of stardust.", "without breaking the space-time continuum.",
-                "just for the joy of discovery.", "conceived by well-meaning calculators.",
-                "under the soft glow of friendly neon signs.", "strictly for entertainment purposes.",
-                "because why not?", "in a strangely soothing manner.", "with absolutely no instruction manual.",
-                "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon.",
-                "to satisfy your curiosity parameters.", "while standing on one foot.", "guaranteed to spark joy.",
-                "under the supervision of cybernetic kittens."
-            ];
-
-            const intro = intros[Math.floor(Math.random() * intros.length)];
-            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-            const subject = subjects[Math.floor(Math.random() * subjects.length)];
-            const ending = endings[Math.floor(Math.random() * endings.length)];
+            const intro = subtitleIntros[Math.floor(Math.random() * subtitleIntros.length)];
+            const adj = subtitleAdjectives[Math.floor(Math.random() * subtitleAdjectives.length)];
+            const subject = subtitleSubjects[Math.floor(Math.random() * subtitleSubjects.length)];
+            const ending = subtitleEndings[Math.floor(Math.random() * subtitleEndings.length)];
 
             return `${intro} ${adj} ${subject} ${ending}`;
         }
 
-        // Colorize branding text beautifully with inline styling
-        function colorizeText(text) {
-            const colors = ['text-fraagleBlue', 'text-fraagleRed', 'text-fraagleYellow', 'text-fraagleBlue', 'text-fraagleGreen', 'text-fraagleRed'];
-            return text.split('').map((char, index) => {
-                if (char === ' ') return ' ';
-                const colorClass = colors[index % colors.length];
-                return `<span class="${colorClass}">${char}</span>`;
-            }).join('');
-        }
-
-        // Generate and update dynamically structured tab favicon based on current randomized brand name
-        function setRandomFavicon(title) {
-            const letter = title ? title.charAt(0) : 'F';
-            const colors = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#6366f1', '#ec4899', '#14b8a6'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            
-            // Clean dynamic SVG structure
-            const svg = `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-                    <rect width="100" height="100" rx="26" fill="${encodeURIComponent(randomColor)}"/>
-                    <text x="50" y="55" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="65" fill="%23ffffff" text-anchor="middle" dominant-baseline="middle">${letter}</text>
-                </svg>
-            `;
-            
-            let link = document.querySelector("link[rel*='icon']");
-            if (!link) {
-                link = document.createElement('link');
-                link.type = 'image/svg+xml';
-                link.rel = 'icon';
-                document.head.appendChild(link);
+        // Sourced and added a robust, searchable index of top-tier community-built platforms
+        const thirdPartyWebsites = [
+            {
+                id: "web-db4tarkov",
+                title: "DB4Tarkov",
+                shortName: "db4tarkov.com",
+                type: "website",
+                url: "https://db4tarkov.com/",
+                description: "High-performance all-in-one Tarkov assistant database. Slices together item prices, quick ammunition ballistics stats, quest lines, and hideout checklists.",
+                category: "Companion Site",
+                tags: ["Guides", "Database", "Quests", "Flea Prices"]
+            },
+            {
+                id: "web-eftammo",
+                title: "EFT-Ammo",
+                shortName: "eft-ammo.com eftammo",
+                type: "website",
+                url: "https://www.eft-ammo.com/",
+                description: "The gold standard interactive ballistics analysis dashboard. Compare bullet penetration power, damage values, and armor protection tables dynamically.",
+                category: "Ammo Charts",
+                tags: ["Ballistics", "Ammo Comparer", "Armor Damage"]
+            },
+            {
+                id: "web-tarkovmarket",
+                title: "Tarkov Market",
+                shortName: "tarkov-market.com",
+                type: "website",
+                url: "https://tarkov-market.com/",
+                description: "Live Flea Market price tracker offering history charts, profit calculators, item comparisons, and interactive bartering margin tools.",
+                category: "Price Tracker",
+                tags: ["Flea Market", "Price Trends", "Barter Profits"]
+            },
+            {
+                id: "web-tarkovtracker",
+                title: "Tarkov Tracker",
+                shortName: "tarkovtracker.io",
+                type: "website",
+                url: "https://tarkovtracker.io/",
+                description: "Personal hideout and quest planner. Input your current progression level to map out quest prerequisites, hideout upgrade materials, and item unlock paths.",
+                category: "Quest Tracker",
+                tags: ["Progression Tracker", "Hideout List", "Quest Trees"]
+            },
+            {
+                id: "web-mapgenie",
+                title: "MapGenie Tarkov (Map-Genie / Map Genie)",
+                shortName: "mapgenie.io map-genie map genie maps customs streets reserve woods interchange shoreline ground zero lighthouse factory labs",
+                type: "website",
+                url: "https://mapgenie.io/tarkov",
+                description: "Highly comprehensive interactive map suites for Customs, Streets of Tarkov, Reserve, Woods, Interchange, Shoreline, Ground Zero, Lighthouse, and Labs.",
+                category: "Interactive Maps",
+                tags: ["Loot Spawns", "Extraction Points", "Key Guides", "PMC Spawns"]
+            },
+            {
+                id: "web-tarkovhelp",
+                title: "Tarkov Help",
+                shortName: "tarkov.help maps",
+                type: "website",
+                url: "https://tarkov.help/",
+                description: "Dynamic resource covering quests, bullet effectiveness, customized maps, spawn locators, and weapon modification blueprints.",
+                category: "Guides Platform",
+                tags: ["Quest Blueprints", "Spawn Maps", "Ammo Tables"]
+            },
+            {
+                id: "web-tarkovgunsmith",
+                title: "Tarkov Gunsmith",
+                shortName: "tarkovgunsmith.com",
+                type: "website",
+                url: "https://tarkovgunsmith.com/",
+                description: "Community weapon preset simulator. Calculate ergonomic and recoil tradeoffs on weapon builds to fit Gunsmith task checklists.",
+                category: "Modding Tool",
+                tags: ["Weapon Builds", "Preset Simulator", "Ergonomics Calculator"]
+            },
+            {
+                id: "web-tarkovwiki",
+                title: "Official Escape from Tarkov Wiki",
+                shortName: "tarkov wiki encyclopedia fandom",
+                type: "website",
+                url: "https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki",
+                description: "The definitive community-run encyclopedia covering items, lore, detailed quest guides, extraction details, and historical update logs.",
+                category: "Encyclopedia",
+                tags: ["Wiki Guides", "Item Tables", "Extraction Coordinates"]
             }
-            link.href = `data:image/svg+xml,${svg.trim()}`;
-        }
-
-        function loadDynamicTitleAndSubtitle() {
-            const logoTitle = document.getElementById('logo-title');
-            const logoSubtitle = document.getElementById('logo-subtitle');
-            
-            const finalTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)];
-            
-            if (logoTitle) logoTitle.innerHTML = colorizeText(finalTitle);
-            document.title = finalTitle + " Hub";
-            if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
-            
-            // Trigger dynamic tab favicon update matching initial letter
-            setRandomFavicon(finalTitle);
-
-            // Trigger randomized background glow with full properties randomization
-            applyRandomGlowColors();
-        }
+        ];
 
         async function loadTarkovItems() {
             let items = [];
@@ -767,90 +846,7 @@
                 });
             });
 
-            // 1.5 POPULATE POPULAR THIRD-PARTY UTILITY WEBSITES IN SEARCH INDEX
-            const thirdPartyWebsites = [
-                {
-                    id: "web-db4tarkov",
-                    title: "DB4Tarkov",
-                    shortName: "db4tarkov.com",
-                    type: "website",
-                    url: "https://db4tarkov.com/",
-                    description: "High-performance all-in-one Tarkov assistant database. Slices together item prices, quick ammunition ballistics stats, quest lines, and hideout checklists.",
-                    category: "Companion Site",
-                    tags: ["Guides", "Database", "Quests", "Flea Prices"]
-                },
-                {
-                    id: "web-eftammo",
-                    title: "EFT-Ammo",
-                    shortName: "eft-ammo.com eftammo",
-                    type: "website",
-                    url: "https://www.eft-ammo.com/",
-                    description: "The gold standard interactive ballistics analysis dashboard. Compare bullet penetration power, damage values, and armor protection tables dynamically.",
-                    category: "Ammo Charts",
-                    tags: ["Ballistics", "Ammo Comparer", "Armor Damage"]
-                },
-                {
-                    id: "web-tarkovmarket",
-                    title: "Tarkov Market",
-                    shortName: "tarkov-market.com",
-                    type: "website",
-                    url: "https://tarkov-market.com/",
-                    description: "Live Flea Market price tracker offering history charts, profit calculators, item comparisons, and interactive bartering margin tools.",
-                    category: "Price Tracker",
-                    tags: ["Flea Market", "Price Trends", "Barter Profits"]
-                },
-                {
-                    id: "web-tarkovtracker",
-                    title: "Tarkov Tracker",
-                    shortName: "tarkovtracker.io",
-                    type: "website",
-                    url: "https://tarkovtracker.io/",
-                    description: "Personal hideout and quest planner. Input your current progression level to map out quest prerequisites, hideout upgrade materials, and item unlock paths.",
-                    category: "Quest Tracker",
-                    tags: ["Progression Tracker", "Hideout List", "Quest Trees"]
-                },
-                {
-                    id: "web-mapgenie",
-                    title: "MapGenie Tarkov (Map-Genie / Map Genie)",
-                    shortName: "mapgenie.io map-genie map genie maps customs streets reserve woods interchange shoreline ground zero lighthouse factory labs",
-                    type: "website",
-                    url: "https://mapgenie.io/tarkov",
-                    description: "Highly comprehensive interactive map suites for Customs, Streets of Tarkov, Reserve, Woods, Interchange, Shoreline, Ground Zero, Lighthouse, and Labs.",
-                    category: "Interactive Maps",
-                    tags: ["Loot Spawns", "Extraction Points", "Key Guides", "PMC Spawns"]
-                },
-                {
-                    id: "web-tarkovhelp",
-                    title: "Tarkov Help",
-                    shortName: "tarkov.help maps",
-                    type: "website",
-                    url: "https://tarkov.help/",
-                    description: "Dynamic resource covering quests, bullet effectiveness, customized maps, spawn locators, and weapon modification blueprints.",
-                    category: "Guides Platform",
-                    tags: ["Quest Blueprints", "Spawn Maps", "Ammo Tables"]
-                },
-                {
-                    id: "web-tarkovgunsmith",
-                    title: "Tarkov Gunsmith",
-                    shortName: "tarkovgunsmith.com",
-                    type: "website",
-                    url: "https://tarkovgunsmith.com/",
-                    description: "Community weapon preset simulator. Calculate ergonomic and recoil tradeoffs on weapon builds to fit Gunsmith task checklists.",
-                    category: "Modding Tool",
-                    tags: ["Weapon Builds", "Preset Simulator", "Ergonomics Calculator"]
-                },
-                {
-                    id: "web-tarkovwiki",
-                    title: "Official Escape from Tarkov Wiki",
-                    shortName: "tarkov wiki encyclopedia fandom",
-                    type: "website",
-                    url: "https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki",
-                    description: "The definitive community-run encyclopedia covering items, lore, detailed quest guides, extraction details, and historical update logs.",
-                    category: "Encyclopedia",
-                    tags: ["Wiki Guides", "Item Tables", "Extraction Coordinates"]
-                }
-            ];
-
+            // Populate Third-Party websites
             thirdPartyWebsites.forEach(site => {
                 searchIndex.push({
                     id: site.id,
@@ -860,7 +856,7 @@
                     url: site.url,
                     description: site.description,
                     category: site.category,
-                    iconLink: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=64&auto=format&fit=crop&q=60", // Safe fallback icon
+                    iconLink: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=128&auto=format&fit=crop&q=60",
                     tags: site.tags
                 });
             });
@@ -875,7 +871,6 @@
                     throw new Error();
                 }
             } catch (e) {
-                // Corrected lang: e to lang: en (English) to fix failure to load data fallback
                 const fallbackItemsQuery = `query {
                     pvp: items(lang: en, gameMode: regular) {
                         id name shortName wikiLink iconLink basePrice weight avg24hPrice category { name }
@@ -902,7 +897,6 @@
             }
 
             try {
-                // Fixed Traders query: removed non-existent field 'imageLink' to guarantee API execution success
                 const fallbackTradersQuery = `query {
                     traders(lang: en) {
                         id name wikiLink
@@ -924,7 +918,7 @@
                 tasks = data?.tasks || [];
             } catch (e) {}
 
-            // Populate items safely with objective parameters
+            // Populate items safely
             items.filter(Boolean).forEach(item => {
                 const itemName = item.name || 'Unknown Item';
                 let statsSnippet = `${item.category?.name || 'Equipment'} item in Escape from Tarkov.`;
@@ -989,17 +983,39 @@
             });
         }
 
-        // --- LOAD CORES WRAPPED IN SECURE EVENT HANDLER ---
-        async function initializeHubData() {
-            loadDynamicTitleAndSubtitle();
-            await loadTarkovItems(); // Added await to ensure index is populated before interacting
+        // --- 3.5 TACTICAL HUD DECRYPT ANIMATION ENGINE ---
+        function triggerVersionDecrypt() {
+            const versionTag = document.getElementById('version-tag');
+            if (!versionTag) return;
+            
+            const targetText = "v0.1 (alpha)";
+            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
+            let iterations = 0;
+            
+            clearInterval(versionTag.decryptInterval);
+            
+            versionTag.decryptInterval = setInterval(() => {
+                let displayText = targetText.split("").map((char, index) => {
+                    if (char === " ") return " ";
+                    
+                    // If we've iterated past this index, lock in the correct character
+                    if (index < iterations) {
+                        return targetText[index];
+                    }
+                    
+                    // Otherwise, render a random cipher symbol
+                    return possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                }).join("");
+                
+                versionTag.textContent = displayText;
+                
+                if (iterations >= targetText.length) {
+                    clearInterval(versionTag.decryptInterval);
+                }
+                
+                iterations += 1 / 3;
+            }, 25);
         }
-
-        // Execute data loading safely after the DOM is fully constructed
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeHubData();
-        });
-
 
         // --- 4. REAL-TIME SEARCH ENGINE & GOOGLE-STYLE RESULTS SYSTEM ---
         const searchInput = document.getElementById('search-input');
@@ -1035,7 +1051,6 @@
             }, 3000);
         }
 
-        // Hide hover tooltip
         function cancelHoverPreview() {
             clearTimeout(hoverTimer);
             if (previewCard) previewCard.classList.add('hidden');
@@ -1280,7 +1295,7 @@
                 return title.includes(normalizedQuery) || category.includes(normalizedQuery) || shortName.includes(normalizedQuery);
             });
 
-            // Sort matches dynamically using the newly implemented Google-style Relevance Scoring System
+            // Sort matches dynamically using the Google-style Relevance Scoring System
             matches.sort((a, b) => getRelevanceScore(b, normalizedQuery) - getRelevanceScore(a, normalizedQuery));
 
             // If forcedExactItem is passed, prioritize it first and rearrange adjacent matches below it
@@ -1399,7 +1414,7 @@
                     const adjacentSection = document.createElement('div');
                     adjacentSection.className = "pt-2 pb-1 border-b border-lightBorder dark:border-darkBorder/20 mb-2";
                     adjacentSection.innerHTML = `
-                        <h4 class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider select-none">
+                        <h4 class="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider select-none text-left pl-5">
                             Adjacent Matches & Related Results
                         </h4>
                     `;
