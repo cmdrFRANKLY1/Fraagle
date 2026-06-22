@@ -1,0 +1,54 @@
+Aarakocra
+Aasimar
+Astral Elf
+Autognome
+Bugbear
+Centaur
+Changeling
+Dhampir
+Dragonborn
+Drow
+Duergar
+Dwarf
+Eladrin
+Elf
+Fairy
+Firbolg
+Genasi
+Giff
+Githyanki
+Githzerai
+Gnome
+Goblin
+Goliath
+Hadozee
+Halfling
+Half-Elf
+Half-Orc
+Hexblood
+Hobgoblin
+Human
+Kalashtar
+Kenku
+Kobold
+Leonin
+Lizardfolk
+Locathah
+Loxodon
+Minotaur
+Orc
+Owlin
+Plasmoid
+Reborn
+Satyr
+Sea Elf
+Shadar-Kai
+Shifter
+Simic Hybrid
+Tabaxi
+Tiefling
+Tortle
+Triton
+Vedalken
+Warforged
+Yuan-ti Pureblood
