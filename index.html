@@ -369,32 +369,44 @@
             }, 20);
         }
 
-        // Decrypt Load Time tag into its performance-coded color (Label only)
+        // Decrypt Load Time tag into its performance-coded color (Label "LOADED IN" only)
         function triggerLoadTimeColorDecrypt(tagElement, targetText, colorClass) {
             const possibleChars = "0123456789_#@*&%$?![]=+/\\";
             let iterations = 0;
+            const targetLength = 9; // Only "LOADED IN" has 9 chars and gets color-scrambled
 
             clearInterval(tagElement.decryptInterval);
 
             tagElement.decryptInterval = setInterval(() => {
                 let displayText = targetText.split("").map((char, index) => {
                     if (char === " ") return "&nbsp;";
-                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
                     
+                    let displayChar;
                     let wrapColor = 'text-zinc-500';
-                    // Index ranges: 
-                    // 0 to 8 is "LOADED IN" -> Colorized
+
                     if (index < 9) {
+                        // "LOADED IN" undergoes scrambling and gets colorized
+                        displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
                         wrapColor = `${colorClass} font-semibold`;
+                    } else {
+                        // The rest of the string stays untouched (no scramble effect)
+                        displayChar = char;
                     }
-                    
+
                     return `<span class="${wrapColor}">${displayChar}</span>`;
                 }).join("");
 
                 tagElement.innerHTML = displayText;
 
-                if (iterations >= targetText.length) {
+                if (iterations >= targetLength) {
                     clearInterval(tagElement.decryptInterval);
+                    // Force complete final render of the entire string to ensure correctness
+                    let finalText = targetText.split("").map((char, index) => {
+                        if (char === " ") return "&nbsp;";
+                        let wrapColor = (index < 9) ? `${colorClass} font-semibold` : 'text-zinc-500';
+                        return `<span class="${wrapColor}">${char}</span>`;
+                    }).join("");
+                    tagElement.innerHTML = finalText;
                 }
                 iterations += 1 / 2;
             }, 20);
