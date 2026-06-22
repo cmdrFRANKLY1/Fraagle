@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tarkoogle Hub</title>
     <!-- Tailwind CSS CDN -->
@@ -117,16 +118,16 @@
         </div>
     </header>
 
+    <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned completely to the left, matching header) -->
+    <aside id="left-sidebar-links" class="hidden lg:flex absolute left-0 pl-5 top-32 flex-col w-52 select-none text-left z-20">
+        <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2 border-b border-darkBorder pb-1">Escape from Tarkov</h4>
+        <nav id="quick-links-list" class="flex flex-col gap-0">
+            <!-- Loaded dynamically -->
+        </nav>
+    </aside>
+
     <!-- Unified Split Sidebar & Content Container -->
     <div class="flex-grow w-full max-w-5xl mx-auto px-6 py-4 z-10 relative flex items-center justify-center min-h-[70vh]">
-
-        <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned left with 'by cmdrFRANKLY') -->
-        <aside id="left-sidebar-links" class="hidden lg:flex absolute left-5 top-32 flex-col w-52 select-none text-left">
-            <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4 border-b border-darkBorder pb-1.5">Directory</h4>
-            <nav id="quick-links-list" class="flex flex-col gap-[2px]">
-                <!-- Loaded dynamically -->
-            </nav>
-        </aside>
 
         <!-- Main Search Container (Remains perfectly centered) -->
         <main id="main-container" class="w-full max-w-2xl mx-auto flex flex-col items-center justify-center text-center">
@@ -143,7 +144,7 @@
                     <div class="absolute left-full ml-3 flex flex-col items-start justify-center text-left whitespace-nowrap top-1/2 -translate-y-1/2 select-none">
                         <!-- Version Number tag -->
                         <span id="version-number" class="text-[10px] sm:text-xs font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
-                        <!-- Version Name tag (moved below the number) -->
+                        <!-- Version Name tag -->
                         <span id="version-name" class="text-[8px] sm:text-[10px] font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase mt-0.5"></span>
                     </div>
                 </div>
@@ -286,7 +287,7 @@
                             <!-- Increased ID font size by 2 (text-[10px] -> text-[12px]) -->
                             <span id="char-id" class="text-[12px] font-bold text-zinc-400 tracking-wider">Loading ID...</span>
                             <!-- Increased Playing Tag font size by 2 (text-[8px] -> text-[10px]) -->
-                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700/50 text-zinc-300 font-semibold truncate max-w-[150px] animate-pulse"></span>
+                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700/50 text-zinc-300 font-semibold truncate max-w-[150px] font-mono animate-pulse"></span>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-1 mt-1.5">
@@ -451,9 +452,15 @@
         // Fetcher Utility with safe handling - Upgraded to handle raw text list formats cleanly
         async function fetchFileJSON(url) {
             try {
+                if (!url || url.trim() === "" || url.trim() === "/") return null;
                 const response = await fetch(url);
                 if (response.ok) {
                     const text = await response.text();
+                    const trimmedText = text.trim();
+                    // Safeguard against SPA fallbacks (HTML pages returned as 404 fallbacks)
+                    if (trimmedText.startsWith("<html") || trimmedText.toLowerCase().startsWith("<!doctype html")) {
+                        return null;
+                    }
                     try {
                         return JSON.parse(text);
                     } catch (jsonErr) {
@@ -941,7 +948,7 @@
                 suggestionsFeed.innerHTML = `
                     <div class="p-8 text-center text-zinc-500">
                         <svg class="w-10 h-10 mx-auto text-zinc-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <p class="text-xs font-semibold">No active listings matching your query found.</p>
                         <p class="text-[10px] text-zinc-600 mt-1">Try resetting the filter category parameters above.</p>
