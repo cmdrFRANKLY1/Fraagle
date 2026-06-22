@@ -75,6 +75,13 @@
             transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, background-color 0.3s ease;
         }
 
+        /* Standard base layout specifications for the details panel */
+        #knowledge-panel {
+            border-radius: 1.5rem !important; /* Premium rounded-2xl corners */
+            border-width: 1px;
+            border-style: solid;
+        }
+
         /* ==========================================================================
            1. DARK MODE STYLING SCHEMES
            ========================================================================== */
@@ -251,10 +258,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zM12.5 3.042A8.967 8.967 0 0012 3c-1.196 0-2.324.288-3.354.799m6.708 0A8.967 8.967 0 0112 3a8.967 8.967 0 01-3.354.799M12 3v18m0-18c-1.84 1.84-5.16 1.84-7 0m7 0c1.84 1.84-5.16 1.84-7 0m-7 0a9 9 0 010 18M3.055 11H20.94m-20.94 2H20.94"></path>
                     </svg>
                 </a>
-                <!-- YouTube -->
+                <!-- YouTube (Upgraded with a highly robust Lucide vector path guaranteed to render) -->
                 <a href="https://www.youtube.com/battlestategames" target="_blank" title="BSG YouTube" class="hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M22.54 6.42a2.78 2.5 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.5 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.5 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.5 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                        <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor"></polygon>
                     </svg>
                 </a>
                 <!-- Twitter / X -->
@@ -311,8 +319,8 @@
                     </div>
                 </div>
 
-                <!-- Right: Knowledge Panel (Floats beautifully with no border panel, organic Google-style layouts) -->
-                <div id="knowledge-panel" class="hidden w-full lg:w-[38%] sticky top-24 mb-12 max-h-[calc(100vh-140px)] overflow-y-auto p-1 flex-shrink-0 animate-fade-in">
+                <!-- Right: Knowledge Panel (Floats beautifully aligned to the first result card top, sticky top-[120px] and rounded-2xl corners) -->
+                <div id="knowledge-panel" class="hidden w-full lg:w-[38%] sticky top-[120px] mb-12 max-h-[calc(100vh-180px)] overflow-y-auto p-1 flex-shrink-0 animate-fade-in">
                     <!-- Knowledge Panel Content Populated via JS -->
                 </div>
             </div>
@@ -1250,7 +1258,7 @@
                     }
                     
                     if (item.pvePrice) {
-                        tags.push(`<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
+                        tags.push(`<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
                     }
 
                     if (item.armorClass) {
@@ -1258,7 +1266,7 @@
                     }
 
                     if (item.damage) {
-                        tags.push(`<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/10">Damage: ${item.damage}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/10">Damage: ${item.damage}</span>`);
                     }
 
                     tagsHtml = `
