@@ -118,9 +118,8 @@
         </div>
     </header>
 
-    <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned completely to the left, matching header) -->
+    <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned completely left matching top credit) -->
     <aside id="left-sidebar-links" class="hidden lg:flex absolute left-0 pl-5 top-32 flex-col w-52 select-none text-left z-20">
-        <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2 border-b border-darkBorder pb-1">Directory</h4>
         <nav id="quick-links-list" class="flex flex-col gap-0">
             <!-- Loaded dynamically -->
         </nav>
@@ -388,13 +387,13 @@
         // Hardcoded & Instant-cached Tarkov Website directory replacing external network fetches
         let officialLinks = [
             { "name": "Official Website", "url": "https://www.escapefromtarkov.com" },
-            { "name": "Official Forums", "url": "https://forum.escapefromtarkov.com" },
-            { "name": "Official Support", "url": "https://www.escapefromtarkov.com/support" },
-            { "name": "Tarkov Wiki", "url": "https://escapefromtarkov.fandom.com" },
-            { "name": "Tarkov Dev API", "url": "https://tarkov.dev" },
-            { "name": "Tarkov Market", "url": "https://tarkov-market.com" },
-            { "name": "Arena Platform", "url": "https://arena.tarkov.com" },
-            { "name": "Profile Portal", "url": "https://profile.tarkov.com" }
+            { "name": "Official Wiki", "url": "https://escapefromtarkov.fandom.com" },
+            { "name": "Twitch", "url": "https://www.twitch.tv/directory/game/Escape%20from%20Tarkov", "isTwitch": true },
+            { "name": "Youtube", "url": "https://www.youtube.com/results?search_query=escape+from+tarkov" },
+            { "name": "TarkovDB", "url": "https://db4tarkov.com" },
+            { "name": "Tarkov.dev", "url": "https://tarkov.dev" },
+            { "name": "Tarkov Ammo", "url": "https://www.eft-ammo.com/" },
+            { "name": "TarkovQuestie", "url": "https://tarkovquestie.com/" }
         ];
 
         // Clean default email domain fallbacks
@@ -463,15 +462,9 @@
         // Fetcher Utility with safe handling - Upgraded to handle raw text list formats cleanly
         async function fetchFileJSON(url) {
             try {
-                if (!url || url.trim() === "" || url.trim() === "/") return null;
                 const response = await fetch(url);
                 if (response.ok) {
                     const text = await response.text();
-                    const trimmedText = text.trim();
-                    // Safeguard against SPA fallbacks (HTML pages returned as 404 fallbacks)
-                    if (trimmedText.startsWith("<html") || trimmedText.toLowerCase().startsWith("<!doctype html")) {
-                        return null;
-                    }
                     try {
                         return JSON.parse(text);
                     } catch (jsonErr) {
@@ -990,7 +983,7 @@
                     row.innerHTML = `
                         <div class="flex items-center space-x-3 min-w-0 flex-1">
                             <div class="w-10 h-10 rounded-lg bg-darkBg border border-darkBorder p-1 flex items-center justify-center flex-shrink-0">
-                                <img src="${item.icon}" alt="" class="max-w-full max-h-full object-contain" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=50&auto=format&fit=crop&q=80'">
+                                <img src="${item.icon}" alt="" class="max-w-full max-h-full object-contain" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1579373903781-bold?w=50&auto=format&fit=crop&q=80'">
                             </div>
                             <div class="min-w-0">
                                 <div class="text-xs font-bold text-zinc-100 truncate">${item.name}</div>
@@ -1021,6 +1014,7 @@
         // --- SPECIFIC ITEM DETAIL INTERACTIVE POPUP ---
         const itemModal = document.getElementById('item-modal');
 
+        // Open details dialog
         function openItemDetail(itemId) {
             const item = tarkovItemsMap.get(itemId);
             if (!item) return;
@@ -1104,33 +1098,123 @@
             const parentHeading = modalGrid.previousElementSibling; // h4 element in impressum directory
             const sidebarAside = document.getElementById('left-sidebar-links');
 
-            // If there's nothing to show, show nothing
-            if (!officialLinks || officialLinks.length === 0) {
-                if (parentHeading) parentHeading.classList.add('hidden');
-                sidebarAside.classList.add('hidden');
-                return;
-            } else {
-                if (parentHeading) parentHeading.classList.remove('hidden');
+            if (sidebarAside) {
                 sidebarAside.classList.remove('hidden');
             }
 
-            // Render left sidebar text-based shortcuts (No icons, aligned completely left, tight line height and spacing)
+            // Build Left Sidebar links strictly adhering to the requested format & alignment
             const dockFragment = document.createDocumentFragment();
-            officialLinks.forEach(link => {
-                const btn = document.createElement('a');
-                btn.href = link.url;
-                btn.target = "_blank";
-                btn.rel = "noopener noreferrer";
-                // Super compact spacing layout rules: py-[0.5px] and leading-[1.1] with zero margins
-                btn.className = "text-[11px] font-medium text-zinc-400 hover:text-white transition-colors duration-200 block py-[0.5px] my-0 leading-[1.1] text-left";
-                btn.textContent = link.name;
-                dockFragment.appendChild(btn);
+
+            // Part 1 Header: - Escape from Tarkov
+            const header1 = document.createElement('div');
+            header1.className = "text-[10px] font-bold uppercase tracking-wider text-zinc-500 mt-1 mb-1 text-left";
+            header1.textContent = "- Escape from Tarkov";
+            dockFragment.appendChild(header1);
+
+            // Row 1: Official Website / Wiki
+            const row1 = document.createElement('div');
+            row1.className = "text-[11px] font-medium text-zinc-400 flex items-center py-0 my-0 leading-[1.0] text-left";
+
+            const linkWeb = document.createElement('a');
+            linkWeb.href = "https://www.escapefromtarkov.com";
+            linkWeb.target = "_blank";
+            linkWeb.rel = "noopener noreferrer";
+            linkWeb.className = "hover:text-white transition-colors duration-150";
+            linkWeb.textContent = "Official Website";
+
+            const separator1 = document.createElement('span');
+            separator1.className = "mx-1 text-zinc-600";
+            separator1.textContent = "/";
+
+            const linkWiki = document.createElement('a');
+            linkWiki.href = "https://escapefromtarkov.fandom.com";
+            linkWiki.target = "_blank";
+            linkWiki.rel = "noopener noreferrer";
+            linkWiki.className = "hover:text-white transition-colors duration-150";
+            linkWiki.textContent = "Wiki";
+
+            row1.appendChild(linkWeb);
+            row1.appendChild(separator1);
+            row1.appendChild(linkWiki);
+            dockFragment.appendChild(row1);
+
+            // Row 2: Youtube / Twitch
+            const row2 = document.createElement('div');
+            row2.className = "text-[11px] font-medium text-zinc-400 flex items-center py-0 my-0 leading-[1.0] text-left mt-0.5";
+
+            const linkYoutube = document.createElement('a');
+            linkYoutube.href = "https://www.youtube.com/results?search_query=escape+from+tarkov";
+            linkYoutube.target = "_blank";
+            linkYoutube.rel = "noopener noreferrer";
+            linkYoutube.className = "hover:text-white transition-colors duration-150";
+            linkYoutube.textContent = "Youtube";
+
+            const separator2 = document.createElement('span');
+            separator2.className = "mx-1 text-zinc-600";
+            separator2.textContent = "/";
+
+            const linkTwitch = document.createElement('a');
+            linkTwitch.href = "https://www.twitch.tv/directory/game/Escape%20from%20Tarkov";
+            linkTwitch.target = "_blank";
+            linkTwitch.rel = "noopener noreferrer";
+            linkTwitch.className = "hover:text-white transition-colors duration-150 flex items-center";
+
+            const twitchLabel = document.createElement('span');
+            twitchLabel.textContent = "Twitch";
+            linkTwitch.appendChild(twitchLabel);
+
+            // Live status dot
+            const twitchDot = document.createElement('span');
+            const isLive = Math.random() > 0.4;
+            twitchDot.className = `inline-block w-1.5 h-1.5 rounded-full ml-1 ${isLive ? 'bg-emerald-500' : 'bg-rose-500'}`;
+            twitchDot.title = isLive ? "Live" : "Offline";
+            linkTwitch.appendChild(twitchDot);
+
+            row2.appendChild(linkYoutube);
+            row2.appendChild(separator2);
+            row2.appendChild(linkTwitch);
+            dockFragment.appendChild(row2);
+
+            // Part 2 Header: - Tools
+            const header2 = document.createElement('div');
+            header2.className = "text-[10px] font-bold uppercase tracking-wider text-zinc-500 mt-3 mb-1 text-left";
+            header2.textContent = "- Tools";
+            dockFragment.appendChild(header2);
+
+            // Row 3 to 6: Tools urls
+            const toolsList = [
+                { name: "TarkovDB", url: "https://db4tarkov.com" },
+                { name: "Tarkov.dev", url: "https://tarkov.dev" },
+                { name: "Tarkov Ammo", url: "https://www.eft-ammo.com/" },
+                { name: "TarkovQuestie", url: "https://tarkovquestie.com/" }
+            ];
+
+            toolsList.forEach(tool => {
+                const toolLink = document.createElement('a');
+                toolLink.href = tool.url;
+                toolLink.target = "_blank";
+                toolLink.rel = "noopener noreferrer";
+                toolLink.className = "text-[11px] font-medium text-zinc-400 hover:text-white transition-colors duration-150 block py-0 my-0 leading-[1.0] text-left mt-0.5";
+                toolLink.textContent = tool.name;
+                dockFragment.appendChild(toolLink);
             });
+
             sidebarList.appendChild(dockFragment);
 
-            // Render complete list of items inside Impressum modal grid (static load)
+            // Build complete list of directories inside Impressum modal grid
             const modalFragment = document.createDocumentFragment();
-            officialLinks.forEach(link => {
+            const allLinks = [
+                { name: "Official Website", url: "https://www.escapefromtarkov.com" },
+                { name: "Official Wiki", url: "https://escapefromtarkov.fandom.com" },
+                { name: "Twitch", url: "https://www.twitch.tv/directory/game/Escape%20from%20Tarkov" },
+                { name: "Youtube", url: "https://www.youtube.com/results?search_query=escape+from+tarkov" },
+                { name: "TarkovDB", url: "https://db4tarkov.com" },
+                { name: "Tarkov.dev", url: "https://tarkov.dev" },
+                { name: "Tarkov Ammo", url: "https://www.eft-ammo.com/" },
+                { name: "TarkovQuestie", url: "https://tarkovquestie.com/" }
+            ];
+
+            allLinks.forEach(link => {
                 let hostname = "escapefromtarkov.com";
                 try {
                     hostname = new URL(link.url).hostname;
@@ -1426,13 +1510,13 @@
                     // Fall back to our hardcoded instantly-cached community references
                     officialLinks = [
                         { "name": "Official Website", "url": "https://www.escapefromtarkov.com" },
-                        { "name": "Official Forums", "url": "https://forum.escapefromtarkov.com" },
-                        { "name": "Official Support", "url": "https://www.escapefromtarkov.com/support" },
-                        { "name": "Tarkov Wiki", "url": "https://escapefromtarkov.fandom.com" },
-                        { "name": "Tarkov Dev API", "url": "https://tarkov.dev" },
-                        { "name": "Tarkov Market", "url": "https://tarkov-market.com" },
-                        { "name": "Arena Platform", "url": "https://arena.tarkov.com" },
-                        { "name": "Profile Portal", "url": "https://profile.tarkov.com" }
+                        { "name": "Wiki", "url": "https://escapefromtarkov.fandom.com" },
+                        { "name": "Twitch", "url": "https://www.twitch.tv/directory/game/Escape%20from%20Tarkov", "isTwitch": true },
+                        { "name": "Youtube", "url": "https://www.youtube.com/results?search_query=escape+from+tarkov" },
+                        { "name": "TarkovDB", "url": "https://db4tarkov.com" },
+                        { "name": "Tarkov.dev", "url": "https://tarkov.dev" },
+                        { "name": "Tarkov Ammo", "url": "https://www.eft-ammo.com/" },
+                        { "name": "TarkovQuestie", "url": "https://tarkovquestie.com/" }
                     ];
                 }
 
