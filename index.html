@@ -118,16 +118,16 @@
         </div>
     </header>
 
-    <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned completely to the left, matching header) -->
-    <aside id="left-sidebar-links" class="hidden lg:flex absolute left-0 pl-5 top-32 flex-col w-52 select-none text-left z-20">
-        <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2 border-b border-darkBorder pb-1">Escape from Tarkov</h4>
-        <nav id="quick-links-list" class="flex flex-col gap-0">
-            <!-- Loaded dynamically -->
-        </nav>
-    </aside>
-
     <!-- Unified Split Sidebar & Content Container -->
     <div class="flex-grow w-full max-w-5xl mx-auto px-6 py-4 z-10 relative flex items-center justify-center min-h-[70vh]">
+
+        <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned left with 'by cmdrFRANKLY') -->
+        <aside id="left-sidebar-links" class="hidden lg:flex absolute left-5 top-32 flex-col w-52 select-none text-left">
+            <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-3 border-b border-darkBorder pb-1.5">Directory</h4>
+            <nav id="quick-links-list" class="flex flex-col gap-0">
+                <!-- Loaded dynamically -->
+            </nav>
+        </aside>
 
         <!-- Main Search Container (Remains perfectly centered) -->
         <main id="main-container" class="w-full max-w-2xl mx-auto flex flex-col items-center justify-center text-center">
@@ -1096,14 +1096,11 @@
             // If there's nothing to show, show nothing
             if (!officialLinks || officialLinks.length === 0) {
                 if (parentHeading) parentHeading.classList.add('hidden');
-                if (sidebarAside) sidebarAside.classList.add('hidden');
+                sidebarAside.classList.add('hidden');
                 return;
             } else {
                 if (parentHeading) parentHeading.classList.remove('hidden');
-                if (sidebarAside) {
-                    sidebarAside.classList.remove('hidden');
-                    sidebarAside.classList.add('lg:flex');
-                }
+                sidebarAside.classList.remove('hidden');
             }
 
             // Render left sidebar text-based shortcuts (No icons, aligned left, clean list, Verdana)
