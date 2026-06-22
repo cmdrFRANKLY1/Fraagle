@@ -203,16 +203,20 @@
     <main id="main-container" class="flex-grow flex flex-col items-center justify-start px-4 pt-16 sm:pt-24 relative z-10 w-full max-w-3xl mx-auto transition-all duration-300">
         
         <!-- Logo Header -->
-        <div class="mb-6 select-none text-center">
-            <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm">
-                <span class="text-fraagleBlue">F</span>
-                <span class="text-fraagleRed">r</span>
-                <span class="text-fraagleYellow">a</span>
-                <span class="text-fraagleBlue">a</span>
-                <span class="text-fraagleGreen">g</span>
-                <span class="text-fraagleRed">l</span>
-                <span class="text-fraagleBlue">e</span>
-            </h1>
+        <div class="mb-6 select-none text-center flex flex-col items-center">
+            <div class="inline-flex items-end justify-center gap-3">
+                <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex drop-shadow-sm">
+                    <span class="text-fraagleBlue">F</span>
+                    <span class="text-fraagleRed">r</span>
+                    <span class="text-fraagleYellow">a</span>
+                    <span class="text-fraagleBlue">a</span>
+                    <span class="text-fraagleGreen">g</span>
+                    <span class="text-fraagleRed">l</span>
+                    <span class="text-fraagleBlue">e</span>
+                </h1>
+                <!-- Dynamic Typing Decrypting Version Indicator -->
+                <span id="version-tag" class="text-xs sm:text-sm font-mono font-bold tracking-wider text-emerald-600 dark:text-emerald-500 select-none pb-1.5 sm:pb-2.5 min-w-[120px] text-left drop-shadow-[0_0_6px_rgba(16,185,129,0.35)]"></span>
+            </div>
             <!-- Dynamic Permutated Subtitle -->
             <p id="logo-subtitle" class="text-xs sm:text-sm font-medium tracking-wider text-zinc-500 dark:text-zinc-500 mt-2 min-h-[1.25rem]"></p>
         </div>
@@ -641,7 +645,7 @@
                 "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", 
                 "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful",
                 "gravitationally-skewed", "helium-filled", "neon-bathed", "spark-emitting",
-                "highly-caffeinated", "strictly-static", "polymorphic", "exquisite"
+                "strictly-static", "polymorphic", "exquisite"
             ];
             
             const subjects = [
@@ -856,7 +860,7 @@
                     url: site.url,
                     description: site.description,
                     category: site.category,
-                    iconLink: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=64&auto=format&fit=crop&q=60", // Safe neutral fallback template icon
+                    iconLink: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=64&auto=format&fit=crop&q=60", // Safe fallback icon
                     tags: site.tags
                 });
             });
@@ -1487,13 +1491,13 @@
                     : '';
 
                 resultBlock.innerHTML = `
-                    <div class="text-[11px] text-zinc-400 dark:text-zinc-500 mb-0.5 tracking-wide truncate flex items-center gap-1.5 select-none">
+                    <div class="text-[11px] text-zinc-400 dark:text-zinc-500 mb-0.5 tracking-wide truncate flex items-center gap-1.5 select-none text-left pl-5">
                         <div class="flex-shrink-0 w-3.5 h-3.5 flex items-center justify-center">
                             ${iconHtml}
                         </div>
                         <span class="truncate">${breadcrumbPath}</span>
                     </div>
-                    <div class="flex flex-col items-start pl-5">
+                    <div class="flex flex-col items-start pl-5 text-left">
                         ${primaryTagHtml}
                         <a href="${item.url}" target="_blank" class="block mb-0.5 search-result-item-link">
                             <h3 class="text-[17px] sm:text-[18px] text-blue-600 dark:text-blue-400 hover:underline font-normal leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
@@ -1501,7 +1505,7 @@
                             </h3>
                         </a>
                     </div>
-                    <div class="pl-5">
+                    <div class="pl-5 text-left">
                         ${(item.type === 'tarkov' || item.type === 'website') ? tagsHtml : `
                         <p class="text-[13px] text-zinc-600 dark:text-zinc-400 leading-normal">
                             <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[9px] tracking-wider px-1 py-0.5 rounded mr-1 select-none uppercase">
