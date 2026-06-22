@@ -139,7 +139,7 @@
     </header>
 
     <!-- Main Content Container (Centered and Search-Engine Focused) -->
-    <main class="flex-grow flex flex-col items-center justify-start px-4 pt-16 sm:pt-24 relative z-10 w-full max-w-3xl mx-auto">
+    <main id="main-container" class="flex-grow flex flex-col items-center justify-start px-4 pt-16 sm:pt-24 relative z-10 w-full max-w-3xl mx-auto transition-all duration-300">
         
         <!-- Logo Header -->
         <div class="mb-6 select-none text-center">
@@ -251,10 +251,10 @@
                 </a>
             </div>
 
-            <!-- Wrapper to ensure results and knowledge panel are structured like Google -->
-            <div class="w-full max-w-5xl flex flex-col md:flex-row gap-8 items-start justify-center">
+            <!-- Wrapper to ensure results and knowledge panel are structured like Google (Widescreen max-w-6xl spacing) -->
+            <div class="w-full flex flex-col lg:flex-row gap-10 items-start justify-center">
                 <!-- Left: Standard Search Results -->
-                <div class="w-full md:w-2/3 max-w-2xl flex-shrink-0">
+                <div class="w-full lg:w-[62%] flex-shrink-0">
                     <div class="text-xs text-zinc-500 dark:text-zinc-500 mb-6 flex items-center justify-between">
                         <span id="results-meta-text">About 0 results (0.00 seconds)</span>
                         <button id="results-close-btn" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">Clear Search</button>
@@ -264,8 +264,8 @@
                     </div>
                 </div>
 
-                <!-- Right: Knowledge Panel (Google style side info) -->
-                <div id="knowledge-panel" class="hidden w-full md:w-1/3 order-first md:order-last sticky top-24 border border-lightBorder dark:border-darkBorder rounded-3xl bg-white/60 dark:bg-darkCard/60 backdrop-blur-md p-6 shadow-xl dark:shadow-2xl flex-shrink-0 animate-fade-in">
+                <!-- Right: Knowledge Panel (Google style side info - moved to the right with wider footprint) -->
+                <div id="knowledge-panel" class="hidden w-full lg:w-[38%] sticky top-24 border border-lightBorder dark:border-darkBorder rounded-3xl bg-white/60 dark:bg-darkCard/60 backdrop-blur-md p-6 shadow-xl dark:shadow-2xl flex-shrink-0 animate-fade-in">
                     <!-- Knowledge Panel Content Populated via JS -->
                 </div>
             </div>
@@ -962,12 +962,26 @@
                 return;
             }
 
+            // Widen layout container (Transition main wrapper width dynamically to widescreen layout)
+            const mainContainer = document.getElementById('main-container');
+            if (mainContainer) {
+                mainContainer.classList.remove('max-w-3xl');
+                mainContainer.classList.add('max-w-6xl');
+            }
+
             const startTime = performance.now();
-            const matches = searchIndex.filter(item => {
+            let matches = searchIndex.filter(item => {
                 const title = (item?.title || '').toLowerCase();
                 const category = (item?.category || '').toLowerCase();
                 return title.includes(normalizedQuery) || category.includes(normalizedQuery);
             });
+
+            // If forcedExactItem is passed, prioritize it first and rearrange adjacent matches below it
+            if (forcedExactItem) {
+                // Remove exact match if already in original matches, then prepend as main target
+                matches = matches.filter(item => item.id !== forcedExactItem.id);
+                matches.unshift(forcedExactItem);
+            }
 
             const endTime = performance.now();
             const processTime = ((endTime - startTime) / 1000).toFixed(3);
@@ -1009,8 +1023,21 @@
                 return;
             }
 
-            matches.forEach(item => {
+            matches.forEach((item, index) => {
                 if (!item) return;
+
+                // Add clear section divider before Listing Adjacent suggestions
+                if (forcedExactItem && index === 1) {
+                    const adjacentSection = document.createElement('div');
+                    adjacentSection.className = "pt-4 pb-2 border-b border-lightBorder dark:border-darkBorder/40 mb-3";
+                    adjacentSection.innerHTML = `
+                        <h4 class="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider select-none">
+                            Adjacent Matches & Related Results
+                        </h4>
+                    `;
+                    googleResultsContainer.appendChild(adjacentSection);
+                }
+
                 const resultBlock = document.createElement('div');
                 resultBlock.className = "text-left w-full py-2 group";
 
@@ -1057,15 +1084,23 @@
                     `;
                 }
 
+                // If this is the active primary selection item, give it a prominent aesthetic tag
+                const primaryTagHtml = (forcedExactItem && index === 0) 
+                    ? `<span class="inline-flex items-center mb-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500 text-white tracking-widest uppercase shadow-sm select-none">Primary Match</span>`
+                    : '';
+
                 resultBlock.innerHTML = `
                     <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1 tracking-wide truncate flex items-center gap-1.5 select-none">
                         <span>${breadcrumbPath}</span>
                     </div>
-                    <a href="${item.url}" target="_blank" class="block mb-1 search-result-item-link">
-                        <h3 class="text-[19px] sm:text-[20px] text-blue-600 dark:text-blue-400 hover:underline font-normal leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                            ${item.title || 'Untitled'}
-                        </h3>
-                    </a>
+                    <div class="flex flex-col items-start">
+                        ${primaryTagHtml}
+                        <a href="${item.url}" target="_blank" class="block mb-1 search-result-item-link">
+                            <h3 class="text-[19px] sm:text-[20px] text-blue-600 dark:text-blue-400 hover:underline font-normal leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                                ${item.title || 'Untitled'}
+                            </h3>
+                        </a>
+                    </div>
                     ${item.type === 'tarkov' ? tagsHtml : `
                     <p class="text-sm text-zinc-700 dark:text-zinc-400 leading-relaxed">
                         <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[10px] tracking-wider px-1.5 py-0.5 rounded-md mr-1.5 select-none uppercase">
@@ -1096,6 +1131,13 @@
             const panel = document.getElementById('knowledge-panel');
             if (panel) panel.classList.add('hidden');
             cancelHoverPreview();
+
+            // Transition main wrapper container size back to standard search-box centered format
+            const mainContainer = document.getElementById('main-container');
+            if (mainContainer) {
+                mainContainer.classList.remove('max-w-6xl');
+                mainContainer.classList.add('max-w-3xl');
+            }
         }
 
         if (resultsCloseBtn) resultsCloseBtn.addEventListener('click', dismissGoogleSearchResults);
