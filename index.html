@@ -25,6 +25,13 @@
         // Tailwind configuration for advanced modern styling in both modes
         tailwind.config = {
             darkMode: 'class',
+            safelist: [
+                // Safelist all possible glow colors so Tailwind compiles them
+                'bg-blue-500/10', 'bg-orange-500/10', 'bg-purple-500/10', 'bg-yellow-500/10', 
+                'bg-teal-500/10', 'bg-rose-500/10', 'bg-indigo-500/10', 'bg-emerald-500/10', 
+                'bg-cyan-500/10', 'bg-red-500/10', 'bg-fuchsia-500/10', 'bg-lime-500/10', 
+                'bg-sky-500/10', 'bg-pink-500/10'
+            ],
             theme: {
                 extend: {
                     colors: {
@@ -73,9 +80,9 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- Decorative Ambient Soft Glow Gradients (Colors and coordinates dynamically applied via JS) -->
-    <div id="ambient-glow-1" class="absolute rounded-full blur-[120px] pointer-events-none transition-all duration-700"></div>
-    <div id="ambient-glow-2" class="absolute rounded-full blur-[120px] pointer-events-none transition-all duration-700"></div>
+    <!-- Decorative Ambient Soft Glow Gradients (Colors dynamically applied via JS) -->
+    <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+    <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full blur-[120px] pointer-events-none transition-opacity duration-300"></div>
 
     <!-- Top Navigation Bar -->
     <header class="flex items-center justify-between p-5 relative z-10 w-full">
@@ -363,26 +370,6 @@
         </div>
     </div>
 
-    <!-- App Sandbox Desktop Window Frame Wrapper Overlay (z-50 modal on top of index.html) -->
-    <div id="app-window-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm transition-opacity duration-300">
-        <div id="app-window-card" class="bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl w-full h-[90vh] max-w-5xl shadow-2xl backdrop-blur-xl flex flex-col relative transform transition-all scale-95 opacity-0 duration-300 overflow-hidden">
-            <!-- Window Topbar Panel Controls -->
-            <div class="px-5 py-3.5 border-b border-lightBorder dark:border-darkBorder/40 flex items-center justify-between flex-shrink-0 select-none bg-zinc-50/50 dark:bg-zinc-900/50">
-                <div class="flex items-center space-x-2">
-                    <button id="app-window-close-btn" class="w-3 h-3 rounded-full bg-fraagleRed cursor-pointer flex items-center justify-center text-[7px] text-transparent hover:text-black/80 font-bold transition focus:outline-none" title="Close Workspace App">✕</button>
-                    <button id="app-window-minimize-btn" class="w-3 h-3 rounded-full bg-fraagleYellow cursor-pointer flex items-center justify-center text-[7px] text-transparent hover:text-black/80 font-bold transition focus:outline-none" title="Minimize window">─</button>
-                    <button id="app-window-maximize-btn" class="w-3 h-3 rounded-full bg-fraagleGreen cursor-pointer flex items-center justify-center text-[7px] text-transparent hover:text-black/80 font-bold transition focus:outline-none" title="Toggle Fullscreen">⤢</button>
-                </div>
-                <span id="app-window-title" class="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">Loading App...</span>
-                <div class="w-16"></div> <!-- Balance alignment space spacer -->
-            </div>
-            <!-- Dynamic Sandbox Frame Body -->
-            <div class="flex-grow w-full h-full relative bg-lightBg dark:bg-darkBg">
-                <iframe id="app-window-iframe" src="" class="w-full h-full border-none"></iframe>
-            </div>
-        </div>
-    </div>
-
     <!-- Scroll to Top ("Up" Arrow) floating button -->
     <button id="scroll-to-top" class="fixed bottom-6 right-6 p-3 rounded-full bg-white/80 dark:bg-darkCard/80 border border-lightBorder dark:border-darkBorder shadow-xl backdrop-blur-md text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center justify-center cursor-pointer" aria-label="Scroll to Top">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -438,80 +425,27 @@
         const ambientGlow1 = document.getElementById('ambient-glow-1');
         const ambientGlow2 = document.getElementById('ambient-glow-2');
 
-        // Complete list of beautiful, balanced, non-complementary visual color pairs
-        // Explicitly avoids "bad" clashing, muddy, or low-contrast color combinations
         const glowColorPairs = [
-            ['bg-blue-500/10', 'bg-teal-500/10'],
-            ['bg-purple-500/10', 'bg-rose-500/10'],
-            ['bg-fuchsia-500/10', 'bg-rose-500/10'],
-            ['bg-orange-500/10', 'bg-yellow-500/10'],
-            ['bg-indigo-500/10', 'bg-sky-500/10'],
-            ['bg-cyan-500/10', 'bg-teal-500/10'],
-            ['bg-emerald-500/10', 'bg-teal-500/10'],
-            ['bg-violet-500/10', 'bg-pink-500/10'],
-            ['bg-pink-500/10', 'bg-purple-500/10'],
-            ['bg-rose-500/10', 'bg-pink-500/10'],
-            ['bg-cyan-500/10', 'bg-blue-500/10'],
-            ['bg-emerald-500/10', 'bg-green-500/10']
+            ['bg-blue-500/10', 'bg-orange-500/10'],
+            ['bg-purple-500/10', 'bg-yellow-500/10'],
+            ['bg-teal-500/10', 'bg-rose-500/10'],
+            ['bg-indigo-500/10', 'bg-emerald-500/10'],
+            ['bg-cyan-500/10', 'bg-red-500/10'],
+            ['bg-fuchsia-500/10', 'bg-lime-500/10'],
+            ['bg-sky-500/10', 'bg-pink-500/10']
         ];
         
         function applyRandomGlowColors() {
-            if (!ambientGlow1 || !ambientGlow2) return;
-            
-            const allGlowClasses = [
-                'bg-blue-500/10', 'bg-orange-500/10', 'bg-purple-500/10', 'bg-yellow-500/10', 
-                'bg-teal-500/10', 'bg-rose-500/10', 'bg-indigo-500/10', 'bg-emerald-500/10', 
-                'bg-cyan-500/10', 'bg-red-500/10', 'bg-fuchsia-500/10', 'bg-lime-500/10', 
-                'bg-sky-500/10', 'bg-pink-500/10', 'bg-green-500/10', 'bg-violet-500/10'
-            ];
-            
+            const allGlowClasses = glowColorPairs.flat();
             const pair = glowColorPairs[Math.floor(Math.random() * glowColorPairs.length)];
             
             // Clean up old classes
             ambientGlow1.classList.remove(...allGlowClasses);
             ambientGlow2.classList.remove(...allGlowClasses);
             
-            // Apply randomized pair
+            // Apply new random complementary pair
             ambientGlow1.classList.add(pair[0]);
             ambientGlow2.classList.add(pair[1]);
-
-            // Randomize position coordinate parameters, border-radius/shapes and scale
-            const shapeVariations = ['rounded-full', 'rounded-[40%_60%_70%_30%_/_40%_50%_60%_50%]', 'rounded-[60%_40%_30%_70%_/_50%_60%_50%_40%]', 'rounded-[50%_50%_30%_70%_/_50%_60%_40%_60%]'];
-            const shape1 = shapeVariations[Math.floor(Math.random() * shapeVariations.length)];
-            const shape2 = shapeVariations[Math.floor(Math.random() * shapeVariations.length)];
-
-            ambientGlow1.className = ambientGlow1.className.replace(/rounded-\S+/g, '');
-            ambientGlow2.className = ambientGlow2.className.replace(/rounded-\S+/g, '');
-
-            ambientGlow1.classList.add(shape1);
-            ambientGlow2.classList.add(shape2);
-
-            // Randomize dimension boundaries
-            const sizeValue1 = Math.floor(Math.random() * 20) + 40; // 40vw to 60vw
-            const sizeValue2 = Math.floor(Math.random() * 20) + 40; 
-            ambientGlow1.style.width = `${sizeValue1}vw`;
-            ambientGlow1.style.height = `${sizeValue1}vw`;
-            ambientGlow2.style.width = `${sizeValue2}vw`;
-            ambientGlow2.style.height = `${sizeValue2}vw`;
-
-            // Randomize spatial positioning coordinates
-            const offset1 = Math.floor(Math.random() * 15) - 15; // -15% to 0%
-            const offset2 = Math.floor(Math.random() * 15) - 15;
-            ambientGlow1.style.top = `${offset1}%`;
-            ambientGlow1.style.left = `${offset1}%`;
-            ambientGlow2.style.bottom = `${offset2}%`;
-            ambientGlow2.style.right = `${offset2}%`;
-
-            // Randomize blur indices
-            const blurs = ['blur-[100px]', 'blur-[120px]', 'blur-[140px]', 'blur-[160px]'];
-            const blur1 = blurs[Math.floor(Math.random() * blurs.length)];
-            const blur2 = blurs[Math.floor(Math.random() * blurs.length)];
-            
-            ambientGlow1.className = ambientGlow1.className.replace(/blur-\S+/g, '');
-            ambientGlow2.className = ambientGlow2.className.replace(/blur-\S+/g, '');
-            
-            ambientGlow1.classList.add(blur1);
-            ambientGlow2.classList.add(blur2);
         }
 
         function applyGradientState(isEnabled) {
@@ -576,9 +510,7 @@
             "settings.html",
             "tasks.html",
             "twitchViewer.html",
-            "youtubeStream.html",
-            "eftMindmap.html",
-            "rtfmVoiceAttack.html"
+            "youtubeStream.html"
         ];
 
         // Modern, premium light/dark dynamic pastel gradients for icons
@@ -594,7 +526,7 @@
 
         function getAppTitle(fileName) {
             let name = fileName.replace(/\.html$/i, '');
-            const prefixes = ['eft', 'twitch', 'youtube', 'va', 'rtfm'];
+            const prefixes = ['eft', 'twitch', 'youtube', 'va'];
             for (const pref of prefixes) {
                 if (name.toLowerCase().startsWith(pref)) {
                     let rest = name.slice(pref.length);
@@ -609,9 +541,6 @@
             if (name.toLowerCase().startsWith('va')) {
                 name = name.slice(2);
             }
-            if (name.toLowerCase().startsWith('rtfm')) {
-                name = name.slice(4);
-            }
             let spaced = name
                 .replace(/([a-z])([A-Z])/g, '$1 $2')
                 .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
@@ -622,7 +551,7 @@
             return spaced;
         }
 
-        // Greatly expanded library of potential general search hub branding titles
+        // Expanded list of general random titles for dynamic exploration
         const generalSearchTitles = [
             "Fraagle", "Seeker", "Nexus", "Portal", "Horizon", "Discover", "Sleek", "Explore",
             "Infinity", "Orbit", "Unified", "Clarity", "Apex", "Vortex", "Stellar", "Cosmos",
@@ -630,11 +559,10 @@
             "Solace", "Summit", "Enigma", "Quantum", "Prism", "Echo", "Mirage", "Aura",
             "Helix", "Vector", "Fable", "Spire", "Zephyr", "Rift", "Glow", "Ascent",
             "Spectra", "Stratis", "Altis", "Focus", "Radiant", "Odyssey", "Lumina", "Oasis",
-            "Pinnacle", "Aegis", "Vanguard", "Genesis", "Haven", "Equinox", "Paradigm", "Flux",
-            "Saga", "Propel", "Vertex", "Solstice", "Apex", "Exalt", "Quasar", "Nucleus"
+            "Pinnacle", "Aegis", "Vanguard", "Genesis", "Haven", "Equinox", "Paradigm", "Flux"
         ];
 
-        // Massively expanded Combinatorial Subtitle Builder with even more permutations
+        // Advanced Combinatorial Subtitle Builder with rich permutations
         function generatePermutatedSubtitle() {
             const intros = [
                 "Your friendly guide to", "Instantly teleporting through", "A whimsical window into",
@@ -644,9 +572,7 @@
                 "The most reliable source for", "A secret garden full of", "The ultimate playground of",
                 "An astronomical orbit around", "Crafting high-quality queries for", "The legendary archives of",
                 "Delving fearlessly into", "Sailing the cybernetic seas of", "Unlocking the mysteries of",
-                "A sanctuary dedicated to", "The definitive roadmap for", "Orbiting the dynamic realms of",
-                "An elegant gateway into", "Sifting through the cosmic dust of", "Unraveling the deep syntax of",
-                "Peering through the multi-threaded looking glass of"
+                "A sanctuary dedicated to", "The definitive roadmap for"
             ];
             
             const adjectives = [
@@ -655,9 +581,7 @@
                 "cyber-organic", "laser-focused", "stellar", "glowing", "cloud-native",
                 "whimsical", "magnetic", "kaleidoscopic", "polychromatic", "giggle-powered",
                 "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", 
-                "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful",
-                "gravitationally-skewed", "helium-filled", "neon-bathed", "spark-emitting",
-                "highly-caffeinated", "strictly-static", "polymorphic", "exqusite"
+                "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful"
             ];
             
             const subjects = [
@@ -668,9 +592,7 @@
                 "acoustic pizza vibrations", "sub-aquatic bicycle repair guides", "hovercraft cat grooming manuals",
                 "invisible ink ingredient lists", "philosophical donut holes", "nebulous cloud formations",
                 "digital jellyfish orchestras", "interdimensional coffee brewing", "time-traveling toasters",
-                "tactical rubber ducks", "cybernetic cheese wheels", "sub-atomic particle salads",
-                "galactic map coordinates", "advanced bubblewrap physics", "glowing microchip ecosystems",
-                "neon-tinted matrix indexes"
+                "tactical rubber ducks", "cybernetic cheese wheels"
             ];
             
             const endings = [
@@ -681,9 +603,7 @@
                 "just for the pure joy of discovery.", "conceived by well-meaning calculators.",
                 "under the soft glow of friendly neon signs.", "strictly for entertainment purposes.",
                 "because why not?", "in a strangely soothing manner.", "with absolutely no instruction manual.",
-                "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon.",
-                "to satisfy your curiosity parameters.", "while standing on one foot.", "guaranteed to spark joy.",
-                "under the supervision of cybernetic kittens."
+                "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon."
             ];
 
             const intro = intros[Math.floor(Math.random() * intros.length)];
@@ -713,7 +633,7 @@
             document.title = finalTitle + " Hub";
             if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
             
-            // Trigger randomized background glow with full properties randomization
+            // Trigger randomized background glow
             applyRandomGlowColors();
         }
 
@@ -873,9 +793,9 @@
                 const firstLetter = title.charAt(0).toUpperCase();
                 const gradient = iconGradients[index % iconGradients.length];
 
-                const link = document.createElement('button');
-                link.type = "button";
-                link.className = "flex flex-col items-center p-2.5 rounded-xl border border-transparent hover:border-lightBorder dark:hover:border-darkBorder hover:bg-lightBg dark:hover:bg-darkBg/50 transition-all duration-200 text-center group w-full focus:outline-none";
+                const link = document.createElement('a');
+                link.href = `/apps/${app}`;
+                link.className = "flex flex-col items-center p-2.5 rounded-xl border border-transparent hover:border-lightBorder dark:hover:border-darkBorder hover:bg-lightBg dark:hover:bg-darkBg/50 transition-all duration-200 text-center group";
                 link.innerHTML = `
                     <div class="w-10 h-10 rounded-lg bg-gradient-to-tr ${gradient} border flex items-center justify-center font-bold text-sm shadow-inner group-hover:scale-105 transition duration-200 flex-shrink-0">
                         ${firstLetter}
@@ -885,16 +805,10 @@
                     </span>
                 `;
 
-                // Intercept app loading with our dynamic on-top desktop frame overlay instead of hard redirecting
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    openAppInWindow(app, title);
-                });
-
-                if (app.toLowerCase().startsWith('va') || app.toLowerCase().includes('voiceattack')) {
+                if (app.toLowerCase().startsWith('va')) {
                     dropdownVoiceAttackGrid.appendChild(link);
                     hasVoiceAttack = true;
-                } else if (app.toLowerCase().startsWith('eft') || app.toLowerCase().includes('mindmap')) {
+                } else if (app.toLowerCase().startsWith('eft')) {
                     dropdownTarkovGrid.appendChild(link);
                     hasTarkov = true;
                 } else if (app.startsWith('twitch') || app.startsWith('youtube')) {
@@ -917,54 +831,6 @@
 
             if (hasGeneral) dropdownGeneralSection.classList.remove('hidden');
             else dropdownGeneralSection.classList.add('hidden');
-        }
-
-        // --- APP FRAME MODAL WINDOW ENGINE ---
-        function openAppInWindow(appFileName, appTitle) {
-            const appModal = document.getElementById('app-window-modal');
-            const appCard = document.getElementById('app-window-card');
-            const appIframe = document.getElementById('app-window-iframe');
-            const appWindowTitle = document.getElementById('app-window-title');
-            const launcherDropdown = document.getElementById('app-launcher-dropdown');
-
-            if (!appModal || !appCard || !appIframe || !appWindowTitle) return;
-
-            // Close launcher dropdown if open
-            if (launcherDropdown) {
-                launcherDropdown.classList.add('hidden');
-                launcherDropdown.classList.add('opacity-0', 'scale-95');
-                launcherDropdown.classList.remove('opacity-100', 'scale-100');
-            }
-
-            // Set Window header & path loading sources
-            appWindowTitle.textContent = appTitle;
-            appIframe.src = appFileName;
-
-            // Bring modal on screen
-            appModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden'); // Lock background scroll
-
-            requestAnimationFrame(() => {
-                appCard.classList.remove('opacity-0', 'scale-95');
-                appCard.classList.add('opacity-100', 'scale-100');
-            });
-        }
-
-        function closeAppWindow() {
-            const appModal = document.getElementById('app-window-modal');
-            const appCard = document.getElementById('app-window-card');
-            const appIframe = document.getElementById('app-window-iframe');
-
-            if (!appModal || !appCard || !appIframe) return;
-
-            appCard.classList.remove('opacity-100', 'scale-100');
-            appCard.classList.add('opacity-0', 'scale-95');
-
-            setTimeout(() => {
-                appModal.classList.add('hidden');
-                appIframe.src = ""; // Clear iframe resources
-                document.body.classList.remove('overflow-hidden'); // Unlock background
-            }, 300);
         }
 
         // --- LOAD CORES WRAPPED IN SECURE EVENT HANDLER ---
@@ -993,37 +859,6 @@
         // Execute data loading safely after the DOM is fully constructed
         document.addEventListener('DOMContentLoaded', () => {
             initializeHubData();
-
-            // Setup App window actions
-            const closeAppBtn = document.getElementById('app-window-close-btn');
-            const appModalOverlay = document.getElementById('app-window-modal');
-            const maximizeBtn = document.getElementById('app-window-maximize-btn');
-            const appCard = document.getElementById('app-window-card');
-
-            if (closeAppBtn) {
-                closeAppBtn.addEventListener('click', closeAppWindow);
-            }
-            if (appModalOverlay) {
-                appModalOverlay.addEventListener('click', (e) => {
-                    if (e.target === appModalOverlay) {
-                        closeAppWindow();
-                    }
-                });
-            }
-
-            // Optional: Toggle Fullscreen wrapper style mechanics
-            if (maximizeBtn && appCard) {
-                maximizeBtn.addEventListener('click', () => {
-                    const isFullscreen = appCard.classList.contains('h-screen');
-                    if (isFullscreen) {
-                        appCard.classList.remove('h-screen', 'max-w-none', 'm-0', 'rounded-none');
-                        appCard.classList.add('h-[90vh]', 'max-w-5xl', 'rounded-2xl');
-                    } else {
-                        appCard.classList.remove('h-[90vh]', 'max-w-5xl', 'rounded-2xl');
-                        appCard.classList.add('h-screen', 'max-w-none', 'm-0', 'rounded-none');
-                    }
-                });
-            }
         });
 
 
@@ -1101,7 +936,368 @@
             }, 3000);
         }
 
-        // ... truncated remaining script functions
+        function cancelHoverPreview() {
+            clearTimeout(hoverTimer);
+            if (previewCard) previewCard.classList.add('hidden');
+        }
+
+        function positionPreviewCard(e) {
+            if (!previewCard) return;
+            const cardWidth = 288;
+            const viewportWidth = window.innerWidth;
+            let left = e.pageX + 15;
+            let top = e.pageY + 15;
+
+            if (left + cardWidth > viewportWidth) {
+                left = e.pageX - cardWidth - 15;
+            }
+
+            previewCard.style.left = `${left}px`;
+            previewCard.style.top = `${top}px`;
+        }
+
+        function revealPreviewDetails(item) {
+            if (!item || !previewCard) return;
+            const iconUrl = item.iconLink || 'https://via.placeholder.com/64?text=No+Image';
+            
+            if (item.type === 'tarkov') {
+                previewCard.innerHTML = `
+                    <div class="flex flex-col space-y-3 animate-fade-in select-none">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-14 h-14 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 border border-lightBorder dark:border-darkBorder p-1 flex items-center justify-center flex-shrink-0">
+                                <img src="${iconUrl}" alt="${item.title}" class="w-full h-full object-contain rounded-lg" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&auto=format&fit=crop&q=60'">
+                            </div>
+                            <div class="truncate">
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.title}</h4>
+                                <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">${item.category}</span>
+                            </div>
+                        </div>
+                        <div class="border-t border-lightBorder dark:border-darkBorder pt-3 space-y-1.5 text-xs text-zinc-600 dark:text-zinc-300">
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Base Price:</span>
+                                <span class="font-semibold text-zinc-800 dark:text-zinc-200">${item.basePrice ? item.basePrice.toLocaleString() + ' ₽' : 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-zinc-400 dark:text-zinc-500">Average Price:</span>
+                                <span class="font-semibold text-zinc-800 dark:text-zinc-200">${item.avgPrice ? item.avgPrice.toLocaleString() + ' ₽' : 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'trader') {
+                previewCard.innerHTML = `
+                    <div class="flex flex-col space-y-3 animate-fade-in select-none">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-14 h-14 rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 border border-lightBorder dark:border-darkBorder p-1 flex items-center justify-center flex-shrink-0">
+                                <img src="${iconUrl}" alt="${item.title}" class="w-full h-full object-contain rounded-lg" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=60'">
+                            </div>
+                            <div class="truncate">
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.title}</h4>
+                                <span class="text-[10px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Tarkov Trader</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (item.type === 'quest') {
+                previewCard.innerHTML = `
+                    <div class="flex flex-col space-y-3 animate-fade-in select-none">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                                Q
+                            </div>
+                            <div class="truncate">
+                                <h4 class="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.title}</h4>
+                                <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Tarkov Quest</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function executeSearch(queryText) {
+            if (dropdownResults) dropdownResults.classList.add('hidden');
+            cancelHoverPreview();
+            
+            const normalizedQuery = queryText.toLowerCase().trim();
+            if (normalizedQuery.length === 0) {
+                dismissGoogleSearchResults();
+                return;
+            }
+
+            const startTime = performance.now();
+            const matches = searchIndex.filter(item => {
+                const title = (item?.title || '').toLowerCase();
+                const category = (item?.category || '').toLowerCase();
+                return title.includes(normalizedQuery) || category.includes(normalizedQuery);
+            });
+
+            const endTime = performance.now();
+            const processTime = ((endTime - startTime) / 1000).toFixed(3);
+            if (resultsMetaText) resultsMetaText.textContent = `About ${matches.length} results (${processTime} seconds)`;
+
+            if (googleResultsView) googleResultsView.classList.remove('hidden');
+
+            const hasTarkovResults = matches.some(item => 
+                item && (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest')
+            );
+
+            if (hasTarkovResults && bsgChannelsBar) {
+                bsgChannelsBar.classList.remove('hidden');
+            } else if (bsgChannelsBar) {
+                bsgChannelsBar.classList.add('hidden');
+            }
+
+            if (!googleResultsContainer) return;
+            googleResultsContainer.innerHTML = '';
+            
+            if (matches.length === 0) {
+                googleResultsContainer.innerHTML = `
+                    <div class="text-left py-4 text-zinc-500 dark:text-zinc-400 text-sm">
+                        <p class="mb-2">Your search - <strong class="text-zinc-800 dark:text-zinc-100">${queryText}</strong> - did not match any documents or Tarkov items.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            matches.forEach(item => {
+                if (!item) return;
+                const resultBlock = document.createElement('div');
+                resultBlock.className = "text-left max-w-2xl py-2 group";
+
+                let breadcrumbPath = `fraagle.host › apps › ${(item.title || '').toLowerCase().replace(/\s+/g, '-')}`;
+                if (item.type === 'tarkov') {
+                    breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${item.shortName || 'Item'}`;
+                }
+
+                let tagsHtml = '';
+                if (item.type === 'tarkov') {
+                    const priceVal = item.avgPrice || item.basePrice || 0;
+                    tagsHtml = `
+                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                            <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[11px] px-2 py-0.5 rounded-md mr-1.5 select-none">(${priceVal > 0 ? priceVal.toLocaleString() + ' ₽' : 'N/A'})</span>
+                            <a href="${item.url}" target="_blank" class="inline-block bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 font-bold text-[11px] px-2.5 py-0.5 rounded-md hover:underline">Wikipedia ↗</a>
+                        </div>
+                    `;
+                }
+
+                resultBlock.innerHTML = `
+                    <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-1 tracking-wide truncate flex items-center gap-1.5 select-none">
+                        <span>${breadcrumbPath}</span>
+                    </div>
+                    <a href="${item.url}" target="_blank" class="block mb-1 search-result-item-link">
+                        <h3 class="text-[19px] sm:text-[20px] text-blue-600 dark:text-blue-400 hover:underline font-normal leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                            ${item.title || 'Untitled'}
+                        </h3>
+                    </a>
+                    ${item.type === 'tarkov' ? tagsHtml : `
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[10px] tracking-wider px-1.5 py-0.5 rounded-md mr-1.5 select-none uppercase">
+                            ${item.category || 'General'}
+                        </span>
+                        ${item.description || ''}
+                    </p>
+                    `}
+                `;
+
+                if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest') {
+                    const hoverTarget = resultBlock.querySelector('.search-result-item-link');
+                    hoverTarget.addEventListener('mouseenter', (e) => startHoverPreview(e, item));
+                    hoverTarget.addEventListener('mousemove', (e) => positionPreviewCard(e));
+                    hoverTarget.addEventListener('mouseleave', cancelHoverPreview);
+                }
+
+                googleResultsContainer.appendChild(resultBlock);
+            });
+        }
+
+        function dismissGoogleSearchResults() {
+            if (searchInput) searchInput.value = '';
+            if (clearBtn) clearBtn.classList.add('hidden');
+            if (dropdownResults) dropdownResults.classList.add('hidden');
+            if (googleResultsView) googleResultsView.classList.add('hidden');
+            if (bsgChannelsBar) bsgChannelsBar.classList.add('hidden');
+            cancelHoverPreview();
+        }
+
+        if (resultsCloseBtn) resultsCloseBtn.addEventListener('click', dismissGoogleSearchResults);
+
+        function renderAutocompleteDropdown(matches, isSearching = false) {
+            if (!resultsContainer || !dropdownResults) return;
+            resultsContainer.innerHTML = '';
+            if (matches.length === 0) {
+                dropdownResults.classList.add('hidden');
+                return;
+            }
+
+            const header = document.createElement('div');
+            header.className = "text-[10px] font-bold text-zinc-400 dark:text-zinc-500 px-4 py-2 uppercase tracking-widest select-none";
+            header.textContent = isSearching ? "Found Recommendations" : "Quick Suggestions";
+            resultsContainer.appendChild(header);
+
+            matches.slice(0, 10).forEach((item) => {
+                if (!item) return;
+                const element = document.createElement('div');
+                element.className = "flex items-center justify-between px-4 py-3 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/70 transition duration-150 cursor-pointer border-l-2 border-transparent hover:border-indigo-600 dark:hover:border-indigo-400";
+                
+                let badgeColor = 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 dark:border-indigo-500/30';
+                if (item.type === 'tarkov') {
+                    badgeColor = 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/20 dark:border-amber-500/30';
+                }
+
+                element.innerHTML = `
+                    <div class="flex items-center space-x-3 truncate">
+                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500/40 flex-shrink-0"></div>
+                        <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">${item.title || 'Untitled'}</span>
+                    </div>
+                    <span class="text-[10px] font-semibold border ${badgeColor} uppercase tracking-wider px-2 py-0.5 rounded-full select-none max-w-[120px] truncate">
+                        ${item.category || 'General'}
+                    </span>
+                `;
+
+                element.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (item.url) window.open(item.url, '_blank');
+                    
+                    if (searchInput) searchInput.value = item.title || '';
+                    if (clearBtn) clearBtn.classList.remove('hidden');
+                    executeSearch(item.title || '');
+                });
+
+                if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest') {
+                    element.addEventListener('mouseenter', (e) => startHoverPreview(e, item));
+                    element.addEventListener('mousemove', (e) => positionPreviewCard(e));
+                    element.addEventListener('mouseleave', cancelHoverTooltip);
+                }
+
+                resultsContainer.appendChild(element);
+            });
+
+            dropdownResults.classList.remove('hidden');
+        }
+
+        function cancelHoverTooltip() {
+            cancelHoverPreview();
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => {
+                const query = searchInput.value.toLowerCase().trim();
+                if (query.length > 0) {
+                    renderAutocompleteDropdown(matchedResultsBuffer, true);
+                } else if (dropdownResults) {
+                    dropdownResults.classList.add('hidden');
+                }
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+
+                if (query.length > 0) {
+                    if (clearBtn) clearBtn.classList.remove('hidden');
+                } else {
+                    if (clearBtn) clearBtn.classList.add('hidden');
+                    if (dropdownResults) dropdownResults.classList.add('hidden');
+                    if (googleResultsView) googleResultsView.classList.add('hidden');
+                    cancelHoverPreview();
+                    return;
+                }
+
+                matchedResultsBuffer = searchIndex.filter(item => {
+                    const title = (item?.title || '').toLowerCase();
+                    const category = (item?.category || '').toLowerCase();
+                    return title.includes(query) || category.includes(query);
+                });
+
+                renderAutocompleteDropdown(matchedResultsBuffer, true);
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    executeSearch(searchInput.value);
+                }
+            });
+        }
+
+        if (clearBtn) clearBtn.addEventListener('click', dismissGoogleSearchResults);
+
+        document.addEventListener('click', (e) => {
+            const searchContainer = document.getElementById('search-container');
+            if (searchContainer && !searchContainer.contains(e.target) && dropdownResults) {
+                dropdownResults.classList.add('hidden');
+            }
+        });
+
+        window.addEventListener('scroll', () => {
+            const searchContainer = document.getElementById('search-container');
+            if (!searchContainer || !scrollToTopBtn) return;
+            const searchBarRect = searchContainer.getBoundingClientRect();
+            if (searchBarRect.bottom < 0) {
+                scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+                scrollToTopBtn.classList.add('opacity-100');
+            } else {
+                scrollToTopBtn.classList.remove('opacity-100');
+                scrollToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+            }
+        });
+
+        if (scrollToTopBtn) {
+            scrollToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // --- 5. IMPRESSUM POPUP MODAL ENGINE ---
+        const impressumBtn = document.getElementById('impressum-btn');
+        const impressumModal = document.getElementById('impressum-modal');
+        const closeImpressumBtn = document.getElementById('close-impressum-btn');
+        const closeImpressumOkBtn = document.getElementById('close-impressum-ok-btn');
+
+        function openImpressum() {
+            if (impressumModal) impressumModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeImpressum() {
+            if (impressumModal) impressumModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        if (impressumBtn) {
+            impressumBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openImpressum();
+            });
+        }
+        if (closeImpressumBtn) closeImpressumBtn.addEventListener('click', closeImpressum);
+        if (closeImpressumOkBtn) closeImpressumOkBtn.addEventListener('click', closeImpressum);
+
+        if (impressumModal) {
+            impressumModal.addEventListener('click', (e) => {
+                if (e.target === impressumModal) {
+                    closeImpressum();
+                }
+            });
+        }
+
+        // Global key shortcut commands
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchInput && searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            if (e.key === 'Escape') {
+                if (searchInput && document.activeElement === searchInput) {
+                    searchInput.blur();
+                }
+                if (dropdownResults) dropdownResults.classList.add('hidden');
+                cancelHoverPreview();
+                closeImpressum();
+            }
+        });
     </script>
 </body>
 </html>
