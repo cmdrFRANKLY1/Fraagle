@@ -283,25 +283,41 @@
             const splitter2 = document.getElementById('splitter2');
 
             // ----- state -----
-            let mode = 'txt2json'; // 'txt2json' or 'json2txt'
-            let rawData = {}; // { groupName: [lines] }
+            let mode = 'txt2json';
+            let rawData = {};
             let groupNames = [];
             let selectedGroups = new Set();
             let fileContent = '';
+            let inputFileName = ''; // full name of the loaded file, e.g., "data.txt"
+            let inputBaseName = ''; // base name without extension, e.g., "data"
 
-            // ----- helpers -----
+            // ----- improved parser with more group patterns -----
             function parseTxt(text) {
                 const groupPatterns = [
+                    { regex: /^#\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^##\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^#+\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^\/\/\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^--\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^;\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^\*\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^'\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^%\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^@\s+(.+)$/, nameIndex: 1 },
                     { regex: /^\[(.+)\]$/, nameIndex: 1 },
+                    { regex: /^\((.+)\)$/, nameIndex: 1 },
+                    { regex: /^<(.+)>$/, nameIndex: 1 },
                     { regex: /^={3,}\s*(.+?)\s*={3,}$/, nameIndex: 1 },
                     { regex: /^-{3,}\s*(.+?)\s*-{3,}$/, nameIndex: 1 },
                     { regex: /^\*{3,}\s*(.+?)\s*\*{3,}$/, nameIndex: 1 },
                     { regex: /^\.{3,}\s*(.+?)\s*\.{3,}$/, nameIndex: 1 },
-                    { regex: /^#+\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^_{3,}\s*(.+?)\s*_{3,}$/, nameIndex: 1 },
                     { regex: /^={3,}\s*(.+)$/, nameIndex: 1 },
                     { regex: /^-{3,}\s*(.+)$/, nameIndex: 1 },
                     { regex: /^\*{3,}\s*(.+)$/, nameIndex: 1 },
                     { regex: /^\.{3,}\s*(.+)$/, nameIndex: 1 },
+                    { regex: /^_{3,}\s*(.+)$/, nameIndex: 1 },
+                    { regex: /^(?:group|GROUP)\s*:\s*(.+)$/, nameIndex: 1 },
                 ];
 
                 const lines = text.split(/\r?\n/);
@@ -320,21 +336,28 @@
                 for (const line of lines) {
                     const trimmed = line.trim();
                     let matched = false;
+                    if (currentGroup === null && trimmed === '') continue;
                     for (const pattern of groupPatterns) {
                         const match = trimmed.match(pattern.regex);
                         if (match) {
                             flush();
-                            currentGroup = match[pattern.nameIndex].trim();
-                            currentLines = [];
+                            const groupName = match[pattern.nameIndex].trim();
+                            if (groupName) {
+                                currentGroup = groupName;
+                                currentLines = [];
+                            }
                             matched = true;
                             break;
                         }
                     }
                     if (!matched) {
-                        if (currentGroup !== null) currentLines.push(line);
-                        else {
-                            if (!groups['_default']) groups['_default'] = [];
-                            groups['_default'].push(line);
+                        if (currentGroup !== null) {
+                            currentLines.push(line);
+                        } else {
+                            if (trimmed !== '') {
+                                if (!groups['_default']) groups['_default'] = [];
+                                groups['_default'].push(line);
+                            }
                         }
                     }
                 }
@@ -349,12 +372,15 @@
                         if (def.length > 0) groups['default'] = def;
                     }
                 }
+
                 for (const k in groups) {
                     groups[k] = groups[k].filter(s => s !== '');
+                    if (groups[k].length === 0) delete groups[k];
                 }
                 return groups;
             }
 
+            // ----- groups to text (json2txt) -----
             function groupsToText(groups, selected) {
                 let lines = [];
                 for (const name of groupNames) {
@@ -371,6 +397,7 @@
                 return lines.join('\n');
             }
 
+            // ----- groups to json -----
             function groupsToJson(groups, selected) {
                 const output = {};
                 for (const name of groupNames) {
@@ -391,7 +418,7 @@
                     stats.textContent = `${total} items in ${selectedGroups.size} groups`;
                     saveBtn.disabled = (groupNames.length === 0 || selectedGroups.size === 0);
                     inputCount.textContent = Object.values(rawData).reduce((sum, arr) => sum + arr.length, 0);
-                } else { // json2txt
+                } else {
                     const txt = groupsToText(rawData, selectedGroups);
                     rightPanelBody.textContent = txt || '(empty)';
                     const total = groupNames.reduce((sum, n) => sum + (selectedGroups.has(n) ? (rawData[n] || []).length : 0), 0);
@@ -439,7 +466,12 @@
             // ----- load file -----
             function loadFile(file) {
                 if (!file) return;
-                fileName.textContent = file.name;
+                inputFileName = file.name;
+                // Extract base name without extension
+                const lastDot = inputFileName.lastIndexOf('.');
+                inputBaseName = lastDot > 0 ? inputFileName.slice(0, lastDot) : inputFileName;
+
+                fileName.textContent = inputFileName;
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     try {
@@ -449,7 +481,6 @@
                             rawData = groups;
                             groupNames = Object.keys(groups);
                             selectedGroups = new Set(groupNames);
-                            // show original text with line numbers
                             const lines = fileContent.split(/\r?\n/);
                             const lineDisplay = lines.map((line, idx) => {
                                 const num = (idx + 1).toString().padStart(2, ' ');
@@ -458,7 +489,7 @@
                             leftPanelBody.innerHTML = lineDisplay || '(empty)';
                             rebuildGroups();
                             updatePreview();
-                        } else { // json2txt
+                        } else {
                             const data = JSON.parse(fileContent);
                             if (typeof data !== 'object' || Array.isArray(data) || data === null) {
                                 throw new Error('JSON must be an object with array values.');
@@ -486,6 +517,8 @@
             }
 
             function resetAll() {
+                inputFileName = '';
+                inputBaseName = '';
                 fileName.textContent = 'no file';
                 leftPanelBody.innerHTML = '';
                 rightPanelBody.textContent = '';
@@ -499,34 +532,40 @@
                 rebuildGroups();
             }
 
-            // ----- save -----
+            // ----- save with proper file picker (uses same folder as input) -----
             async function saveOutput() {
                 if (saveBtn.disabled) return;
-                let content, ext, mime, suggestedName;
-                const base = fileName.textContent.replace(/\.[^.]+$/, '') || 'data';
 
+                let content, ext, mime;
                 if (mode === 'txt2json') {
                     content = groupsToJson(rawData, selectedGroups);
                     ext = 'json';
                     mime = 'application/json';
-                    suggestedName = base + '.json';
                 } else {
                     content = groupsToText(rawData, selectedGroups);
                     ext = 'txt';
                     mime = 'text/plain';
-                    suggestedName = base + '.txt';
                 }
 
+                // Build suggested filename using the input base name
+                const suggestedName = inputBaseName ? `${inputBaseName}.${ext}` : `output.${ext}`;
+
                 try {
+                    // Use the modern File System Access API if available
                     if ('showSaveFilePicker' in window) {
                         const handle = await window.showSaveFilePicker({
                             suggestedName: suggestedName,
-                            types: [{ description: ext.toUpperCase() + ' file', accept: { [mime]: ['.' + ext] } }]
+                            types: [
+                                { description: ext.toUpperCase() + ' file', accept: { [mime]: ['.' + ext] } }
+                            ]
                         });
                         const writable = await handle.createWritable();
                         await writable.write(content);
                         await writable.close();
+                        // Update the file name display to reflect the saved name
+                        fileName.textContent = handle.name || suggestedName;
                     } else {
+                        // Fallback: download using a Blob
                         const blob = new Blob([content], { type: mime });
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
@@ -538,6 +577,7 @@
                         URL.revokeObjectURL(url);
                     }
                 } catch (err) {
+                    // User aborted or error
                     if (err.name !== 'AbortError' && err.name !== 'SecurityError') {
                         console.warn('Save failed:', err);
                     }

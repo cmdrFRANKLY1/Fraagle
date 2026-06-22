@@ -1,4 +1,4 @@
-Real World
+# Real World
 Pizza
 Sushi
 Burger
@@ -55,8 +55,7 @@ Boston cream pie
 Cupcakes
 Brownies
 Cookies
-
-Fantasy & Mythology
+# Fantasy & Mythology
 Lembas
 Butterbeer
 Skooma
@@ -95,8 +94,7 @@ Firewhisky
 Polyjuice Potion
 Gillyweed
 Turkish Delight
-
-Pop Culture & Sci‑Fi
+# Pop Culture & Sci‑Fi
 Duff Beer
 Jelly Doughnut
 Ribwich

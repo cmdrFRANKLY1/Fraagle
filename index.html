@@ -96,7 +96,8 @@
         <div class="flex items-center space-x-3">
             <button id="profile-trigger-btn" class="group flex items-center justify-center bg-darkCard/60 p-1.5 rounded-xl transition duration-200 focus:outline-none" title="Open Character Sheet">
                 <div class="w-8 h-8 rounded-lg overflow-hidden shadow-sm relative">
-                    <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
+                    <!-- Added id to header profile image for synchronized updates -->
+                    <img id="header-profile-img" src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
                     <!-- Dynamic Google Status Indicator Dot -->
                     <span id="profile-status-dot" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkCard rounded-full transition-colors duration-300"></span>
                 </div>
@@ -106,7 +107,7 @@
 
     <!-- Main Content Container -->
     <main id="main-container" class="flex-grow flex flex-col items-center justify-center px-4 w-full max-w-3xl mx-auto z-10">
-        
+
         <!-- Logo Header -->
         <div class="mb-8 select-none text-center flex flex-col items-center justify-center w-full relative">
             <div class="relative inline-flex items-center justify-center">
@@ -114,14 +115,14 @@
                 <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex justify-center items-center drop-shadow-sm z-10 min-h-[48px] sm:min-h-[72px]">
                     <!-- Text dynamically set into this container -->
                 </h1>
-                
+
                 <!-- Tactical HUD Sidebar containing Version, absolutely positioned to prevent shifting -->
                 <div class="absolute left-full ml-3 flex flex-col items-start justify-center text-left whitespace-nowrap top-1/2 -translate-y-1/2 select-none">
                     <!-- Version tag -->
                     <span id="version-tag" class="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
                 </div>
             </div>
-            
+
             <!-- Dynamic Permutated Subtitle: Enforced strictly to one line with truncation -->
             <p id="logo-subtitle" class="text-xs sm:text-sm font-medium tracking-wider text-zinc-500 mt-3 min-h-[1.25rem] text-center max-w-full px-4"></p>
         </div>
@@ -132,10 +133,10 @@
                 <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     id="search-input"
-                    placeholder="Search the web..." 
+                    placeholder="Search the web..."
                     class="w-full bg-transparent border-none outline-none text-[16px] text-zinc-100 placeholder-zinc-500"
                     autocomplete="off"
                     autofocus
@@ -411,9 +412,9 @@
             }
 
             // Fetch procedural bio categories JSON cleanly from multiple local path candidates
-            const bioData = await fetchFileJSON('./resources/dnd/listBiography.json') || 
-                            await fetchFileJSON('resources/dnd/listBiography.json') || 
-                            await fetchFileJSON('listBiography.json') || 
+            const bioData = await fetchFileJSON('./resources/dnd/listBiography.json') ||
+                            await fetchFileJSON('resources/dnd/listBiography.json') ||
+                            await fetchFileJSON('listBiography.json') ||
                             await fetchFileJSON('/resources/dnd/listBiography.json');
             if (bioData && typeof bioData === 'object') {
                 if (bioData.intros) bioIntros = bioData.intros;
@@ -441,28 +442,40 @@
 
             // --- D&D MODULE DYNAMIC DATASETS RESOLUTION (Plural-first filenames check) ---
             dndNames = await loadResourceArray([
-                './resources/dnd/listNames.json', 
-                'resources/dnd/listNames.json', 
-                '/resources/dnd/listNames.json', 
+                './resources/dnd/listNames.json',
+                'resources/dnd/listNames.json',
+                '/resources/dnd/listNames.json',
                 'listNames.json'
             ]);
             dndProfessions = await loadResourceArray([
-                './resources/dnd/listProfessions.json', 
-                'resources/dnd/listProfessions.json', 
-                '/resources/dnd/listProfessions.json', 
-                'listProfessions.json'
+                './resources/dnd/listProfessions.json',
+                'resources/dnd/listProfessions.json',
+                '/resources/dnd/listProfessions.json',
+                'listProfessions.json',
+                './resources/dnd/listProfession.json',
+                'resources/dnd/listProfession.json',
+                '/resources/dnd/listProfession.json',
+                'listProfession.json'
             ]);
             dndRaces = await loadResourceArray([
-                './resources/dnd/listRaces.json', 
-                'resources/dnd/listRaces.json', 
-                '/resources/dnd/listRaces.json', 
-                'listRaces.json'
+                './resources/dnd/listRaces.json',
+                'resources/dnd/listRaces.json',
+                '/resources/dnd/listRaces.json',
+                'listRaces.json',
+                './resources/dnd/listRace.json',
+                'resources/dnd/listRace.json',
+                '/resources/dnd/listRace.json',
+                'listRace.json'
             ]);
             dndPlaces = await loadResourceArray([
-                './resources/dnd/listPlaces.json', 
-                'resources/dnd/listPlaces.json', 
-                '/resources/dnd/listPlaces.json', 
-                'listPlaces.json'
+                './resources/dnd/listPlaces.json',
+                'resources/dnd/listPlaces.json',
+                '/resources/dnd/listPlaces.json',
+                'listPlaces.json',
+                './resources/dnd/listPlace.json',
+                'resources/dnd/listPlace.json',
+                '/resources/dnd/listPlace.json',
+                'listPlace.json'
             ]);
 
             // Load Attribute descriptor mapping
@@ -484,25 +497,25 @@
         function triggerVersionDecrypt() {
             const versionTag = document.getElementById('version-tag');
             if (!versionTag) return;
-            
+
             versionTag.classList.remove('opacity-0');
             versionTag.classList.add('opacity-100');
-            
+
             const targetText = currentVersion;
             const possibleChars = "0123456789_#@*&%$?![]=+/\\";
             let iterations = 0;
-            
+
             clearInterval(versionTag.decryptInterval);
-            
+
             versionTag.decryptInterval = setInterval(() => {
                 let displayText = targetText.split("").map((char, index) => {
                     if (char === " ") return " ";
                     if (index < iterations) return targetText[index];
                     return possibleChars[Math.floor(Math.random() * possibleChars.length)];
                 }).join("");
-                
+
                 versionTag.textContent = displayText;
-                
+
                 if (iterations >= targetText.length) {
                     clearInterval(versionTag.decryptInterval);
                 }
@@ -520,7 +533,7 @@
                 document.getElementById('char-race').textContent = "Check URL";
                 document.getElementById('char-profession').textContent = "Fetch Failed";
                 document.getElementById('char-location').textContent = "CORS Blocked (Local File Protocol)";
-                
+
                 // Show the helpful custom CORS guide if we are currently loading locally
                 if (corsNotice) {
                     corsNotice.classList.remove('hidden');
@@ -558,14 +571,14 @@
             const bg = bioBackgrounds[Math.floor(Math.random() * bioBackgrounds.length)];
             const motivation = bioMotivations[Math.floor(Math.random() * bioMotivations.length)];
             const secret = bioSecrets[Math.floor(Math.random() * bioSecrets.length)];
-            
+
             document.getElementById('char-bio').textContent = `${intro} ${bg} ${motivation} ${secret}`;
 
             // Generate customized stats
             const attributesGrid = document.getElementById('attributes-grid');
             if (attributesGrid) {
                 attributesGrid.innerHTML = '';
-                
+
                 // Pre-configured style colors mapping for standard attributes
                 const styleColors = {
                     "Strength": "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5 text-tarkoogleRed",
@@ -590,7 +603,7 @@
                     const descriptors = attributesObj[attrName];
                     const randomDescriptor = Array.isArray(descriptors) ? Math.floor(Math.random() * descriptors.length) : "";
                     const chosenDesc = Array.isArray(descriptors) ? descriptors[randomDescriptor] : "";
-                    
+
                     // Standard D&D stats generator (3d6 roll)
                     const baseScore = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 3;
                     const modifier = Math.floor((baseScore - 10) / 2);
@@ -614,10 +627,19 @@
                 }
             }
 
-            // Retain This Person Does Not Exist dynamic query parameter key so the image shifts on reroll!
+            // Create a shared unique timestamp query parameter key so the image shifts on reroll, but stays identical across both elements
+            const uniqueAvatarUrl = `https://thispersondoesnotexist.com?nocache=${Date.now()}`;
+
+            // Sync the side drawer avatar
             const avatarImg = document.getElementById('char-avatar');
             if (avatarImg) {
-                avatarImg.src = `https://thispersondoesnotexist.com?nocache=${Date.now()}`;
+                avatarImg.src = uniqueAvatarUrl;
+            }
+
+            // Sync the top right header profile avatar
+            const headerImg = document.getElementById('header-profile-img');
+            if (headerImg) {
+                headerImg.src = uniqueAvatarUrl;
             }
 
             // Assign a random online status color: Green, Yellow, or Red
@@ -633,10 +655,10 @@
         function loadDynamicTitleAndSubtitle() {
             const logoSubtitle = document.getElementById('logo-subtitle');
             currentTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)] || "Tarkoogle";
-            
+
             document.title = currentTitle + " Hub";
             if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
-            
+
             setRandomFavicon(currentTitle);
 
             // Title display: Letters are picked at random from indexColorPalette.json
