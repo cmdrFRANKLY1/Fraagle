@@ -472,6 +472,17 @@
             return [];
         }
 
+        // Generic object loader helper that queries multiple local file candidates with robust parsing
+        async function loadResourceObject(paths) {
+            for (let path of paths) {
+                const data = await fetchFileJSON(path);
+                if (data) {
+                    if (typeof data === 'object') return data;
+                }
+            }
+            return null;
+        }
+
         // Path resolver: Convert "resources, text, indexTitles" into "./resources/text/indexTitles.json"
         function resolvePath(commaString) {
             if (!commaString) return "";
@@ -720,10 +731,10 @@
             // ID section pattern: <nickname>#<randomNumberBetween0001and9999>
             const randomNum = Math.floor(Math.random() * 9999) + 1;
             const paddedNum = String(randomNum).padStart(4, '0');
-            const generatedID = `${randomNickname}#${paddedNum}`;
+            const generatedID = `${randomNickname}#paddedNum`;
             const idEl = document.getElementById('char-id');
             if (idEl) {
-                idEl.textContent = generatedID;
+                idEl.textContent = `${randomNickname}#${paddedNum}`;
             }
 
             // Render stats grid
@@ -1145,44 +1156,87 @@
         }
 
         async function loadResourceData() {
-            // Load title settings first
-            const titleStylePayload = await fetchFileJSON('./settings/styleIndexTitles.json') ||
-                                      await fetchFileJSON('settings/styleIndexTitles.json') ||
-                                      await fetchFileJSON('/settings/styleIndexTitles.json');
+            // Load title settings first with fallbacks
+            const titleStylePayload = await loadResourceObject([
+                './settings/styleIndexTitles.json',
+                'settings/styleIndexTitles.json',
+                '/settings/styleIndexTitles.json',
+                'styleIndexTitles.json'
+            ]);
 
-            // Load subtitle settings
-            const subtitleStylePayload = await fetchFileJSON('./settings/styleIndexSubtitles.json') ||
-                                         await fetchFileJSON('settings/styleIndexSubtitles.json') ||
-                                         await fetchFileJSON('/settings/styleIndexSubtitles.json');
+            // Load subtitle settings with fallbacks
+            const subtitleStylePayload = await loadResourceObject([
+                './settings/styleIndexSubtitles.json',
+                'settings/styleIndexSubtitles.json',
+                '/settings/styleIndexSubtitles.json',
+                'styleIndexSubtitles.json'
+            ]);
 
             // Map arrays to key-value objects
             const titleSettings = {};
-            if (Array.isArray(titleStylePayload)) {
-                titleStylePayload.forEach(item => titleSettings[item.name] = item.value);
+            if (titleStylePayload) {
+                if (Array.isArray(titleStylePayload)) {
+                    titleStylePayload.forEach(item => titleSettings[item.name] = item.value);
+                } else if (typeof titleStylePayload === 'object') {
+                    Object.assign(titleSettings, titleStylePayload);
+                }
             }
             const subtitleSettings = {};
-            if (Array.isArray(subtitleStylePayload)) {
-                subtitleStylePayload.forEach(item => subtitleSettings[item.name] = item.value);
+            if (subtitleStylePayload) {
+                if (Array.isArray(subtitleStylePayload)) {
+                    subtitleStylePayload.forEach(item => subtitleSettings[item.name] = item.value);
+                } else if (typeof subtitleStylePayload === 'object') {
+                    Object.assign(subtitleSettings, subtitleStylePayload);
+                }
             }
 
-            // Resolve dynamic text paths based on loaded settings
-            const titleTextPath = resolvePath(titleSettings.text) || './resources/text/indexTitles.json';
-            const titlesData = await fetchFileJSON(titleTextPath);
-            if (titlesData && Array.isArray(titlesData)) generalSearchTitles = titlesData;
+            // Resolve dynamic text paths based on loaded settings using robust fallback arrays
+            const titleTextPath = resolvePath(titleSettings.text);
+            const titlesData = await loadResourceArray([
+                titleTextPath,
+                titleTextPath.replace(/^\.\//, ''),
+                '/' + titleTextPath.replace(/^\.\//, ''),
+                './resources/text/indexTitles.json',
+                'resources/text/indexTitles.json',
+                'indexTitles.json'
+            ]);
+            if (titlesData && Array.isArray(titlesData) && titlesData.length > 0) {
+                generalSearchTitles = titlesData;
+            }
 
-            const subtitleTextPath = resolvePath(subtitleSettings.text) || './resources/text/listSubtitles.json';
-            const subsData = await fetchFileJSON(subtitleTextPath);
-            if (subsData && typeof subsData === 'object') {
+            const subtitleTextPath = resolvePath(subtitleSettings.text);
+            const subsData = await loadResourceObject([
+                subtitleTextPath,
+                subtitleTextPath.replace(/^\.\//, ''),
+                '/' + subtitleTextPath.replace(/^\.\//, ''),
+                './resources/text/listSubtitles.json',
+                'resources/text/listSubtitles.json',
+                'listSubtitles.json'
+            ]);
+            if (subsData && typeof subsData === 'object' && !Array.isArray(subsData)) {
                 if (subsData.intros) subtitleIntros = subsData.intros;
                 if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
                 if (subsData.subjects) subtitleSubjects = subsData.subjects;
                 if (subsData.endings) subtitleEndings = subsData.endings;
             }
 
-            // Resolve color palettes dynamically
-            const titleColorPath = resolvePath(titleSettings.color) || './resources/colors/indexColorPalette.json';
-            const colorsData = await fetchFileJSON(titleColorPath);
-            if (colorsData && Array.isArray(colorsData)) logoColorPalette = colorsData;
+            // Resolve color palettes dynamically with robust loadResourceArray path sweepers
+            const titleColorPath = resolvePath(titleSettings.color);
+            const colorsData = await loadResourceArray([
+                titleColorPath,
+                titleColorPath.replace(/^\.\//, ''),
+                '/' + titleColorPath.replace(/^\.\//, ''),
+                './resources/colors/indexColorPalette.json',
+                'resources/colors/indexColorPalette.json',
+                'indexColorPalette.json',
+                './resources/colors/palettes/google.json',
+                'resources/colors/palettes/google.json',
+                '/resources/colors/palettes/google.json',
+                'google.json'
+            ]);
+            if (colorsData && Array.isArray(colorsData) && colorsData.length > 0) {
+                logoColorPalette = colorsData;
+            }
 
             // Apply Fonts dynamically to Title & Subtitle from settings!
             const titleTag = document.getElementById('logo-title');
@@ -1206,7 +1260,12 @@
             }
 
             // Load general static config files as fallback options
-            const bioData = await fetchFileJSON('./resources/dnd/listBiography.json') || await fetchFileJSON('listBiography.json');
+            const bioData = await loadResourceObject([
+                './resources/dnd/listBiography.json',
+                'resources/dnd/listBiography.json',
+                'listBiography.json',
+                '/resources/dnd/listBiography.json'
+            ]);
             if (bioData && typeof bioData === 'object') {
                 if (bioData.intros) bioIntros = bioData.intros;
                 if (bioData.backgrounds) bioBackgrounds = bioData.backgrounds;
@@ -1279,7 +1338,12 @@
             const genderData = await loadResourceArray(['./resources/dnd/listGender.json', 'listGender.json']);
             if (genderData && genderData.length > 0) dndGenders = genderData;
 
-            const attribsData = await fetchFileJSON('./resources/dnd/listAttributes.json') || await fetchFileJSON('listAttributes.json');
+            const attribsData = await loadResourceObject([
+                './resources/dnd/listAttributes.json',
+                'resources/dnd/listAttributes.json',
+                '/resources/dnd/listAttributes.json',
+                'listAttributes.json'
+            ]);
             if (attribsData && typeof attribsData === 'object' && !Array.isArray(attribsData)) dndAttributes = attribsData;
 
             // Load custom email providers list
