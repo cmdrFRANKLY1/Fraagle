@@ -986,7 +986,7 @@
                             <a href="${item.url}" target="_blank" title="Open wiki page" class="hover:underline inline-flex items-center gap-1.5">
                                 ${item.title}
                                 <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-60 hover:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                 </svg>
                             </a>
                         </h2>
@@ -1195,6 +1195,12 @@
 
                 googleResultsContainer.appendChild(resultBlock);
             });
+
+            // Smoothly scroll down to make sure search container matches top layout of viewport at search display time
+            const searchContainer = document.getElementById('search-container');
+            if (searchContainer) {
+                searchContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function dismissGoogleSearchResults() {
@@ -1331,6 +1337,7 @@
             const searchContainer = document.getElementById('search-container');
             if (!searchContainer || !scrollToTopBtn) return;
             const searchBarRect = searchContainer.getBoundingClientRect();
+            // Shows floating "UP" arrow to go back up when scrolling past the search bar
             if (searchBarRect.bottom < 0) {
                 scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
                 scrollToTopBtn.classList.add('opacity-100');
