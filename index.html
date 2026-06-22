@@ -264,8 +264,8 @@
                     </div>
                 </div>
 
-                <!-- Right: Knowledge Panel (Google style side info - moved to the right with wider footprint) -->
-                <div id="knowledge-panel" class="hidden w-full lg:w-[38%] sticky top-24 border border-lightBorder dark:border-darkBorder rounded-3xl bg-white/60 dark:bg-darkCard/60 backdrop-blur-md p-6 shadow-xl dark:shadow-2xl flex-shrink-0 animate-fade-in">
+                <!-- Right: Knowledge Panel (Google style side info - floats and stays responsive off the bottom of the screen) -->
+                <div id="knowledge-panel" class="hidden w-full lg:w-[38%] sticky top-24 mb-12 max-h-[calc(100vh-140px)] overflow-y-auto border border-lightBorder dark:border-darkBorder rounded-3xl bg-white/60 dark:bg-darkCard/60 backdrop-blur-md p-6 shadow-xl dark:shadow-2xl flex-shrink-0 animate-fade-in">
                     <!-- Knowledge Panel Content Populated via JS -->
                 </div>
             </div>
@@ -360,6 +360,7 @@
         const sunIcon = document.getElementById('theme-toggle-sun-icon');
         const moonIcon = document.getElementById('theme-toggle-moon-icon');
 
+        // Apply dark/light styles based on preferences
         function applyTheme(isDark) {
             if (isDark) {
                 document.documentElement.classList.add('dark');
@@ -582,7 +583,7 @@
                 "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", 
                 "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful",
                 "gravitationally-skewed", "helium-filled", "neon-bathed", "spark-emitting",
-                "highly-caffeinated", "strictly-static", "polymorphic", "exquisite"
+                "strictly-static", "polymorphic", "exquisite"
             ];
             
             const subjects = [
@@ -703,7 +704,7 @@
                 tasks = data?.tasks || [];
             } catch (e) {}
 
-            // Populate items safely
+            // Populate items safely with age-appropriate objective parameters
             items.filter(Boolean).forEach(item => {
                 const itemName = item.name || 'Unknown Item';
                 let statsSnippet = `${item.category?.name || 'Equipment'}. Base price: ${item.basePrice || 0} ₽.`;
@@ -928,10 +929,17 @@
 
             panel.innerHTML = `
                 <div class="flex justify-center mb-5 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-lightBorder dark:border-darkBorder/50 relative overflow-hidden">
-                    <img src="${iconUrl}" alt="${item.title}" class="h-32 w-auto object-contain z-10 drop-shadow-lg" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=128&auto=format&fit=crop&q=60'">
+                    <img src="${iconUrl}" alt="${item.title}" class="h-32 w-auto object-contain z-10 drop-shadow-lg animate-fade-in" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=128&auto=format&fit=crop&q=60'">
                     <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/5 dark:to-white/5 pointer-events-none"></div>
                 </div>
-                <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-1 leading-tight tracking-tight">${item.title}</h2>
+                <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-1 leading-tight tracking-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                    <a href="${item.url}" target="_blank" title="Open wiki page" class="hover:underline inline-flex items-center gap-1.5">
+                        ${item.title}
+                        <svg class="w-4 h-4 flex-shrink-0 opacity-60 hover:opacity-100 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                </h2>
                 <p class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-4">${item.category || item.type}</p>
                 <div class="text-sm text-zinc-600 dark:text-zinc-300 mb-6 leading-relaxed">
                     ${item.description || item.traderDesc || 'Official databased entry from the Escape from Tarkov universe.'}
@@ -946,7 +954,7 @@
                 </div>` : ''}
 
                 <a href="${item.url}" target="_blank" class="flex items-center justify-center w-full py-3 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold text-sm hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-all border border-indigo-200 dark:border-indigo-500/30 group">
-                    <svg class="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    <svg class="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     View Official Wiki Entry
                 </a>
             `;
