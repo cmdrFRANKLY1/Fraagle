@@ -641,7 +641,7 @@
                 "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", 
                 "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful",
                 "gravitationally-skewed", "helium-filled", "neon-bathed", "spark-emitting",
-                "strictly-static", "polymorphic", "exquisite"
+                "highly-caffeinated", "strictly-static", "polymorphic", "exquisite"
             ];
             
             const subjects = [
@@ -856,7 +856,7 @@
                     url: site.url,
                     description: site.description,
                     category: site.category,
-                    iconLink: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=64&auto=format&fit=crop&q=60", // Better generic web image default
+                    iconLink: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=64&auto=format&fit=crop&q=60", // Safe neutral fallback template icon
                     tags: site.tags
                 });
             });
@@ -1085,7 +1085,7 @@
                     <div class="flex flex-col space-y-2 animate-fade-in select-none">
                         <div class="flex items-center space-x-2">
                             <div class="w-10 h-10 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 border border-lightBorder dark:border-darkBorder p-1 flex items-center justify-center flex-shrink-0">
-                                <img src="${iconUrl}" alt="${item.title}" class="w-full h-full object-contain rounded-md" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=60'">
+                                <img src="${iconUrl}" alt="${item.title}" class="w-full h-full object-cover rounded-md" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=60'">
                             </div>
                             <div class="truncate">
                                 <h4 class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.title}</h4>
@@ -1235,6 +1235,22 @@
             `;
         }
 
+        // Dynamic Relevance-Based Ranking System (Matches exact, prefix, word boundary, and inside text queries)
+        function getRelevanceScore(item, query) {
+            const title = (item.title || '').toLowerCase();
+            const shortName = (item.shortName || '').toLowerCase();
+            const category = (item.category || '').toLowerCase();
+            
+            if (title === query || shortName === query) return 1000;
+            if (title.startsWith(query)) return 500;
+            
+            const words = title.split(/\s+/);
+            if (words.some(word => word.startsWith(query))) return 300;
+            if (title.includes(query) || category.includes(query) || shortName.includes(query)) return 50;
+            
+            return 0;
+        }
+
         function executeSearch(queryText, forcedExactItem = null) {
             if (dropdownResults) dropdownResults.classList.add('hidden');
             cancelHoverPreview();
@@ -1259,6 +1275,9 @@
                 const shortName = (item?.shortName || '').toLowerCase();
                 return title.includes(normalizedQuery) || category.includes(normalizedQuery) || shortName.includes(normalizedQuery);
             });
+
+            // Sort matches dynamically using the newly implemented Google-style Relevance Scoring System
+            matches.sort((a, b) => getRelevanceScore(b, normalizedQuery) - getRelevanceScore(a, normalizedQuery));
 
             // If forcedExactItem is passed, prioritize it first and rearrange adjacent matches below it
             if (forcedExactItem) {
@@ -1329,6 +1348,9 @@
                 });
             }
 
+            // Sort adjacent recommendations by relevance too
+            adjacentMatches.sort((a, b) => getRelevanceScore(b, normalizedQuery) - getRelevanceScore(a, normalizedQuery));
+
             // Combine base query matches and dynamically filtered adjacent recommendation lists
             adjacentMatches.forEach(item => {
                 if (!matches.some(m => m.id === item.id)) {
@@ -1380,25 +1402,25 @@
                     googleResultsContainer.appendChild(adjacentSection);
                 }
 
-                // Dynamically build a custom, safe, and elegant layout favicon next to the item name in search results
-                // Sized to "way bigger" scale (w-10 h-10) with custom frosted styling
+                // Dynamically build a custom, safe, and elegant layout favicon next to the breadcrumb path in search results
+                // Returned to the original compact size (w-3.5 h-3.5) next to the path
                 let iconHtml = '';
                 if (item.type === 'tarkov') {
                     const tarkovFallbackUrl = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=64&auto=format&fit=crop&q=60';
-                    iconHtml = `<img src="${item.iconLink || tarkovFallbackUrl}" alt="" class="w-10 h-10 object-contain rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 p-1.5 border border-zinc-200/50 dark:border-zinc-700/50" onerror="this.onerror=null; this.src='${tarkovFallbackUrl}';">`;
+                    iconHtml = `<img src="${item.iconLink || tarkovFallbackUrl}" alt="" class="w-3.5 h-3.5 object-contain rounded" onerror="this.onerror=null; this.src='${tarkovFallbackUrl}';">`;
                 } else if (item.type === 'trader') {
                     const traderFallbackUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&auto=format&fit=crop&q=60';
-                    iconHtml = `<img src="${item.iconLink || traderFallbackUrl}" alt="" class="w-10 h-10 object-cover rounded-full border border-zinc-200/50 dark:border-zinc-700/50" onerror="this.onerror=null; this.src='${traderFallbackUrl}';">`;
+                    iconHtml = `<img src="${item.iconLink || traderFallbackUrl}" alt="" class="w-3.5 h-3.5 object-cover rounded-full" onerror="this.onerror=null; this.src='${traderFallbackUrl}';">`;
                 } else if (item.type === 'quest') {
                     iconHtml = `
-                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm border border-amber-500/20 flex-shrink-0">
+                        <div class="w-3.5 h-3.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-[8px] border border-amber-500/20">
                             Q
                         </div>
                     `;
                 } else if (item.type === 'website') {
                     iconHtml = `
-                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-500/20 flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <div class="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 flex items-center justify-center">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
                             </svg>
                         </div>
@@ -1406,7 +1428,6 @@
                 }
 
                 const resultBlock = document.createElement('div');
-                // Compact padding of each search result element from p-4 to p-2.5 px-3.5. Added class 'search-result-card' for glow styles.
                 resultBlock.className = "search-result-card text-left w-full p-2.5 px-3.5 border border-transparent rounded-xl cursor-pointer group";
 
                 let breadcrumbPath = item.type === 'website' 
@@ -1466,31 +1487,29 @@
                     : '';
 
                 resultBlock.innerHTML = `
-                    <div class="text-[11px] text-zinc-400 dark:text-zinc-500 mb-1 tracking-wide truncate select-none pl-[42px] sm:pl-[44px]">
-                        <span>${breadcrumbPath}</span>
-                    </div>
-                    <div class="flex items-start space-x-3 sm:space-x-3.5">
-                        <div class="flex-shrink-0 w-10 h-10 flex items-center justify-center">
+                    <div class="text-[11px] text-zinc-400 dark:text-zinc-500 mb-0.5 tracking-wide truncate flex items-center gap-1.5 select-none">
+                        <div class="flex-shrink-0 w-3.5 h-3.5 flex items-center justify-center">
                             ${iconHtml}
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex flex-col items-start">
-                                ${primaryTagHtml}
-                                <a href="${item.url}" target="_blank" class="block mb-0.5 search-result-item-link">
-                                    <h3 class="text-[17px] sm:text-[18px] text-blue-600 dark:text-blue-400 hover:underline font-normal leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                                        ${item.title.split(' (')[0] || 'Untitled'}
-                                    </h3>
-                                </a>
-                            </div>
-                            ${(item.type === 'tarkov' || item.type === 'website') ? tagsHtml : `
-                            <p class="text-[13px] text-zinc-600 dark:text-zinc-400 leading-normal mt-0.5">
-                                <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[9px] tracking-wider px-1 py-0.5 rounded mr-1 select-none uppercase">
-                                    ${item.category || 'General'}
-                                </span>
-                                ${item.description || ''}
-                            </p>
-                            `}
-                        </div>
+                        <span class="truncate">${breadcrumbPath}</span>
+                    </div>
+                    <div class="flex flex-col items-start pl-5">
+                        ${primaryTagHtml}
+                        <a href="${item.url}" target="_blank" class="block mb-0.5 search-result-item-link">
+                            <h3 class="text-[17px] sm:text-[18px] text-blue-600 dark:text-blue-400 hover:underline font-normal leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                                ${item.title.split(' (')[0] || 'Untitled'}
+                            </h3>
+                        </a>
+                    </div>
+                    <div class="pl-5">
+                        ${(item.type === 'tarkov' || item.type === 'website') ? tagsHtml : `
+                        <p class="text-[13px] text-zinc-600 dark:text-zinc-400 leading-normal">
+                            <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[9px] tracking-wider px-1 py-0.5 rounded mr-1 select-none uppercase">
+                                ${item.category || 'General'}
+                            </span>
+                            ${item.description || ''}
+                        </p>
+                        `}
                     </div>
                 `;
 
@@ -1553,6 +1572,9 @@
             header.className = "text-[10px] font-bold text-zinc-400 dark:text-zinc-500 px-4 py-2 uppercase tracking-widest select-none";
             header.textContent = isSearching ? "Found Recommendations" : "Quick Suggestions";
             resultsContainer.appendChild(header);
+
+            // Sort autocomplete dropdown using Relevance Scoring too
+            matches.sort((a, b) => getRelevanceScore(b, searchInput.value.toLowerCase().trim()) - getRelevanceScore(a, searchInput.value.toLowerCase().trim()));
 
             matches.slice(0, 10).forEach((item) => {
                 if (!item) return;
