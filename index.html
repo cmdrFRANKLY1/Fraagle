@@ -173,7 +173,10 @@
             <button id="gradient-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/80 dark:bg-darkCard/50 backdrop-blur-md hover:bg-zinc-50 dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Glow Gradients">
                 <!-- Sparkle/Glow Icon -->
                 <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-300 pointer-events-none transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
                 </svg>
             </button>
 
@@ -261,7 +264,7 @@
                 <!-- YouTube (Upgraded with a highly robust Lucide vector path guaranteed to render) -->
                 <a href="https://www.youtube.com/battlestategames" target="_blank" title="BSG YouTube" class="hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                        <path d="M22.54 6.42a2.78 2.5 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.5 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.5 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.5 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                        <path d="M22.54 6.42a2.78 2.5 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6 4.6a2.78 2.5 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.5 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.5 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
                         <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor"></polygon>
                     </svg>
                 </a>
@@ -319,8 +322,8 @@
                     </div>
                 </div>
 
-                <!-- Right: Knowledge Panel (Floats beautifully aligned to the first result card top, sticky top-[120px] and rounded-2xl corners) -->
-                <div id="knowledge-panel" class="hidden w-full lg:w-[38%] sticky top-[120px] mb-12 max-h-[calc(100vh-180px)] overflow-y-auto p-1 flex-shrink-0 animate-fade-in">
+                <!-- Right: Knowledge Panel (Floats beautifully aligned to the first result card top, sticky top-[120px] and rounded-2xl corners, padded with p-5 to avoid clipping on rounded edges) -->
+                <div id="knowledge-panel" class="hidden w-full lg:w-[38%] sticky top-[120px] mb-12 max-h-[calc(100vh-180px)] overflow-y-auto p-5 flex-shrink-0 animate-fade-in">
                     <!-- Knowledge Panel Content Populated via JS -->
                 </div>
             </div>
@@ -794,7 +797,7 @@
             // Populate items safely with objective parameters
             items.filter(Boolean).forEach(item => {
                 const itemName = item.name || 'Unknown Item';
-                let statsSnippet = `${item.category?.name || 'Equipment'}. Base price: ${item.basePrice || 0} ₽.`;
+                let statsSnippet = `${item.category?.name || 'Equipment'} item in Escape from Tarkov.`;
                 
                 const pvePrice = pvePriceMap.get(item.id) || Math.round((item.avg24hPrice || item.basePrice || 0) * 0.95);
                 
@@ -1057,7 +1060,7 @@
                             <a href="${item.url}" target="_blank" title="Open wiki page" class="hover:underline inline-flex items-center gap-1.5">
                                 ${item.title}
                                 <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-60 hover:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                 </svg>
                             </a>
                         </h2>
@@ -1258,7 +1261,7 @@
                     }
                     
                     if (item.pvePrice) {
-                        tags.push(`<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
+                        tags.push(`<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
                     }
 
                     if (item.armorClass) {
@@ -1266,7 +1269,7 @@
                     }
 
                     if (item.damage) {
-                        tags.push(`<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/10">Damage: ${item.damage}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/10">Damage: ${item.damage}</span>`);
                     }
 
                     tagsHtml = `
