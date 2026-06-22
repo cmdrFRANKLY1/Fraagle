@@ -25,6 +25,13 @@
         // Tailwind configuration for advanced modern styling in both modes
         tailwind.config = {
             darkMode: 'class',
+            safelist: [
+                // Safelist all possible glow colors so Tailwind compiles them
+                'bg-blue-500/10', 'bg-orange-500/10', 'bg-purple-500/10', 'bg-yellow-500/10', 
+                'bg-teal-500/10', 'bg-rose-500/10', 'bg-indigo-500/10', 'bg-emerald-500/10', 
+                'bg-cyan-500/10', 'bg-red-500/10', 'bg-fuchsia-500/10', 'bg-lime-500/10', 
+                'bg-sky-500/10', 'bg-pink-500/10'
+            ],
             theme: {
                 extend: {
                     colors: {
@@ -73,9 +80,9 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- Decorative Ambient Soft Glow Gradients (Adapts beautifully to both Light & Dark modes) -->
-    <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
-    <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-purple-500/10 dark:bg-purple-500/10 blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+    <!-- Decorative Ambient Soft Glow Gradients (Colors dynamically applied via JS) -->
+    <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+    <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full blur-[120px] pointer-events-none transition-opacity duration-300"></div>
 
     <!-- Top Navigation Bar -->
     <header class="flex items-center justify-between p-5 relative z-10 w-full">
@@ -178,8 +185,8 @@
             <p id="logo-subtitle" class="text-xs sm:text-sm font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 mt-2 min-h-[1.25rem]"></p>
         </div>
 
-        <!-- Sleek Search Box Wrapper with Ambient Shadows -->
-        <div class="w-full max-w-[584px] mb-8 relative group" id="search-container">
+        <!-- Sleek Search Box Wrapper with Ambient Shadows (z-30 added to stack above footer & credits) -->
+        <div class="w-full max-w-[584px] mb-8 relative group z-30" id="search-container">
             <div class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white/90 dark:bg-darkCard/70 backdrop-blur-md focus-within:bg-white dark:focus-within:bg-darkCard/90 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 focus-within:shadow-xl focus-within:shadow-indigo-500/10 focus-within:border-indigo-500/50 dark:focus-within:border-indigo-400/50 transition-all duration-300">
                 <!-- Search Icon -->
                 <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -418,6 +425,29 @@
         const ambientGlow1 = document.getElementById('ambient-glow-1');
         const ambientGlow2 = document.getElementById('ambient-glow-2');
 
+        const glowColorPairs = [
+            ['bg-blue-500/10', 'bg-orange-500/10'],
+            ['bg-purple-500/10', 'bg-yellow-500/10'],
+            ['bg-teal-500/10', 'bg-rose-500/10'],
+            ['bg-indigo-500/10', 'bg-emerald-500/10'],
+            ['bg-cyan-500/10', 'bg-red-500/10'],
+            ['bg-fuchsia-500/10', 'bg-lime-500/10'],
+            ['bg-sky-500/10', 'bg-pink-500/10']
+        ];
+        
+        function applyRandomGlowColors() {
+            const allGlowClasses = glowColorPairs.flat();
+            const pair = glowColorPairs[Math.floor(Math.random() * glowColorPairs.length)];
+            
+            // Clean up old classes
+            ambientGlow1.classList.remove(...allGlowClasses);
+            ambientGlow2.classList.remove(...allGlowClasses);
+            
+            // Apply new random complementary pair
+            ambientGlow1.classList.add(pair[0]);
+            ambientGlow2.classList.add(pair[1]);
+        }
+
         function applyGradientState(isEnabled) {
             if (isEnabled === 'enabled') {
                 ambientGlow1.classList.remove('opacity-0', 'pointer-events-none');
@@ -521,8 +551,95 @@
             return spaced;
         }
 
+        // Expanded list of general random titles for dynamic exploration
+        const generalSearchTitles = [
+            "Fraagle", "Seeker", "Nexus", "Portal", "Horizon", "Discover", "Sleek", "Explore",
+            "Infinity", "Orbit", "Unified", "Clarity", "Apex", "Vortex", "Stellar", "Cosmos",
+            "Zenith", "Aether", "Pulse", "Catalyst", "Nova", "Beacon", "Chronos", "Elysium",
+            "Solace", "Summit", "Enigma", "Quantum", "Prism", "Echo", "Mirage", "Aura",
+            "Helix", "Vector", "Fable", "Spire", "Zephyr", "Rift", "Glow", "Ascent",
+            "Spectra", "Stratis", "Altis", "Focus", "Radiant", "Odyssey", "Lumina", "Oasis",
+            "Pinnacle", "Aegis", "Vanguard", "Genesis", "Haven", "Equinox", "Paradigm", "Flux"
+        ];
+
+        // Advanced Combinatorial Subtitle Builder with rich permutations
+        function generatePermutatedSubtitle() {
+            const intros = [
+                "Your friendly guide to", "Instantly teleporting through", "A whimsical window into",
+                "An optimized catalyst for", "The premier launchpad for", "Gently navigating the",
+                "A hyper-dimensional key to", "A pristine, logic-free path into", "Your daily dose of",
+                "A customized springboard toward", "A cozy digital hammock for", "A futuristic portal serving",
+                "The most reliable source for", "A secret garden full of", "The ultimate playground of",
+                "An astronomical orbit around", "Crafting high-quality queries for", "The legendary archives of",
+                "Delving fearlessly into", "Sailing the cybernetic seas of", "Unlocking the mysteries of",
+                "A sanctuary dedicated to", "The definitive roadmap for"
+            ];
+            
+            const adjectives = [
+                "wobbly", "bubbly", "quantum-entangled", "neomorphic", "retro-futuristic",
+                "gravity-defying", "fluffy", "hyper-threaded", "pixel-perfect", "sub-atomic",
+                "cyber-organic", "laser-focused", "stellar", "glowing", "cloud-native",
+                "whimsical", "magnetic", "kaleidoscopic", "polychromatic", "giggle-powered",
+                "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", 
+                "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful"
+            ];
+            
+            const subjects = [
+                "bubble-tea recipes", "robotic penguin blueprints", "neomorphic button shadows",
+                "clandestine cookie jars", "cosmic potato logic", "gravity-free space socks",
+                "digital dandelion dreams", "underwater firefly networks", "secret hamster space programs",
+                "virtual origami instructions", "sentient marshmallow algorithms", "quantum pancake configurations",
+                "acoustic pizza vibrations", "sub-aquatic bicycle repair guides", "hovercraft cat grooming manuals",
+                "invisible ink ingredient lists", "philosophical donut holes", "nebulous cloud formations",
+                "digital jellyfish orchestras", "interdimensional coffee brewing", "time-traveling toasters",
+                "tactical rubber ducks", "cybernetic cheese wheels"
+            ];
+            
+            const endings = [
+                "using pure imagination.", "while drinking warm cocoa.", "powered by friendly space sloths.",
+                "at the speed of a startled twilight turtle.", "inside a comfortable pocket dimension.",
+                "approved by intergalactic wizards.", "optimized for maximum coziness.",
+                "with a gentle sprinkle of stardust.", "without breaking the space-time continuum.",
+                "just for the pure joy of discovery.", "conceived by well-meaning calculators.",
+                "under the soft glow of friendly neon signs.", "strictly for entertainment purposes.",
+                "because why not?", "in a strangely soothing manner.", "with absolutely no instruction manual.",
+                "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon."
+            ];
+
+            const intro = intros[Math.floor(Math.random() * intros.length)];
+            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const subject = subjects[Math.floor(Math.random() * subjects.length)];
+            const ending = endings[Math.floor(Math.random() * endings.length)];
+
+            return `${intro} ${adj} ${subject} ${ending}`;
+        }
+
+        function colorizeText(text) {
+            const colors = ['text-fraagleBlue', 'text-fraagleRed', 'text-fraagleYellow', 'text-fraagleBlue', 'text-fraagleGreen', 'text-fraagleRed'];
+            return text.split('').map((char, index) => {
+                if (char === ' ') return ' ';
+                const colorClass = colors[index % colors.length];
+                return `<span class="${colorClass}">${char}</span>`;
+            }).join('');
+        }
+
+        function loadDynamicTitleAndSubtitle() {
+            const logoTitle = document.getElementById('logo-title');
+            const logoSubtitle = document.getElementById('logo-subtitle');
+            
+            const finalTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)];
+            
+            if (logoTitle) logoTitle.innerHTML = colorizeText(finalTitle);
+            document.title = finalTitle + " Hub";
+            if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
+            
+            // Trigger randomized background glow
+            applyRandomGlowColors();
+        }
+
         function updateUIVisibility() {
             const appLauncherBtn = document.getElementById('app-launcher-btn');
+            if (!appLauncherBtn) return;
             if (localAppsRawList.length === 0) {
                 appLauncherBtn.classList.add('hidden');
             } else {
@@ -543,64 +660,6 @@
             } catch (err) {
                 return null;
             }
-        }
-
-        function colorizeText(text) {
-            const colors = ['text-fraagleBlue', 'text-fraagleRed', 'text-fraagleYellow', 'text-fraagleBlue', 'text-fraagleGreen', 'text-fraagleRed'];
-            return text.split('').map((char, index) => {
-                if (char === ' ') return ' ';
-                const colorClass = colors[index % colors.length];
-                return `<span class="${colorClass}">${char}</span>`;
-            }).join('');
-        }
-
-        const generalSearchTitles = [
-            "Fraagle", "Seeker", "Nexus", "Portal", "Horizon", "Discover", "Sleek", "Explore"
-        ];
-
-        function generatePermutatedSubtitle() {
-            const intros = ["Your friendly guide to", "Instantly teleporting through", "A whimsical window into"];
-            const adjectives = ["wobbly", "bubbly", "pixel-perfect", "stellar"];
-            const subjects = ["bubble-tea recipes", "cosmic potato logic", "sentient marshmallow algorithms"];
-            const endings = ["using pure imagination.", "powered by friendly space sloths.", "just for the pure joy of discovery."];
-
-            const intro = intros[Math.floor(Math.random() * intros.length)];
-            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-            const subject = subjects[Math.floor(Math.random() * subjects.length)];
-            const ending = endings[Math.floor(Math.random() * endings.length)];
-
-            return `${intro} ${adj} ${subject} ${ending}`;
-        }
-
-        function loadDynamicTitleAndSubtitle() {
-            const logoTitle = document.getElementById('logo-title');
-            const logoSubtitle = document.getElementById('logo-subtitle');
-            const finalTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)];
-            logoTitle.innerHTML = colorizeText(finalTitle);
-            document.title = finalTitle + " Hub";
-            logoSubtitle.textContent = generatePermutatedSubtitle();
-        }
-
-        // --- LOAD CORES ---
-        async function initializeHubData() {
-            loadDynamicTitleAndSubtitle();
-
-            // 1. Fetch Local Dashboard apps with universal robust fallback
-            try {
-                const res = await fetch('/app-list.json');
-                if (!res.ok) throw new Error();
-                localAppsRawList = await res.json();
-            } catch (err) {
-                // Fetch failed or unavailable on deployment/sandbox - always guarantee a visible fallback experience!
-                localAppsRawList = fallbackAppsList;
-                document.getElementById('setup-warning').classList.remove('hidden');
-            }
-
-            currentlyFilteredApps = [...localAppsRawList];
-            updateUIVisibility();
-            renderLauncherDropdown(localAppsRawList);
-
-            loadTarkovItems();
         }
 
         async function loadTarkovItems() {
@@ -717,6 +776,8 @@
             const dropdownGeneralSection = document.getElementById('dropdown-general-section');
             const dropdownVoiceAttackSection = document.getElementById('dropdown-voiceattack-section');
 
+            if (!dropdownGrid || !dropdownGeneralToolsGrid || !dropdownTarkovGrid || !dropdownVoiceAttackGrid) return;
+
             dropdownGrid.innerHTML = '';
             dropdownGeneralToolsGrid.innerHTML = '';
             dropdownTarkovGrid.innerHTML = '';
@@ -759,33 +820,46 @@
                 }
             });
 
-            if (hasVoiceAttack) {
-                dropdownVoiceAttackSection.classList.remove('hidden');
-            } else {
-                dropdownVoiceAttackSection.classList.add('hidden');
-            }
+            if (hasVoiceAttack) dropdownVoiceAttackSection.classList.remove('hidden');
+            else dropdownVoiceAttackSection.classList.add('hidden');
 
-            if (hasTarkov) {
-                dropdownTarkovSection.classList.remove('hidden');
-            } else {
-                dropdownTarkovSection.classList.add('hidden');
-            }
+            if (hasTarkov) dropdownTarkovSection.classList.remove('hidden');
+            else dropdownTarkovSection.classList.add('hidden');
 
-            if (hasGeneralTools) {
-                dropdownGeneralToolsSection.classList.remove('hidden');
-            } else {
-                dropdownGeneralToolsSection.classList.add('hidden');
-            }
+            if (hasGeneralTools) dropdownGeneralToolsSection.classList.remove('hidden');
+            else dropdownGeneralToolsSection.classList.add('hidden');
 
-            if (hasGeneral) {
-                dropdownGeneralSection.classList.remove('hidden');
-            } else {
-                dropdownGeneralSection.classList.add('hidden');
-            }
+            if (hasGeneral) dropdownGeneralSection.classList.remove('hidden');
+            else dropdownGeneralSection.classList.add('hidden');
         }
 
-        // Initialize Core Data
-        initializeHubData();
+        // --- LOAD CORES WRAPPED IN SECURE EVENT HANDLER ---
+        async function initializeHubData() {
+            loadDynamicTitleAndSubtitle();
+
+            // 1. Fetch Local Dashboard apps with universal robust fallback
+            try {
+                const res = await fetch('/app-list.json');
+                if (!res.ok) throw new Error();
+                localAppsRawList = await res.json();
+            } catch (err) {
+                // Fetch failed or unavailable on deployment/sandbox - always guarantee a visible fallback experience!
+                localAppsRawList = fallbackAppsList;
+                const warningDiv = document.getElementById('setup-warning');
+                if (warningDiv) warningDiv.classList.remove('hidden');
+            }
+
+            currentlyFilteredApps = [...localAppsRawList];
+            updateUIVisibility();
+            renderLauncherDropdown(localAppsRawList);
+
+            loadTarkovItems();
+        }
+
+        // Execute data loading safely after the DOM is fully constructed
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeHubData();
+        });
 
 
         // --- 3. 9-DOT MENU INTERACTIVITY ---
@@ -793,6 +867,7 @@
         const launcherDropdown = document.getElementById('app-launcher-dropdown');
 
         function toggleDropdown() {
+            if (!launcherDropdown) return;
             const isHidden = launcherDropdown.classList.contains('hidden');
             if (isHidden) {
                 launcherDropdown.classList.remove('hidden');
@@ -809,13 +884,15 @@
             }
         }
 
-        launcherBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleDropdown();
-        });
+        if (launcherBtn) {
+            launcherBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleDropdown();
+            });
+        }
 
         document.addEventListener('click', (e) => {
-            if (!launcherDropdown.contains(e.target) && e.target !== launcherBtn) {
+            if (launcherDropdown && !launcherDropdown.contains(e.target) && e.target !== launcherBtn) {
                 launcherDropdown.classList.remove('opacity-100', 'scale-100');
                 launcherDropdown.classList.add('opacity-0', 'scale-95');
                 setTimeout(() => {
@@ -845,6 +922,7 @@
             clearTimeout(hoverTimer);
             positionPreviewCard(e);
 
+            if (!previewCard) return;
             previewCard.classList.remove('hidden');
             previewCard.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-6 space-y-3">
@@ -860,10 +938,11 @@
 
         function cancelHoverPreview() {
             clearTimeout(hoverTimer);
-            previewCard.classList.add('hidden');
+            if (previewCard) previewCard.classList.add('hidden');
         }
 
         function positionPreviewCard(e) {
+            if (!previewCard) return;
             const cardWidth = 288;
             const viewportWidth = window.innerWidth;
             let left = e.pageX + 15;
@@ -878,7 +957,7 @@
         }
 
         function revealPreviewDetails(item) {
-            if (!item) return;
+            if (!item || !previewCard) return;
             const iconUrl = item.iconLink || 'https://via.placeholder.com/64?text=No+Image';
             
             if (item.type === 'tarkov') {
@@ -937,7 +1016,7 @@
         }
 
         function executeSearch(queryText) {
-            dropdownResults.classList.add('hidden');
+            if (dropdownResults) dropdownResults.classList.add('hidden');
             cancelHoverPreview();
             
             const normalizedQuery = queryText.toLowerCase().trim();
@@ -955,20 +1034,21 @@
 
             const endTime = performance.now();
             const processTime = ((endTime - startTime) / 1000).toFixed(3);
-            resultsMetaText.textContent = `About ${matches.length} results (${processTime} seconds)`;
+            if (resultsMetaText) resultsMetaText.textContent = `About ${matches.length} results (${processTime} seconds)`;
 
-            googleResultsView.classList.remove('hidden');
+            if (googleResultsView) googleResultsView.classList.remove('hidden');
 
             const hasTarkovResults = matches.some(item => 
                 item && (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest')
             );
 
-            if (hasTarkovResults) {
+            if (hasTarkovResults && bsgChannelsBar) {
                 bsgChannelsBar.classList.remove('hidden');
-            } else {
+            } else if (bsgChannelsBar) {
                 bsgChannelsBar.classList.add('hidden');
             }
 
+            if (!googleResultsContainer) return;
             googleResultsContainer.innerHTML = '';
             
             if (matches.length === 0) {
@@ -1032,17 +1112,18 @@
         }
 
         function dismissGoogleSearchResults() {
-            searchInput.value = '';
-            clearBtn.classList.add('hidden');
-            dropdownResults.classList.add('hidden');
-            googleResultsView.classList.add('hidden');
-            bsgChannelsBar.classList.add('hidden');
+            if (searchInput) searchInput.value = '';
+            if (clearBtn) clearBtn.classList.add('hidden');
+            if (dropdownResults) dropdownResults.classList.add('hidden');
+            if (googleResultsView) googleResultsView.classList.add('hidden');
+            if (bsgChannelsBar) bsgChannelsBar.classList.add('hidden');
             cancelHoverPreview();
         }
 
-        resultsCloseBtn.addEventListener('click', dismissGoogleSearchResults);
+        if (resultsCloseBtn) resultsCloseBtn.addEventListener('click', dismissGoogleSearchResults);
 
         function renderAutocompleteDropdown(matches, isSearching = false) {
+            if (!resultsContainer || !dropdownResults) return;
             resultsContainer.innerHTML = '';
             if (matches.length === 0) {
                 dropdownResults.classList.add('hidden');
@@ -1077,8 +1158,11 @@
                 element.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    searchInput.value = item.title || '';
-                    clearBtn.classList.remove('hidden');
+                    
+                    if (item.url) window.open(item.url, '_blank');
+                    
+                    if (searchInput) searchInput.value = item.title || '';
+                    if (clearBtn) clearBtn.classList.remove('hidden');
                     executeSearch(item.title || '');
                 });
 
@@ -1098,55 +1182,57 @@
             cancelHoverPreview();
         }
 
-        searchInput.addEventListener('focus', () => {
-            const query = searchInput.value.toLowerCase().trim();
-            if (query.length > 0) {
-                renderAutocompleteDropdown(matchedResultsBuffer, true);
-            } else {
-                dropdownResults.classList.add('hidden');
-            }
-        });
-
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-
-            if (query.length > 0) {
-                clearBtn.classList.remove('hidden');
-            } else {
-                clearBtn.classList.add('hidden');
-                dropdownResults.classList.add('hidden');
-                googleResultsView.classList.add('hidden');
-                cancelHoverPreview();
-                return;
-            }
-
-            matchedResultsBuffer = searchIndex.filter(item => {
-                const title = (item?.title || '').toLowerCase();
-                const category = (item?.category || '').toLowerCase();
-                return title.includes(query) || category.includes(query);
+        if (searchInput) {
+            searchInput.addEventListener('focus', () => {
+                const query = searchInput.value.toLowerCase().trim();
+                if (query.length > 0) {
+                    renderAutocompleteDropdown(matchedResultsBuffer, true);
+                } else if (dropdownResults) {
+                    dropdownResults.classList.add('hidden');
+                }
             });
 
-            renderAutocompleteDropdown(matchedResultsBuffer, true);
-        });
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
 
-        clearBtn.addEventListener('click', dismissGoogleSearchResults);
+                if (query.length > 0) {
+                    if (clearBtn) clearBtn.classList.remove('hidden');
+                } else {
+                    if (clearBtn) clearBtn.classList.add('hidden');
+                    if (dropdownResults) dropdownResults.classList.add('hidden');
+                    if (googleResultsView) googleResultsView.classList.add('hidden');
+                    cancelHoverPreview();
+                    return;
+                }
 
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                executeSearch(searchInput.value);
-            }
-        });
+                matchedResultsBuffer = searchIndex.filter(item => {
+                    const title = (item?.title || '').toLowerCase();
+                    const category = (item?.category || '').toLowerCase();
+                    return title.includes(query) || category.includes(query);
+                });
+
+                renderAutocompleteDropdown(matchedResultsBuffer, true);
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    executeSearch(searchInput.value);
+                }
+            });
+        }
+
+        if (clearBtn) clearBtn.addEventListener('click', dismissGoogleSearchResults);
 
         document.addEventListener('click', (e) => {
             const searchContainer = document.getElementById('search-container');
-            if (searchContainer && !searchContainer.contains(e.target)) {
+            if (searchContainer && !searchContainer.contains(e.target) && dropdownResults) {
                 dropdownResults.classList.add('hidden');
             }
         });
 
         window.addEventListener('scroll', () => {
             const searchContainer = document.getElementById('search-container');
-            if (!searchContainer) return;
+            if (!searchContainer || !scrollToTopBtn) return;
             const searchBarRect = searchContainer.getBoundingClientRect();
             if (searchBarRect.bottom < 0) {
                 scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
@@ -1157,10 +1243,11 @@
             }
         });
 
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
+        if (scrollToTopBtn) {
+            scrollToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
 
         // --- 5. IMPRESSUM POPUP MODAL ENGINE ---
         const impressumBtn = document.getElementById('impressum-btn');
@@ -1169,36 +1256,44 @@
         const closeImpressumOkBtn = document.getElementById('close-impressum-ok-btn');
 
         function openImpressum() {
-            impressumModal.classList.remove('hidden');
+            if (impressumModal) impressumModal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
         }
 
         function closeImpressum() {
-            impressumModal.classList.add('hidden');
+            if (impressumModal) impressumModal.classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
         }
 
-        impressumBtn.addEventListener('click', openImpressum);
-        closeImpressumBtn.addEventListener('click', closeImpressum);
-        closeImpressumOkBtn.addEventListener('click', closeImpressum);
+        if (impressumBtn) {
+            impressumBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openImpressum();
+            });
+        }
+        if (closeImpressumBtn) closeImpressumBtn.addEventListener('click', closeImpressum);
+        if (closeImpressumOkBtn) closeImpressumOkBtn.addEventListener('click', closeImpressum);
 
-        impressumModal.addEventListener('click', (e) => {
-            if (e.target === impressumModal) {
-                closeImpressum();
-            }
-        });
+        if (impressumModal) {
+            impressumModal.addEventListener('click', (e) => {
+                if (e.target === impressumModal) {
+                    closeImpressum();
+                }
+            });
+        }
 
         // Global key shortcut commands
         window.addEventListener('keydown', (e) => {
-            if (e.key === '/' && document.activeElement !== searchInput) {
+            if (e.key === '/' && document.activeElement !== searchInput && searchInput) {
                 e.preventDefault();
                 searchInput.focus();
             }
             if (e.key === 'Escape') {
-                if (document.activeElement === searchInput) {
+                if (searchInput && document.activeElement === searchInput) {
                     searchInput.blur();
                 }
-                dropdownResults.classList.add('hidden');
+                if (dropdownResults) dropdownResults.classList.add('hidden');
                 cancelHoverPreview();
                 closeImpressum();
             }
