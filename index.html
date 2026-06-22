@@ -235,7 +235,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                     </svg>
                 </a>
-                <button id="close-modal-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-zinc-850 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/50 transition focus:outline-none">Done</button>
+                <button id="close-modal-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-zinc-855 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/50 transition focus:outline-none">Done</button>
             </div>
         </div>
     </div>
@@ -440,9 +440,15 @@
         // Fetcher Utility with safe handling - Upgraded to handle raw text list formats cleanly
         async function fetchFileJSON(url) {
             try {
+                if (!url || url.trim() === "" || url.trim() === "/") return null;
                 const response = await fetch(url);
                 if (response.ok) {
                     const text = await response.text();
+                    const trimmedText = text.trim();
+                    // Safeguard against SPA fallbacks (HTML pages returned as 404 fallbacks)
+                    if (trimmedText.startsWith("<html") || trimmedText.toLowerCase().startsWith("<!doctype html")) {
+                        return null;
+                    }
                     try {
                         return JSON.parse(text);
                     } catch (jsonErr) {
@@ -455,6 +461,7 @@
 
         async function loadResourceArray(paths) {
             for (let path of paths) {
+                if (!path || path.trim() === "" || path.trim() === "/") continue;
                 const data = await fetchFileJSON(path);
                 if (data) {
                     if (Array.isArray(data)) return data;
@@ -475,6 +482,7 @@
         // Generic object loader helper that queries multiple local file candidates with robust parsing
         async function loadResourceObject(paths) {
             for (let path of paths) {
+                if (!path || path.trim() === "" || path.trim() === "/") continue;
                 const data = await fetchFileJSON(path);
                 if (data) {
                     if (typeof data === 'object') return data;
@@ -845,7 +853,7 @@
                 for (let i = 0; i < currentTitle.length; i++) {
                     const prevColor = i > 0 ? titleColors[i - 1] : null;
                     const filteredPool = logoColorPalette.filter(c => c !== prevColor);
-                    titleColors.push(filteredPool[Math.floor(Math.random() * filteredPool.length)] || logoColorPalette[0]);
+                    titleColors.push(filteredPool[Math.floor(Math.random() * logoColorPalette.length)] || logoColorPalette[0]);
                 }
                 titleTag.innerHTML = currentTitle.split("").map((char, index) => {
                     if (char === " ") return "&nbsp;";
