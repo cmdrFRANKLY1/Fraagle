@@ -290,26 +290,6 @@
                 </div>
             </div>
 
-            <!-- Equipped Gear (Dynamically bound to database items!) -->
-            <div class="p-3.5 bg-darkCard border border-darkBorder rounded-xl space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Active Equipment Loadout</span>
-                    <span class="text-[8px] font-mono font-bold text-tarkoogleBlue uppercase" id="equipped-indicator">Connecting Link</span>
-                </div>
-                <div class="flex items-center gap-3 bg-darkBg/50 p-2 border border-darkBorder/60 rounded-xl" id="equipped-item-wrapper">
-                    <div class="w-10 h-10 rounded-lg bg-darkBg border border-darkBorder/40 p-1 flex items-center justify-center flex-shrink-0">
-                        <img id="equipped-icon" src="" alt="" class="max-w-full max-h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=50&auto=format&fit=crop&q=80'">
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="text-[11px] font-semibold text-zinc-200 truncate" id="equipped-name">Syncing database assets...</div>
-                        <div class="text-[9px] text-zinc-500 font-mono mt-0.5 flex items-center justify-between">
-                            <span id="equipped-spec">Analyzing metrics</span>
-                            <span id="equipped-price" class="text-tarkoogleYellow font-semibold">₽0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Compact Attributes Grid -->
             <div>
                 <div class="flex items-center justify-between mb-2">
@@ -404,19 +384,20 @@
         let currentVersion = "v1.2 (live)";
         let currentTitle = "Tarkoogle";
 
-        let dndNames = ["Killa", "Reshala", "Shturman", "Glukhar", "Sanitar", "Tagilla", "Knight", "Birdeye", "Big Pipe", "Kabhal", "Frank", "Vadim", "Yury", "Dimitri", "Nikita"];
-        let dndProfessions = ["PMC Bear", "PMC Usec", "Scav Raider", "Rogue Leader", "Labs Guard", "Sherpa Scout", "Flea Market Broker", "Scav Boss Hand", "Stash Runner", "Hideout Engineer"];
-        let dndRaces = ["Eastern European", "North American", "Western European", "Scandinavian", "Baltic Freelancer"];
-        let dndPlaces = ["Customs Boiler", "Reserve Bunker D2", "Interchange Ultra", "Streets LexOs", "Shoreline Resort East Wing", "Labs Red Room", "Woods Sniper Rock", "Factory Silos"];
+        // Pure RPG fantasy names entirely clean of Tarkov terms
+        let dndNames = ["Eldrin", "Lyra", "Valen", "Aethelgard", "Sariel", "Thorne", "Zephyr", "Maeve", "Garrick", "Kaelen", "Rowena", "Baelor", "Fara", "Doran", "Kaelthas", "Alister", "Elysia", "Theron", "Vael", "Gideon", "Mireia"];
+        let dndProfessions = ["Grand Wizard", "Forest Ranger", "Holy Paladin", "Shadow Rogue", "High Cleric", "Fierce Gladiator", "Royal Bard", "Arch Druid", "Mystic Alchemist", "Elite Spellsword"];
+        let dndRaces = ["High Elf", "Mountain Dwarf", "Human Vanguard", "Forest Halfling", "Noble Dragonborn", "Starlight Gnome", "Astral Tiefling"];
+        let dndPlaces = ["Eldoria Capital", "The Whispering Woods", "Stonehaven Mines", "The Obsidian Spire", "Sunken Crystal Caves", "Shadowfen Swamp", "Dragon's Teeth Peak", "Forgotten Citadel"];
         let dndAttributes = null;
         let dndGenders = ["Male", "Female", "Classified"];
         let logoColorPalette = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
 
-        // Procedural bios
-        let bioIntros = ["Once a highly decorated officer in the territorial defence forces,", "Known on the radio net by a classified tactical callsign,", "A rogue contractor who chose to stay behind when the blockades fell,", "A specialized black-market supply courier working for the traders,"];
-        let bioBackgrounds = ["they survived the initial evacuation by barricading a key factory floor,", "they spent months mapping the subterranean sewage pipelines underneath Tarkov,", "they once escaped an ambush at the Lighthouse docks using nothing but smoke bombs,", "they became famous for selling clean bottled water when the municipal grid crashed,"];
-        let bioMotivations = ["now driven solely by a personal vendetta against Terragroup operators.", "quietly planning a breakout route towards the outer international green line.", "collecting physical hard drives to reconstruct what really happened in Laboratory X.", "saving enough roubles to purchase a legal passage permit out of Norvinsk."];
-        let bioSecrets = ["They are rumored to hide a keycard behind a false metal plate in their boots.", "They never sleep without a cocked Tokarev pistol tucked under their tactical pack.", "Some say they can predict snipers by checking the behavior of local crows.", "They carry an old photograph of an empty house in St. Petersburg."];
+        // Pure fantasy bios entirely clean of Tarkov terms
+        let bioIntros = ["Once a highly decorated champion of the Royal Vanguard,", "Known across the taverns by a legendary guild moniker,", "A rogue adventurer who chose to explore when the old kingdoms fell,", "A specialized arcane supply courier working for the Grand Magus,"];
+        let bioBackgrounds = ["they survived the dragon siege by defending the fortress library,", "they spent months mapping the hidden subterranean ruins underneath Eldoria,", "they once escaped an ambush in the Shadowfen swamps using nothing but illusion spells,", "they became famous for finding clean elixir wells when the drought struck,"];
+        let bioMotivations = ["now driven solely by a quest to defeat the shadow cultists.", "quietly planning a journey towards the outer mystical runic border.", "collecting ancient crystal shards to rebuild the shattered Starstone.", "saving enough gold to purchase a passage permit into the Elven realms."];
+        let bioSecrets = ["They are rumored to hide a glowing rune stone behind a false plate in their gauntlets.", "They never sleep without a spellbound obsidian dagger tucked under their pillow.", "Some say they can predict magical anomalies by checking the behavior of local crows.", "They carry an old map of an undiscovered floating island in the sky."];
 
         // Fetcher Utility with safe handling
         async function fetchFileJSON(url) {
@@ -444,9 +425,6 @@
 
         // --- EXTREMELY RESILIENT TARKOV DATA STREAM ENGINE ---
         async function gatherTarkovData() {
-            const statusLabel = document.getElementById('loading-status');
-            if (statusLabel) statusLabel.textContent = "Connecting to Tarkov Grid...";
-
             let queryResult = null;
 
             try {
@@ -605,9 +583,9 @@
             }, 25);
         }
 
-        // Procedural Character Generation linked directly to items matrix
+        // Procedural Character Generation (Fantasy Only)
         function generateHeroIdentity() {
-            // Roll name, occupation, background
+            // Roll fantasy identity metrics
             const chosenNameSegments = Math.floor(Math.random() * 2) + 2;
             const chosenNames = [];
             for (let i = 0; i < chosenNameSegments; i++) {
@@ -632,38 +610,6 @@
             const secret = bioSecrets[Math.floor(Math.random() * bioSecrets.length)];
             document.getElementById('char-bio').textContent = `${intro} ${bg} ${motivation} ${secret}`;
 
-            // Bind a live Tarkov item loadout dynamically
-            const equippedIndicator = document.getElementById('equipped-indicator');
-            const equippedIcon = document.getElementById('equipped-icon');
-            const equippedName = document.getElementById('equipped-name');
-            const equippedSpec = document.getElementById('equipped-spec');
-            const equippedPrice = document.getElementById('equipped-price');
-
-            if (tarkovItemsMap.size > 0) {
-                // Filter weapons or rare keys to select as active gear
-                const itemsList = Array.from(tarkovItemsMap.values());
-                const weaponCandidates = itemsList.filter(it => it.category === "Weapon" || it.types.includes("weapon"));
-                const fallbackGear = weaponCandidates.length > 0 ? weaponCandidates : itemsList;
-                const selectedGear = fallbackGear[Math.floor(Math.random() * fallbackGear.length)];
-
-                equippedIndicator.textContent = "GRID STABILIZED";
-                equippedIcon.src = selectedGear.icon;
-                equippedName.textContent = selectedGear.name;
-                equippedSpec.textContent = `${selectedGear.category} (${selectedGear.shortName})`;
-                equippedPrice.textContent = selectedGear.pvpPrice > 0 ? `₽${selectedGear.pvpPrice.toLocaleString()}` : `Base: ₽${selectedGear.basePrice.toLocaleString()}`;
-
-                // Add click listener on active gear block to showcase item details
-                const gearWrapper = document.getElementById('equipped-item-wrapper');
-                gearWrapper.onclick = () => openItemDetail(selectedGear.id);
-                gearWrapper.style.cursor = 'pointer';
-            } else {
-                equippedIndicator.textContent = "LOCAL EMULATION";
-                equippedIcon.src = "";
-                equippedName.textContent = "EBR Custom Kit (Offline)";
-                equippedSpec.textContent = "Sniper Rifle (7.62x51)";
-                equippedPrice.textContent = "₽280,000";
-            }
-
             // Render stats grid
             const attributesGrid = document.getElementById('attributes-grid');
             if (attributesGrid) {
@@ -677,13 +623,14 @@
                     "Charisma": "border-purple-500/50 hover:bg-purple-500/5 text-purple-400"
                 };
 
+                // Pure RPG stats entirely clean of firearms/armor references
                 const attributesObj = dndAttributes || {
-                    "Strength": ["Power", "Recoil Management"],
-                    "Dexterity": ["Ergonomics Mastery", "Sprinting Speed"],
-                    "Constitution": ["Stamina capacity", "Pain tolerance"],
-                    "Intelligence": ["Crafting Logic", "Barter value index"],
-                    "Wisdom": ["Perception range", "Hearing distance"],
-                    "Charisma": ["Trader discount", "Fence loyalty"]
+                    "Strength": ["Might", "Physical Build"],
+                    "Dexterity": ["Agility", "Reaction Speed"],
+                    "Constitution": ["Vitality", "Toughness"],
+                    "Intelligence": ["Arcane Lore", "Analytical Mind"],
+                    "Wisdom": ["Perception range", "Intuitive Insight"],
+                    "Charisma": ["Persuasion", "Leadership Presence"]
                 };
 
                 for (let attrName in attributesObj) {
@@ -997,7 +944,7 @@
                 const textClass = textColors[idx % textColors.length];
 
                 btn.innerHTML = `
-                    <div class="w-12 h-12 rounded-full border border-darkBorder bg-darkCard/60 hover:bg-darkCard hover:border-zinc-500 flex items-center justify-center p-2.5 transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(255,255,255,0.03)] relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-full border border-darkBorder bg-darkCard/60 hover:bg-darkCard hover:border-zinc-500 flex items-center justify-center p-2.5 transition-all duration-300 group-hover:scale-105 group-hover:bg-darkCard group-hover:shadow-[0_0_12px_rgba(255,255,255,0.03)] relative overflow-hidden">
                         <img src="${faviconSrc}" alt="${link.name}" class="w-full h-full object-contain filter brightness-95 group-hover:brightness-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         <span class="hidden ${textClass} text-sm font-bold font-mono uppercase">${fallbackLetter}</span>
                     </div>
@@ -1106,7 +1053,31 @@
 
         async function initializeHub() {
             const loadingScreen = document.getElementById('loading-screen');
+            const statusLabel = document.getElementById('loading-status');
+
             try {
+                // Dynamically fetch custom loading screen text first (or alongside key resources)
+                const loadingScreenData = await fetchFileJSON('./resources/text/loadingScreen.json') ||
+                                          await fetchFileJSON('resources/text/loadingScreen.json') ||
+                                          await fetchFileJSON('loadingScreen.json') ||
+                                          await fetchFileJSON('/resources/text/loadingScreen.json');
+
+                if (loadingScreenData && statusLabel) {
+                    let loadingPhrases = [];
+                    if (Array.isArray(loadingScreenData)) {
+                        loadingPhrases = loadingScreenData;
+                    } else if (typeof loadingScreenData === 'object') {
+                        loadingPhrases = loadingScreenData.phrases || loadingScreenData.statuses || [loadingScreenData.text || loadingScreenData.status];
+                    } else if (typeof loadingScreenData === 'string') {
+                        loadingPhrases = [loadingScreenData];
+                    }
+
+                    const validPhrases = loadingPhrases.filter(p => p && typeof p === 'string');
+                    if (validPhrases.length > 0) {
+                        statusLabel.textContent = validPhrases[Math.floor(Math.random() * validPhrases.length)].toUpperCase();
+                    }
+                }
+
                 // Fetch dynamic links directory in parallel with core databases
                 const [linksPayload] = await Promise.all([
                     loadResourceArray([
