@@ -123,10 +123,12 @@
                     <!-- Text dynamically set into this container -->
                 </h1>
 
-                <!-- Tactical HUD Sidebar containing Version, absolutely positioned to prevent shifting -->
+                <!-- Tactical HUD Sidebar containing Version elements structured vertically -->
                 <div class="absolute left-full ml-3 flex flex-col items-start justify-center text-left whitespace-nowrap top-1/2 -translate-y-1/2 select-none">
-                    <!-- Version tag -->
-                    <span id="version-tag" class="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
+                    <!-- Version Number tag -->
+                    <span id="version-number" class="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
+                    <!-- Version Name tag (moved below the number) -->
+                    <span id="version-name" class="text-[8px] sm:text-[10px] font-mono font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase mt-0.5"></span>
                 </div>
             </div>
 
@@ -269,9 +271,10 @@
 
                         <!-- Dynamic Nickname ID Section with Playing Game status -->
                         <div class="flex flex-wrap items-center gap-2 mt-0.5">
-                            <span id="char-id" class="text-[10px] font-mono font-bold text-zinc-400 tracking-wider">Loading ID...</span>
-                            <!-- Clean performance: Removed animate-pulse (glowing) from the playing status badge -->
-                            <span id="char-game-status" class="hidden text-[8px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold truncate max-w-[150px]"></span>
+                            <!-- Increased ID font size by 2 (text-[10px] -> text-[12px]) -->
+                            <span id="char-id" class="text-[12px] font-mono font-bold text-zinc-400 tracking-wider">Loading ID...</span>
+                            <!-- Increased Playing Tag font size by 2 (text-[8px] -> text-[10px]) -->
+                            <span id="char-game-status" class="hidden text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold truncate max-w-[150px]"></span>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-1 mt-1.5">
@@ -576,41 +579,62 @@
 
         // Decrypt code animation for version
         function triggerVersionDecrypt() {
-            const versionTag = document.getElementById('version-tag');
-            if (!versionTag) return;
+            const versionNumTag = document.getElementById('version-number');
+            const versionNameTag = document.getElementById('version-name');
+            if (!versionNumTag || !versionNameTag) return;
 
             if (!currentVersion) {
-                versionTag.classList.add('hidden');
+                versionNumTag.classList.add('hidden');
+                versionNameTag.classList.add('hidden');
                 return;
             }
 
-            versionTag.classList.remove('hidden');
-            versionTag.classList.remove('opacity-0');
-            versionTag.classList.add('opacity-100');
+            versionNumTag.classList.remove('hidden', 'opacity-0');
+            versionNumTag.classList.add('opacity-100');
+            versionNameTag.classList.remove('hidden', 'opacity-0');
+            versionNameTag.classList.add('opacity-100');
 
-            // Select a random version name to stitch into standard formatting
             const randomName = versionNamesList[Math.floor(Math.random() * versionNamesList.length)] || "alpha";
+            const formattedName = `(${randomName})`;
 
-            // Pattern format: <versionNumber> (<versionName>)
-            const targetText = `${currentVersion} (${randomName})`;
+            // Clear existing intervals
+            clearInterval(versionNumTag.decryptInterval);
+            clearInterval(versionNameTag.decryptInterval);
+
             const possibleChars = "0123456789_#@*&%$?![]=+/\\";
-            let iterations = 0;
 
-            clearInterval(versionTag.decryptInterval);
-
-            versionTag.decryptInterval = setInterval(() => {
-                let displayText = targetText.split("").map((char, index) => {
-                    if (char === " " || char === "(" || char === ")") return char;
-                    if (index < iterations) return targetText[index];
+            // Decrypt Version Number
+            let iterNum = 0;
+            versionNumTag.decryptInterval = setInterval(() => {
+                let displayText = currentVersion.split("").map((char, index) => {
+                    if (char === " ") return " ";
+                    if (index < iterNum) return currentVersion[index];
                     return possibleChars[Math.floor(Math.random() * possibleChars.length)];
                 }).join("");
 
-                versionTag.textContent = displayText;
+                versionNumTag.textContent = displayText;
 
-                if (iterations >= targetText.length) {
-                    clearInterval(versionTag.decryptInterval);
+                if (iterNum >= currentVersion.length) {
+                    clearInterval(versionNumTag.decryptInterval);
                 }
-                iterations += 1 / 3;
+                iterNum += 1 / 3;
+            }, 25);
+
+            // Decrypt Version Name (moved below the number)
+            let iterName = 0;
+            versionNameTag.decryptInterval = setInterval(() => {
+                let displayText = formattedName.split("").map((char, index) => {
+                    if (char === " " || char === "(" || char === ")") return char;
+                    if (index < iterName) return formattedName[index];
+                    return possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                }).join("");
+
+                versionNameTag.textContent = displayText;
+
+                if (iterName >= formattedName.length) {
+                    clearInterval(versionNameTag.decryptInterval);
+                }
+                iterName += 1 / 3;
             }, 25);
         }
 
@@ -1172,7 +1196,7 @@
             // Load custom RPG Nicknames
             const nicknamesData = await loadResourceArray([
                 './resources/dnd/listNicknames.json',
-                'resources/dnd/listNicknames.json',
+                './resources/dnd/listNicknames.json',
                 'listNicknames.json'
             ]);
             if (nicknamesData && nicknamesData.length > 0) dndNicknames = nicknamesData;
@@ -1316,6 +1340,11 @@
         const closeImpressumBtn = document.getElementById('close-impressum-btn');
         const closeImpressumOkBtn = document.getElementById('close-impressum-ok-btn');
 
+        // Close character panel drawer if clicked outside of it
+        const profileTrigger = document.getElementById('profile-trigger-btn');
+        const charDrawer = document.getElementById('character-drawer');
+        const closeDrawerBtn = document.getElementById('close-drawer-btn');
+
         function openImpressum() {
             if (impressumModal) impressumModal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
@@ -1336,10 +1365,6 @@
         }
 
         // Drawer logic
-        const profileTrigger = document.getElementById('profile-trigger-btn');
-        const charDrawer = document.getElementById('character-drawer');
-        const closeDrawerBtn = document.getElementById('close-drawer-btn');
-
         function toggleCharacterDrawer() {
             if (charDrawer) {
                 const isOpen = !charDrawer.classList.contains('translate-x-[120%]');
