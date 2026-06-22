@@ -390,8 +390,10 @@
         let subtitleAdjectives = ["high-tier", "low-recoil", "over-priced", "meticulously-sorted", "fleamarket-indexed", "custom-chambered", "armored", "vital", "highly-volatile"];
         let subtitleSubjects = ["military hardware", "class-6 body armors", "proprietary 7.62 ammunition", "rare intelligence folders", "scavened graphics cards", "proprietary Labs cards", "purified water canisters"];
         let subtitleEndings = ["with real-time updates.", "straight from the flea market.", "to avoid getting head-eyes'd.", "powered by Tarkov Dev API.", "verified by Fence."];
-        let currentVersion = "v1.2 (live)";
-        let currentTitle = "Tarkoogle";
+
+        // Dynamically determined values (fully unhardcoded)
+        let currentVersion = "";
+        let currentTitle = "";
 
         // Pure RPG fantasy names entirely clean of Tarkov terms
         let dndNames = ["Eldrin", "Lyra", "Valen", "Aethelgard", "Sariel", "Thorne", "Zephyr", "Maeve", "Garrick", "Kaelen", "Rowena", "Baelor", "Fara", "Doran", "Kaelthas", "Alister", "Elysia", "Theron", "Vael", "Gideon", "Mireia"];
@@ -563,6 +565,12 @@
             const versionTag = document.getElementById('version-tag');
             if (!versionTag) return;
 
+            if (!currentVersion) {
+                versionTag.classList.add('hidden');
+                return;
+            }
+
+            versionTag.classList.remove('hidden');
             versionTag.classList.remove('opacity-0');
             versionTag.classList.add('opacity-100');
 
@@ -662,7 +670,6 @@
                     "Charisma": "border-purple-500/50 hover:bg-purple-500/5 text-purple-400"
                 };
 
-                // Pure RPG stats entirely clean of firearms/armor references
                 const attributesObj = dndAttributes || {
                     "Strength": ["Might", "Physical Build"],
                     "Dexterity": ["Agility", "Reaction Speed"],
@@ -1099,10 +1106,24 @@
                 if (bioData.secrets) bioSecrets = bioData.secrets;
             }
 
-            const versionData = await fetchFileJSON('./resources/text/indexVersion.json') || await fetchFileJSON('indexVersion.json');
+            // Retrieve version information purely dynamically from indexVersion.json or indexVersion.html
+            const versionData = await fetchFileJSON('./resources/text/indexVersion.json') ||
+                                await fetchFileJSON('indexVersion.json') ||
+                                await fetchFileJSON('./resources/text/indexVersion.html') ||
+                                await fetchFileJSON('indexVersion.html');
             if (versionData) {
-                if (typeof versionData === 'object' && versionData.version) currentVersion = versionData.version;
-                else if (typeof versionData === 'string') currentVersion = versionData;
+                if (typeof versionData === 'object' && versionData.version) {
+                    currentVersion = versionData.version;
+                } else if (typeof versionData === 'string') {
+                    currentVersion = versionData;
+                } else if (typeof versionData === 'object') {
+                    for (let key in versionData) {
+                        if (typeof versionData[key] === 'string') {
+                            currentVersion = versionData[key];
+                            break;
+                        }
+                    }
+                }
             }
 
             // DnD fallback arrays loaders
