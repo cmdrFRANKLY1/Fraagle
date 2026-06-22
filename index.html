@@ -97,7 +97,7 @@
 
         <!-- Center: Modern Live Clock & Date -->
         <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center">
-            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100">00:00:00</span>
+            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100 font-mono">00:00:00</span>
             <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5 whitespace-nowrap">Loading Date...</span>
         </div>
 
@@ -245,7 +245,7 @@
         <!-- Compact Drawer Header (Email Centered) -->
         <div class="py-2.5 px-3.5 border-b border-darkBorder flex items-center justify-center bg-darkCard/40 relative select-none">
             <!-- Centered Dynamic Randomized Email Display -->
-            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 truncate max-w-[240px] text-center">connecting...</span>
+            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 truncate max-w-[240px] text-center font-mono">connecting...</span>
             <button id="close-drawer-btn" class="absolute right-3.5 p-1 rounded-xl text-zinc-400 hover:bg-darkBg hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -273,15 +273,16 @@
                         <!-- Dynamic Nickname ID Section with Playing Game status -->
                         <div class="flex flex-wrap items-center gap-2 mt-0.5">
                             <!-- Increased ID font size by 2 (text-[10px] -> text-[12px]) -->
-                            <span id="char-id" class="text-[12px] font-bold text-zinc-400 tracking-wider">Loading ID...</span>
+                            <span id="char-id" class="text-[12px] font-bold text-zinc-400 tracking-wider font-mono">Loading ID...</span>
                             <!-- Increased Playing Tag font size by 2 (text-[8px] -> text-[10px]) -->
-                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold truncate max-w-[150px]"></span>
+                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold truncate max-w-[150px] font-mono"></span>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-1 mt-1.5">
-                            <span id="char-race" class="text-[9px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder whitespace-nowrap">Race</span>
-                            <span id="char-profession" class="text-[9px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium truncate max-w-[120px]">Profession</span>
-                            <span id="char-gender" class="text-[9px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium">Gender</span>
+                            <!-- Font increased by 1 (text-[9px] -> text-[10px]) and default labels updated -->
+                            <span id="char-race" class="text-[10px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder whitespace-nowrap">Race: Loading...</span>
+                            <span id="char-profession" class="text-[10px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium truncate max-w-[150px]">Profession: Loading...</span>
+                            <span id="char-gender" class="text-[10px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium">Gender: Loading...</span>
                         </div>
                     </div>
                 </div>
@@ -679,10 +680,13 @@
             const randomGender = dndGenders[Math.floor(Math.random() * dndGenders.length)];
 
             document.getElementById('char-name').textContent = randomName;
-            document.getElementById('char-race').textContent = randomRace;
-            document.getElementById('char-profession').textContent = randomProfession;
+
+            // Modified to include explicit descriptive text labels
+            document.getElementById('char-race').textContent = `Race: ${randomRace}`;
+            document.getElementById('char-profession').textContent = `Profession: ${randomProfession}`;
+            document.getElementById('char-gender').textContent = `Gender: ${randomGender}`;
+
             document.getElementById('char-location').textContent = randomPlace;
-            document.getElementById('char-gender').textContent = randomGender;
 
             // Generate procedural bio sentence
             const intro = bioIntros[Math.floor(Math.random() * bioIntros.length)];
@@ -1358,6 +1362,11 @@
         const closeImpressumBtn = document.getElementById('close-impressum-btn');
         const closeImpressumOkBtn = document.getElementById('close-impressum-ok-btn');
 
+        // Close character panel drawer if clicked outside of it
+        const profileTrigger = document.getElementById('profile-trigger-btn');
+        const charDrawer = document.getElementById('character-drawer');
+        const closeDrawerBtn = document.getElementById('close-drawer-btn');
+
         function openImpressum() {
             if (impressumModal) impressumModal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
@@ -1378,10 +1387,6 @@
         }
 
         // Drawer logic
-        const profileTrigger = document.getElementById('profile-trigger-btn');
-        const charDrawer = document.getElementById('character-drawer');
-        const closeDrawerBtn = document.getElementById('close-drawer-btn');
-
         function toggleCharacterDrawer() {
             if (charDrawer) {
                 const isOpen = !charDrawer.classList.contains('translate-x-[120%]');
