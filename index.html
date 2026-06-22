@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tarkoogle Hub</title>
     <!-- Tailwind CSS CDN -->
@@ -121,10 +120,10 @@
     <!-- Unified Split Sidebar & Content Container -->
     <div class="flex-grow w-full max-w-5xl mx-auto px-6 py-4 z-10 relative flex items-center justify-center min-h-[70vh]">
 
-        <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, positioned absolutely to prevent layout shifts) -->
-        <aside id="left-sidebar-links" class="hidden lg:flex absolute left-6 top-32 flex-col w-52 select-none text-left">
+        <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned left with 'by cmdrFRANKLY') -->
+        <aside id="left-sidebar-links" class="hidden lg:flex absolute left-5 top-32 flex-col w-52 select-none text-left">
             <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4 border-b border-darkBorder pb-1.5">Directory</h4>
-            <nav id="quick-links-list" class="flex flex-col gap-2">
+            <nav id="quick-links-list" class="flex flex-col gap-[2px]">
                 <!-- Loaded dynamically -->
             </nav>
         </aside>
@@ -257,7 +256,7 @@
         <!-- Compact Drawer Header (Email Centered) -->
         <div class="py-2.5 px-3.5 border-b border-darkBorder flex items-center justify-center bg-darkCard/40 relative select-none">
             <!-- Centered Dynamic Randomized Email Display -->
-            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 truncate max-w-[240px] text-center">connecting...</span>
+            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 truncate max-w-[240px] text-center font-mono">connecting...</span>
             <button id="close-drawer-btn" class="absolute right-3.5 p-1 rounded-xl text-zinc-400 hover:bg-darkBg hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -452,7 +451,6 @@
         // Fetcher Utility with safe handling - Upgraded to handle raw text list formats cleanly
         async function fetchFileJSON(url) {
             try {
-                if (!url || url.trim() === "" || url.trim() === "/") return null;
                 const response = await fetch(url);
                 if (response.ok) {
                     const text = await response.text();
