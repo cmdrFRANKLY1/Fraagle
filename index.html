@@ -68,11 +68,21 @@
 </head>
 <body class="bg-darkBg text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
 
+    <!-- Premium Full-Screen Loader Overlay -->
+    <div id="loading-screen" class="fixed inset-0 z-[100] bg-darkBg flex flex-col items-center justify-center transition-opacity duration-500 select-none">
+        <div class="relative flex items-center justify-center">
+            <!-- Outer spinning rings -->
+            <div class="w-16 h-16 rounded-full border-4 border-zinc-800 border-t-tarkoogleBlue animate-spin"></div>
+            <!-- Inner branding label pulsing -->
+            <div class="absolute text-sm font-bold font-mono tracking-tight text-zinc-400 animate-pulse">T.</div>
+        </div>
+        <span class="text-xs font-mono font-bold tracking-widest text-zinc-500 mt-4 uppercase animate-pulse">Syncing Database...</span>
+    </div>
+
     <!-- Top Navigation Bar -->
     <header class="flex items-center justify-between p-5 relative z-10 w-full select-none">
-        <!-- Left Side: Mini Brand Indicator & Creator Credit -->
+        <!-- Left Side: Creator Credit -->
         <div class="flex items-center space-x-2">
-            <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">T.</span>
             <span class="text-xs text-zinc-500 font-medium">by <a href="https://steamcommunity.com/id/hellomynameisfrankly/" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-tarkoogleBlue transition-colors font-semibold">cmdrFRANKLY</a></span>
         </div>
 
@@ -87,8 +97,8 @@
             <button id="profile-trigger-btn" class="group flex items-center justify-center bg-darkCard/60 p-1.5 rounded-xl transition duration-200 focus:outline-none" title="Open Character Sheet">
                 <div class="w-8 h-8 rounded-lg overflow-hidden shadow-sm relative">
                     <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
-                    <!-- Little Google status indicator -->
-                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkCard rounded-full"></span>
+                    <!-- Dynamic Google Status Indicator Dot -->
+                    <span id="profile-status-dot" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkCard rounded-full transition-colors duration-300"></span>
                 </div>
             </button>
         </div>
@@ -192,7 +202,6 @@
             <div>
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 font-mono">Attributes & Stats</span>
-                    <span class="text-[9px] text-zinc-400 font-mono">SYSTEM_STABLE</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2" id="attributes-grid">
                     <!-- Loaded dynamically -->
@@ -610,6 +619,15 @@
             if (avatarImg) {
                 avatarImg.src = `https://thispersondoesnotexist.com?nocache=${Date.now()}`;
             }
+
+            // Assign a random online status color: Green, Yellow, or Red
+            const statusDot = document.getElementById('profile-status-dot');
+            if (statusDot) {
+                statusDot.classList.remove('bg-tarkoogleGreen', 'bg-tarkoogleYellow', 'bg-tarkoogleRed', 'bg-emerald-500');
+                const statusColors = ['bg-tarkoogleGreen', 'bg-tarkoogleYellow', 'bg-tarkoogleRed'];
+                const randomColor = statusColors[Math.floor(Math.random() * statusColors.length)];
+                statusDot.classList.add(randomColor);
+            }
         }
 
         function loadDynamicTitleAndSubtitle() {
@@ -665,13 +683,26 @@
 
         // --- BOOTSTRAP INITIALIZATION ---
         async function initializeHubData() {
-            await loadResourceData();
-            loadDynamicTitleAndSubtitle();
-            generateHeroIdentity();
+            const loadingScreen = document.getElementById('loading-screen');
+            try {
+                await loadResourceData();
+                loadDynamicTitleAndSubtitle();
+                generateHeroIdentity();
 
-            // Calculate metrics and send log payload silently (removed UI renderers)
-            const finalLoadTime = Math.round(performance.now() - loadStartTimestamp);
-            await saveLoadTimeToServer(finalLoadTime);
+                // Calculate metrics and send log payload silently
+                const finalLoadTime = Math.round(performance.now() - loadStartTimestamp);
+                await saveLoadTimeToServer(finalLoadTime);
+            } catch (error) {
+                console.error("Initialization failed:", error);
+            } finally {
+                // Safely fade out and remove the full-screen loading screen
+                if (loadingScreen) {
+                    loadingScreen.classList.add('opacity-0');
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }
+            }
         }
 
         document.addEventListener('DOMContentLoaded', initializeHubData);
