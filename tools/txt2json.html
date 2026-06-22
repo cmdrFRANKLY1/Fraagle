@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>txt ↔ json – grouped converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            padding: 1rem;
+            font-family: system-ui, sans-serif;
+            background: #fafafa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header h1 {
+            font-weight: 400;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .options-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .mode-toggle {
+            display: flex;
+            gap: 0.3rem;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        .mode-toggle label {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            cursor: pointer;
+        }
+        .file-group {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .file-input-wrapper .btn {
+            border: 1px solid #ccc;
+            padding: 0.1rem 0.6rem;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+        .file-name {
+            font-size: 0.85rem;
+        }
+        .stats {
+            font-size: 0.8rem;
+            margin-left: auto;
+            opacity: 0.7;
+        }
+        .save-btn {
+            background: transparent;
+            border: 1px solid #ccc;
+            padding: 0.1rem 1rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .save-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .main-content {
+            display: flex;
+            height: 500px;
+            min-height: 150px;
+            max-height: 800px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+        .panel {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 100px;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            background: #f8f8f8;
+        }
+        .badge {
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+        .panel-body {
+            padding: 0.3rem 0.5rem;
+            flex: 1;
+            overflow: auto;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .panel-body .line-number {
+            display: inline-block;
+            width: 2rem;
+            user-select: none;
+        }
+
+        .group-list {
+            display: flex;
+            flex-direction: column;
+            flex: 0 0 160px;
+            min-width: 100px;
+            padding: 0.3rem 0.5rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            gap: 1px;
+            border-left: 1px solid #eee;
+            border-right: 1px solid #eee;
+        }
+        .group-list .group-header {
+            font-size: 0.8rem;
+            padding-bottom: 0.2rem;
+            margin-bottom: 0.2rem;
+            flex-shrink: 0;
+            font-weight: 500;
+            border-bottom: 1px solid #ddd;
+        }
+        .group-list label {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            max-width: 100%;
+            padding: 0 0.1rem;
+        }
+        .group-list label .group-name {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
+        }
+        .group-list input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .group-list .no-groups {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            font-style: italic;
+        }
+
+        .splitter-h {
+            flex: 0 0 1px;
+            cursor: ew-resize;
+            position: relative;
+            z-index: 2;
+            background: #ccc;
+        }
+        .splitter-h:hover {
+            background: #999;
+        }
+
+        @media (max-width: 800px) {
+            .main-content {
+                flex-wrap: wrap;
+                height: auto;
+                min-height: auto;
+                max-height: none;
+            }
+            .splitter-h {
+                display: none;
+            }
+            .group-list {
+                flex: 1 1 100%;
+                border: none;
+                border-top: 1px solid #eee;
+                border-bottom: 1px solid #eee;
+            }
+            .panel {
+                min-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header><h1>txt ↔ json converter (grouped)</h1></header>
+
+        <div class="options-bar">
+            <div class="mode-toggle">
+                <label><input type="radio" name="mode" value="txt2json" checked /> txt → json</label>
+                <label><input type="radio" name="mode" value="json2txt" /> json → txt</label>
+            </div>
+
+            <div class="file-group">
+                <div class="file-input-wrapper">
+                    <span class="btn" id="fileBtn">[ open .txt ]</span>
+                    <input type="file" id="fileInput" accept=".txt" />
+                </div>
+                <span class="file-name" id="fileName">no file</span>
+            </div>
+            <span class="stats" id="stats">0 items</span>
+            <button class="save-btn" id="saveBtn" disabled>save</button>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="panel" id="leftPanel">
+                <div class="panel-header">
+                    <span id="leftLabel">original text</span>
+                    <span class="badge" id="inputCount">0</span>
+                </div>
+                <div class="panel-body" id="leftPanelBody"></div>
+            </div>
+            <div class="splitter-h" id="splitter1"></div>
+            <div class="group-list" id="groupListContainer">
+                <div class="group-header">groups</div>
+                <div class="no-groups">no groups</div>
+            </div>
+            <div class="splitter-h" id="splitter2"></div>
+            <div class="panel" id="rightPanel">
+                <div class="panel-header">
+                    <span id="rightLabel">json output</span>
+                    <span class="badge" id="outputCount">0</span>
+                </div>
+                <div class="panel-body" id="rightPanelBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ----- DOM refs -----
+            const modeRadios = document.querySelectorAll('input[name="mode"]');
+            const fileInput = document.getElementById('fileInput');
+            const fileBtn = document.getElementById('fileBtn');
+            const fileName = document.getElementById('fileName');
+            const leftPanelBody = document.getElementById('leftPanelBody');
+            const rightPanelBody = document.getElementById('rightPanelBody');
+            const leftLabel = document.getElementById('leftLabel');
+            const rightLabel = document.getElementById('rightLabel');
+            const inputCount = document.getElementById('inputCount');
+            const outputCount = document.getElementById('outputCount');
+            const stats = document.getElementById('stats');
+            const saveBtn = document.getElementById('saveBtn');
+            const groupListContainer = document.getElementById('groupListContainer');
+            const splitter1 = document.getElementById('splitter1');
+            const splitter2 = document.getElementById('splitter2');
+
+            // ----- state -----
+            let mode = 'txt2json'; // 'txt2json' or 'json2txt'
+            let rawData = {}; // { groupName: [lines] }
+            let groupNames = [];
+            let selectedGroups = new Set();
+            let fileContent = '';
+
+            // ----- helpers -----
+            function parseTxt(text) {
+                const groupPatterns = [
+                    { regex: /^\[(.+)\]$/, nameIndex: 1 },
+                    { regex: /^={3,}\s*(.+?)\s*={3,}$/, nameIndex: 1 },
+                    { regex: /^-{3,}\s*(.+?)\s*-{3,}$/, nameIndex: 1 },
+                    { regex: /^\*{3,}\s*(.+?)\s*\*{3,}$/, nameIndex: 1 },
+                    { regex: /^\.{3,}\s*(.+?)\s*\.{3,}$/, nameIndex: 1 },
+                    { regex: /^#+\s+(.+)$/, nameIndex: 1 },
+                    { regex: /^={3,}\s*(.+)$/, nameIndex: 1 },
+                    { regex: /^-{3,}\s*(.+)$/, nameIndex: 1 },
+                    { regex: /^\*{3,}\s*(.+)$/, nameIndex: 1 },
+                    { regex: /^\.{3,}\s*(.+)$/, nameIndex: 1 },
+                ];
+
+                const lines = text.split(/\r?\n/);
+                const groups = {};
+                let currentGroup = null;
+                let currentLines = [];
+
+                function flush() {
+                    if (currentGroup !== null) {
+                        const filtered = currentLines.map(l => l.trim()).filter(l => l !== '');
+                        groups[currentGroup] = filtered;
+                        currentLines = [];
+                    }
+                }
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    let matched = false;
+                    for (const pattern of groupPatterns) {
+                        const match = trimmed.match(pattern.regex);
+                        if (match) {
+                            flush();
+                            currentGroup = match[pattern.nameIndex].trim();
+                            currentLines = [];
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        if (currentGroup !== null) currentLines.push(line);
+                        else {
+                            if (!groups['_default']) groups['_default'] = [];
+                            groups['_default'].push(line);
+                        }
+                    }
+                }
+                flush();
+
+                if (groups['_default']) {
+                    const def = groups['_default'].map(l => l.trim()).filter(l => l !== '');
+                    delete groups['_default'];
+                    if (Object.keys(groups).length === 0) {
+                        if (def.length > 0) groups['list'] = def;
+                    } else {
+                        if (def.length > 0) groups['default'] = def;
+                    }
+                }
+                for (const k in groups) {
+                    groups[k] = groups[k].filter(s => s !== '');
+                }
+                return groups;
+            }
+
+            function groupsToText(groups, selected) {
+                let lines = [];
+                for (const name of groupNames) {
+                    if (selected.has(name)) {
+                        const items = groups[name] || [];
+                        if (items.length === 0) continue;
+                        lines.push(`# ${name}`);
+                        for (const item of items) {
+                            lines.push(item);
+                        }
+                        lines.push('');
+                    }
+                }
+                return lines.join('\n');
+            }
+
+            function groupsToJson(groups, selected) {
+                const output = {};
+                for (const name of groupNames) {
+                    if (selected.has(name)) {
+                        output[name] = groups[name] || [];
+                    }
+                }
+                return JSON.stringify(output, null, 2);
+            }
+
+            // ----- update preview -----
+            function updatePreview() {
+                if (mode === 'txt2json') {
+                    const json = groupsToJson(rawData, selectedGroups);
+                    rightPanelBody.textContent = json || '{}';
+                    const total = groupNames.reduce((sum, n) => sum + (selectedGroups.has(n) ? (rawData[n] || []).length : 0), 0);
+                    outputCount.textContent = total;
+                    stats.textContent = `${total} items in ${selectedGroups.size} groups`;
+                    saveBtn.disabled = (groupNames.length === 0 || selectedGroups.size === 0);
+                    inputCount.textContent = Object.values(rawData).reduce((sum, arr) => sum + arr.length, 0);
+                } else { // json2txt
+                    const txt = groupsToText(rawData, selectedGroups);
+                    rightPanelBody.textContent = txt || '(empty)';
+                    const total = groupNames.reduce((sum, n) => sum + (selectedGroups.has(n) ? (rawData[n] || []).length : 0), 0);
+                    outputCount.textContent = txt.split('\n').length;
+                    stats.textContent = `${total} items in ${selectedGroups.size} groups`;
+                    saveBtn.disabled = (groupNames.length === 0 || selectedGroups.size === 0);
+                    inputCount.textContent = Object.keys(rawData).length;
+                }
+            }
+
+            // ----- rebuild groups checkboxes -----
+            function rebuildGroups() {
+                const header = groupListContainer.querySelector('.group-header');
+                groupListContainer.innerHTML = '';
+                groupListContainer.appendChild(header);
+                if (groupNames.length === 0) {
+                    const no = document.createElement('div');
+                    no.className = 'no-groups';
+                    no.textContent = 'no groups';
+                    groupListContainer.appendChild(no);
+                    return;
+                }
+                for (const name of groupNames) {
+                    const label = document.createElement('label');
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.value = name;
+                    cb.checked = selectedGroups.has(name);
+                    cb.dataset.group = name;
+                    label.appendChild(cb);
+                    const span = document.createElement('span');
+                    span.className = 'group-name';
+                    span.textContent = name;
+                    span.title = name;
+                    label.appendChild(span);
+                    groupListContainer.appendChild(label);
+                    cb.addEventListener('change', function() {
+                        if (this.checked) selectedGroups.add(this.value);
+                        else selectedGroups.delete(this.value);
+                        updatePreview();
+                    });
+                }
+            }
+
+            // ----- load file -----
+            function loadFile(file) {
+                if (!file) return;
+                fileName.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        fileContent = e.target.result;
+                        if (mode === 'txt2json') {
+                            const groups = parseTxt(fileContent);
+                            rawData = groups;
+                            groupNames = Object.keys(groups);
+                            selectedGroups = new Set(groupNames);
+                            // show original text with line numbers
+                            const lines = fileContent.split(/\r?\n/);
+                            const lineDisplay = lines.map((line, idx) => {
+                                const num = (idx + 1).toString().padStart(2, ' ');
+                                return `<span class="line-number">${num}</span>${line || ' '}`;
+                            }).join('\n');
+                            leftPanelBody.innerHTML = lineDisplay || '(empty)';
+                            rebuildGroups();
+                            updatePreview();
+                        } else { // json2txt
+                            const data = JSON.parse(fileContent);
+                            if (typeof data !== 'object' || Array.isArray(data) || data === null) {
+                                throw new Error('JSON must be an object with array values.');
+                            }
+                            rawData = {};
+                            for (const key in data) {
+                                if (Array.isArray(data[key])) {
+                                    rawData[key] = data[key].map(item => String(item));
+                                } else {
+                                    console.warn('Skipping non-array key:', key);
+                                }
+                            }
+                            groupNames = Object.keys(rawData);
+                            selectedGroups = new Set(groupNames);
+                            leftPanelBody.textContent = JSON.stringify(data, null, 2);
+                            rebuildGroups();
+                            updatePreview();
+                        }
+                    } catch (err) {
+                        alert('Error: ' + err.message);
+                        resetAll();
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            function resetAll() {
+                fileName.textContent = 'no file';
+                leftPanelBody.innerHTML = '';
+                rightPanelBody.textContent = '';
+                inputCount.textContent = '0';
+                outputCount.textContent = '0';
+                stats.textContent = '0 items';
+                saveBtn.disabled = true;
+                rawData = {};
+                groupNames = [];
+                selectedGroups = new Set();
+                rebuildGroups();
+            }
+
+            // ----- save -----
+            async function saveOutput() {
+                if (saveBtn.disabled) return;
+                let content, ext, mime, suggestedName;
+                const base = fileName.textContent.replace(/\.[^.]+$/, '') || 'data';
+
+                if (mode === 'txt2json') {
+                    content = groupsToJson(rawData, selectedGroups);
+                    ext = 'json';
+                    mime = 'application/json';
+                    suggestedName = base + '.json';
+                } else {
+                    content = groupsToText(rawData, selectedGroups);
+                    ext = 'txt';
+                    mime = 'text/plain';
+                    suggestedName = base + '.txt';
+                }
+
+                try {
+                    if ('showSaveFilePicker' in window) {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: suggestedName,
+                            types: [{ description: ext.toUpperCase() + ' file', accept: { [mime]: ['.' + ext] } }]
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(content);
+                        await writable.close();
+                    } else {
+                        const blob = new Blob([content], { type: mime });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = suggestedName;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }
+                } catch (err) {
+                    if (err.name !== 'AbortError' && err.name !== 'SecurityError') {
+                        console.warn('Save failed:', err);
+                    }
+                }
+            }
+
+            // ----- mode switching -----
+            function setMode(newMode) {
+                mode = newMode;
+                if (mode === 'txt2json') {
+                    leftLabel.textContent = 'original text';
+                    rightLabel.textContent = 'json output';
+                    fileBtn.textContent = '[ open .txt ]';
+                    fileInput.accept = '.txt';
+                } else {
+                    leftLabel.textContent = 'JSON input';
+                    rightLabel.textContent = 'text output';
+                    fileBtn.textContent = '[ open .json ]';
+                    fileInput.accept = '.json';
+                }
+                resetAll();
+                leftPanelBody.innerHTML = mode === 'txt2json' ? 'load a .txt file' : 'load a .json file';
+                rightPanelBody.textContent = mode === 'txt2json' ? '{}' : '';
+                stats.textContent = '0 items';
+                saveBtn.disabled = true;
+            }
+
+            // ----- splitters -----
+            function initSplitter(splitter, leftEl, rightEl) {
+                let dragging = false,
+                    startX, startLeftWidth, startRightWidth;
+                splitter.addEventListener('mousedown', function(e) {
+                    dragging = true;
+                    startX = e.clientX;
+                    startLeftWidth = leftEl.offsetWidth;
+                    startRightWidth = rightEl.offsetWidth;
+                    document.body.style.cursor = 'ew-resize';
+                    document.body.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+                document.addEventListener('mousemove', function(e) {
+                    if (!dragging) return;
+                    const delta = e.clientX - startX;
+                    let newLeft = startLeftWidth + delta;
+                    let newRight = startRightWidth - delta;
+                    const minW = 80;
+                    if (newLeft < minW) { newLeft = minW;
+                        newRight = startLeftWidth + startRightWidth - newLeft; }
+                    if (newRight < minW) { newRight = minW;
+                        newLeft = startLeftWidth + startRightWidth - newRight; }
+                    leftEl.style.flex = `0 0 ${newLeft}px`;
+                    rightEl.style.flex = `0 0 ${newRight}px`;
+                });
+                document.addEventListener('mouseup', function() {
+                    if (dragging) {
+                        dragging = false;
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                    }
+                });
+                splitter.addEventListener('dblclick', function() {
+                    leftEl.style.flex = '';
+                    rightEl.style.flex = '';
+                });
+            }
+
+            initSplitter(splitter1, document.getElementById('leftPanel'), document.getElementById('groupListContainer'));
+            initSplitter(splitter2, document.getElementById('groupListContainer'), document.getElementById('rightPanel'));
+
+            // ----- events -----
+            modeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.checked) setMode(this.value);
+                });
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                const file = this.files[0];
+                if (file) loadFile(file);
+                this.value = '';
+            });
+
+            saveBtn.addEventListener('click', saveOutput);
+
+            // initial
+            setMode('txt2json');
+        })();
+    </script>
+</body>
+</html>
