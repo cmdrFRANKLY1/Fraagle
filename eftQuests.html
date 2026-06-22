@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tarkov Quest Flowchart – All Traders</title>
     <style>
-        /* ===== minimal layout – same style ===== */
         * {
             margin: 0;
             padding: 0;
@@ -20,7 +19,6 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-
         header h1 {
             font-weight: 400;
             font-size: 1.2rem;
@@ -32,7 +30,6 @@
             opacity: 0.6;
             margin-left: 0.5rem;
         }
-
         .options-bar {
             display: flex;
             flex-wrap: wrap;
@@ -116,7 +113,6 @@
             border: 1px solid #ccc;
             background: #fff;
         }
-
         .panel {
             display: flex;
             flex-direction: column;
@@ -145,7 +141,6 @@
             font-size: 0.85rem;
             line-height: 1.5;
         }
-
         .splitter-h {
             flex: 0 0 1px;
             cursor: ew-resize;
@@ -160,7 +155,6 @@
             background: #666;
         }
 
-        /* ===== shared node styles ===== */
         .quest-node {
             display: inline-block;
             padding: 0.2rem 0.8rem;
@@ -195,7 +189,6 @@
             font-weight: 300;
         }
 
-        /* ===== tree view ===== */
         .tree-root {
             padding: 0.5rem 0;
         }
@@ -248,7 +241,6 @@
             display: none;
         }
 
-        /* ===== accordion view ===== */
         .accordion-root {
             padding: 0.2rem 0;
         }
@@ -278,7 +270,6 @@
             padding-left: 1.2rem;
         }
 
-        /* ===== flat view ===== */
         .flat-root {
             padding: 0.2rem 0;
         }
@@ -300,7 +291,6 @@
             opacity: 0.6;
         }
 
-        /* ===== chain view ===== */
         .chain-root {
             padding: 0.5rem 0;
         }
@@ -335,7 +325,6 @@
             gap: 0.3rem;
         }
 
-        /* ===== detail panel ===== */
         .detail-empty {
             color: #999;
             font-style: italic;
@@ -396,7 +385,6 @@
                 border-bottom: none;
             }
         }
-
         .panel-body::-webkit-scrollbar {
             width: 4px;
             height: 4px;
@@ -416,11 +404,6 @@
         .error-placeholder {
             padding: 1rem;
             color: #c00;
-        }
-        .no-quests-placeholder {
-            padding: 1rem;
-            opacity: 0.6;
-            font-style: italic;
         }
     </style>
 </head>
@@ -490,11 +473,11 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!--  MODULE IMPORT – uses your optimized API from ~/api/          -->
-    <!-- ============================================================ -->
     <script type="module">
-        // Import the ultra‑optimized API module
+        // ================================================================
+        //  IMPORT YOUR OPTIMIZED API MODULE
+        //  Path: ./api/tarkovDevApi_A01.js
+        // ================================================================
         import { fetchQuestTree, clearCache } from './api/tarkovDevApi_A01.js';
 
         // ================================================================
@@ -509,7 +492,7 @@
         const statusBadge = document.getElementById('statusBadge');
 
         // ================================================================
-        //  STATE – with loading guard to prevent concurrent fetches
+        //  STATE – with loading guard to prevent infinite fetches
         // ================================================================
         let questData = null;
         let selectedNode = null;
@@ -517,7 +500,7 @@
         let currentView = 'tree';
         let currentTrader = 'Prapor';
         let isLoading = false;
-        let hasLoaded = false;
+        let loadCount = 0; // debug counter
 
         // ================================================================
         //  RENDER FUNCTIONS
@@ -591,7 +574,6 @@
             container.className = 'tree-root';
             const frag = document.createDocumentFragment();
 
-            // Root header
             const header = document.createElement('div');
             header.style.padding = '0.2rem 0.5rem';
             header.style.fontWeight = '500';
@@ -927,19 +909,24 @@
         }
 
         // ================================================================
-        //  LOAD DATA – with loading guard to prevent infinite fetches
+        //  LOAD DATA – with guard against concurrent / repeated fetches
         // ================================================================
         async function loadData(trader) {
-            // Prevent concurrent fetches
+            // CRITICAL: Prevent concurrent fetches
             if (isLoading) {
-                console.log('⏳ Already loading, skipping…');
+                console.log('⏳ [loadData] Already loading, skipping…');
                 return;
             }
 
-            isLoading = true;
-            hasLoaded = false;
+            // If same trader and we already have data, just re-render
+            if (trader === currentTrader && questData) {
+                console.log('📦 [loadData] Using cached data for', trader);
+                renderView(currentView);
+                return;
+            }
 
-            // Disable trader select during fetch
+            console.log(`🔄 [loadData] Loading ${trader} (load #${++loadCount})`);
+            isLoading = true;
             traderSelect.disabled = true;
             document.querySelectorAll('.btn').forEach(b => b.disabled = true);
 
@@ -948,24 +935,25 @@
             statsSpan.textContent = `⏳ loading ${trader}…`;
 
             try {
-                // Use the optimized module – this handles caching internally
-                questData = await fetchQuestTree(trader);
+                const result = await fetchQuestTree(trader);
+                questData = result;
+                currentTrader = trader;
 
-                // Select virtual root by default
+                // Auto-select root
                 selectedNode = questData;
                 selectedNodeName = questData.name;
                 renderDetails(questData);
 
                 currentView = viewSelect.value;
-                currentTrader = trader;
                 renderView(currentView);
 
-                hasLoaded = true;
                 statusBadge.textContent = 'ready';
                 statusBadge.className = 'status-badge success';
 
+                console.log(`✅ [loadData] ${trader} loaded successfully (${countAllNodes(questData)} nodes)`);
+
             } catch (err) {
-                console.error('❌ Load error:', err);
+                console.error('❌ [loadData] Error:', err);
                 treeContainer.replaceChildren();
                 const errDiv = document.createElement('div');
                 errDiv.className = 'error-placeholder';
@@ -983,19 +971,23 @@
         }
 
         // ================================================================
-        //  TRADER CHANGE HANDLER
+        //  TRADER CHANGE – only fires on user selection
         // ================================================================
         function onTraderChange() {
             const trader = traderSelect.value;
-            if (trader === currentTrader && hasLoaded) {
-                // Same trader, just re-render (no fetch needed)
+            console.log(`🔄 [onTraderChange] Switched to: ${trader} (current: ${currentTrader}, hasData: ${!!questData})`);
+
+            // If same trader and we already have data, just re-render
+            if (trader === currentTrader && questData) {
                 renderView(currentView);
                 return;
             }
+
             // Clear selection
             selectedNode = null;
             selectedNodeName = null;
             renderDetails(null);
+
             // Load new trader
             loadData(trader);
         }
@@ -1005,9 +997,10 @@
         // ================================================================
         function onClearCache() {
             const trader = traderSelect.value;
+            console.log(`🗑️ [clearCache] Clearing cache for ${trader}`);
             clearCache(trader);
-            // Reload to fetch fresh
-            hasLoaded = false;
+            questData = null;
+            currentTrader = null;
             loadData(trader);
         }
 
@@ -1015,7 +1008,6 @@
         //  INIT
         // ================================================================
         function init() {
-            // Event listeners
             viewSelect.addEventListener('change', function() {
                 setView(this.value);
             });

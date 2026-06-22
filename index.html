@@ -101,7 +101,7 @@
             <div class="relative inline-flex items-center justify-center">
                 <!-- Title is strictly centered by wrapper. Min-height prevents layout shift while waiting for load -->
                 <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex justify-center items-center drop-shadow-sm z-10 min-h-[48px] sm:min-h-[72px]">
-                    <!-- Text dynamically decrypted into this container -->
+                    <!-- Text dynamically set into this container -->
                 </h1>
                 
                 <!-- Tactical HUD Sidebar containing Version, absolutely positioned to prevent shifting -->
@@ -140,10 +140,10 @@
     </main>
 
     <!-- Premium Floating Side-Drawer Character Sheet -->
-    <div id="character-drawer" class="fixed top-4 bottom-4 right-4 left-4 sm:left-auto w-auto sm:w-[380px] md:w-[420px] bg-darkCard/95 border border-darkBorder rounded-2xl backdrop-blur-xl shadow-2xl z-50 transform translate-x-[calc(100%+2rem)] transition-transform duration-300 ease-in-out flex flex-col">
+    <div id="character-drawer" class="fixed top-4 bottom-4 right-4 w-[calc(100%-2rem)] sm:w-[380px] md:w-[420px] bg-darkCard/95 border border-darkBorder rounded-2xl backdrop-blur-xl shadow-2xl z-50 transform translate-x-[calc(100%+2rem)] transition-transform duration-300 ease-in-out flex flex-col">
         <!-- Drawer Header -->
         <div class="p-5 border-b border-darkBorder flex items-center justify-end">
-            <button id="close-drawer-btn" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-850 hover:text-zinc-200 transition focus:outline-none">
+            <button id="close-drawer-btn" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -461,45 +461,7 @@
             link.href = `data:image/svg+xml,${svg.trim()}`;
         }
 
-        // --- 3.5 TACTICAL HUD DECRYPT ANIMATION ENGINE ---
-
-        // Decrypt Title with colorful brand accents (Google palette, no consecutive same colors)
-        function triggerTitleDecrypt(targetText) {
-            const titleTag = document.getElementById('logo-title');
-            if (!titleTag) return;
-            
-            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
-            const colorPool = ['text-tarkoogleBlue', 'text-tarkoogleRed', 'text-tarkoogleYellow', 'text-tarkoogleGreen'];
-            
-            const titleColors = [];
-            for (let i = 0; i < targetText.length; i++) {
-                const prevColor = i > 0 ? titleColors[i - 1] : null;
-                const filteredPool = colorPool.filter(c => c !== prevColor);
-                titleColors.push(filteredPool[Math.floor(Math.random() * filteredPool.length)]);
-            }
-            
-            let iterations = 0;
-            clearInterval(titleTag.decryptInterval);
-            
-            titleTag.decryptInterval = setInterval(() => {
-                let displayText = targetText.split("").map((char, index) => {
-                    if (char === " ") return "&nbsp;";
-                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
-                    const colorClass = titleColors[index];
-                    return `<span class="${colorClass}">${displayChar}</span>`;
-                }).join("");
-                
-                titleTag.innerHTML = displayText;
-                
-                if (iterations >= targetText.length) {
-                    clearInterval(titleTag.decryptInterval);
-                    triggerVersionDecrypt();
-                }
-                iterations += 1 / 3;
-            }, 25);
-        }
-
-        // Decrypt Version Number tag
+        // --- DECRYPT VERSION NUMBER ONLY ---
         function triggerVersionDecrypt() {
             const versionTag = document.getElementById('version-tag');
             if (!versionTag) return;
@@ -524,218 +486,9 @@
                 
                 if (iterations >= targetText.length) {
                     clearInterval(versionTag.decryptInterval);
-                    
-                    // Trigger the Load Time Decryption ONLY after version completes
-                    const finalLoadTime = Math.round(performance.now() - loadStartTimestamp);
-                    triggerLoadTimeDecrypt(`LOADED IN: ${finalLoadTime}ms`, finalLoadTime);
                 }
                 iterations += 1 / 3;
             }, 25);
-        }
-
-        // Decrypt Load Time tag (starts with standard stealth zinc)
-        function triggerLoadTimeDecrypt(targetText, rawMs) {
-            const loadTimeTag = document.getElementById('load-time-tag');
-            if (!loadTimeTag) return;
-            
-            loadTimeTag.classList.remove('opacity-0');
-            loadTimeTag.classList.add('opacity-100');
-            
-            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
-            let iterations = 0;
-            
-            clearInterval(loadTimeTag.decryptInterval);
-            
-            loadTimeTag.decryptInterval = setInterval(async () => {
-                let displayText = targetText.split("").map((char, index) => {
-                    if (char === " ") return "&nbsp;";
-                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
-                    let wrapColor = (index < 9) ? 'text-zinc-400 font-semibold' : 'text-zinc-500';
-                    return `<span class="${wrapColor}">${displayChar}</span>`;
-                }).join("");
-                
-                loadTimeTag.innerHTML = displayText;
-                
-                if (iterations >= targetText.length) {
-                    clearInterval(loadTimeTag.decryptInterval);
-                    // Send performance metric payload to Vercel Serverless API
-                    await saveLoadTimeToServer(rawMs);
-                    // Compute metric statistics and trigger decryption reveal
-                    await calculateAndDecryptStats(rawMs);
-                }
-                iterations += 1 / 2;
-            }, 20);
-        }
-
-        // Decrypt Load Time tag into its performance-coded color (Label "LOADED IN" only)
-        function triggerLoadTimeColorDecrypt(tagElement, targetText, colorClass) {
-            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
-            let iterations = 0;
-            const targetLength = 9; // Only "LOADED IN" has 9 chars and gets color-scrambled
-
-            clearInterval(tagElement.decryptInterval);
-
-            tagElement.decryptInterval = setInterval(() => {
-                let displayText = targetText.split("").map((char, index) => {
-                    if (char === " ") return "&nbsp;";
-                    
-                    let displayChar;
-                    let wrapColor = 'text-zinc-500';
-
-                    if (index < 9) {
-                        // "LOADED IN" undergoes scrambling and gets colorized
-                        displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
-                        wrapColor = `${colorClass} font-semibold`;
-                    } else {
-                        // The rest of the string stays untouched (no scramble effect)
-                        displayChar = char;
-                    }
-
-                    return `<span class="${wrapColor}">${displayChar}</span>`;
-                }).join("");
-
-                tagElement.innerHTML = displayText;
-
-                if (iterations >= targetLength) {
-                    clearInterval(tagElement.decryptInterval);
-                    // Force complete final render of the entire string to ensure correctness
-                    let finalText = targetText.split("").map((char, index) => {
-                        if (char === " ") return "&nbsp;";
-                        let wrapColor = (index < 9) ? `${colorClass} font-semibold` : 'text-zinc-500';
-                        return `<span class="${wrapColor}">${char}</span>`;
-                    }).join("");
-                    tagElement.innerHTML = finalText;
-                }
-                iterations += 1 / 2;
-            }, 20);
-        }
-
-        // Compute performance stats (LOW, AVG, HIGH) from server data + client localStorage backup
-        async function calculateAndDecryptStats(currentMs) {
-            let times = [];
-
-            // 1. Try pulling log registry arrays from Serverless Endpoint (GET or file fetch)
-            try {
-                const response = await fetch('/api/loadingTimesLogging');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (Array.isArray(data)) {
-                        times = data.map(item => item.timeMs);
-                    } else if (data.success && Array.isArray(data.logs)) {
-                        times = data.logs.map(item => item.timeMs);
-                    }
-                }
-            } catch (err) {
-                console.warn('Could not pull stats from Vercel API, applying localized fallback calculations.');
-            }
-
-            // 2. Load LocalStorage client logs registry backup to guarantee calculations
-            try {
-                let localLogs = [];
-                const saved = localStorage.getItem('tarkoogle_load_times');
-                if (saved) {
-                    localLogs = JSON.parse(saved);
-                }
-                localLogs.push(currentMs);
-                localStorage.setItem('tarkoogle_load_times', JSON.stringify(localLogs));
-
-                // If Serverless metrics are empty or unreachable, fall back to localStorage pool
-                if (times.length === 0) {
-                    times = localLogs;
-                }
-            } catch (e) {
-                if (times.length === 0) {
-                    times = [currentMs];
-                }
-            }
-
-            // 3. Compute metric boundaries
-            const low = Math.min(...times);
-            const high = Math.max(...times);
-            const sum = times.reduce((a, b) => a + b, 0);
-            const avg = Math.round(sum / times.length);
-
-            const statsText = `LOW: ${low}ms AVG: ${avg}ms HIGH: ${high}ms`;
-            
-            // Determine load speed status
-            let colorClass = 'text-amber-400'; // Mid / Average fallback
-            if (currentMs <= avg * 0.95) {
-                colorClass = 'text-emerald-400'; // Low / Fast
-            } else if (currentMs >= avg * 1.15) {
-                colorClass = 'text-rose-400'; // High / Slow
-            }
-
-            // Trigger decrypt for stats, passing colorClass and currentMs so we trigger loaded-in color changes AFTER stats decrypt completes.
-            const part1 = `LOW: ${low}ms`;
-            const part2 = `AVG: ${avg}ms`;
-            triggerStatsDecrypt(statsText, part1.length, part2.length, colorClass, currentMs);
-        }
-
-        // Decrypt stats tag with matching tactical typewriter HUD decryption speed and custom segment coloring
-        function triggerStatsDecrypt(targetText, lowLen, avgLen, finalColorClass, currentMs) {
-            const statsTag = document.getElementById('stats-tag');
-            if (!statsTag) return;
-
-            statsTag.classList.remove('opacity-0');
-            statsTag.classList.add('opacity-100');
-
-            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
-            const idxLow = targetText.indexOf("LOW:");
-            const idxAvg = targetText.indexOf("AVG:");
-            const idxHigh = targetText.indexOf("HIGH:");
-
-            let iterations = 0;
-
-            clearInterval(statsTag.decryptInterval);
-
-            statsTag.decryptInterval = setInterval(() => {
-                let displayText = targetText.split("").map((char, index) => {
-                    if (char === " ") return "&nbsp;";
-                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
-                    
-                    // Style sections individually (only labels LOW:, AVG:, HIGH: colored, numbers and units uncolored)
-                    let colorClass = 'text-zinc-500';
-                    if (index >= idxLow && index < idxLow + 3) {
-                        colorClass = 'text-emerald-500 dark:text-emerald-400 font-semibold'; // LOW label only
-                    } else if (index >= idxAvg && index < idxAvg + 3) {
-                        colorClass = 'text-amber-500 dark:text-amber-400 font-semibold'; // AVG label only
-                    } else if (index >= idxHigh && index < idxHigh + 4) {
-                        colorClass = 'text-rose-500 dark:text-rose-400 font-semibold'; // HIGH label only
-                    }
-
-                    return `<span class="${colorClass}">${displayChar}</span>`;
-                }).join("");
-
-                statsTag.innerHTML = displayText;
-
-                if (iterations >= targetText.length) {
-                    clearInterval(statsTag.decryptInterval);
-                    
-                    // Trigger the Load Time color change decrypt ONLY after stats are completely done decrypting
-                    const loadTimeTag = document.getElementById('load-time-tag');
-                    if (loadTimeTag) {
-                        triggerLoadTimeColorDecrypt(loadTimeTag, `LOADED IN: ${currentMs}ms`, finalColorClass);
-                    }
-                }
-                iterations += 1 / 2; // Decrypts fast
-            }, 20);
-        }
-
-        // Send calculated boot load speed cleanly to the serverless function
-        async function saveLoadTimeToServer(timeMs) {
-            try {
-                await fetch('/api/loadingTimesLogging', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        timeMs: timeMs,
-                        version: currentVersion,
-                        title: currentTitle
-                    })
-                });
-            } catch (err) {
-                console.warn('Unable to log metric to Vercel Serverless Function.', err);
-            }
         }
 
         // --- D&D HERO SYSTEM LOGIC ---
@@ -857,8 +610,118 @@
             
             setRandomFavicon(currentTitle);
 
-            // Trigger the title's unique decrypt animation
-            triggerTitleDecrypt(currentTitle);
+            // Title decryption removed: display colorized letters directly
+            const titleTag = document.getElementById('logo-title');
+            if (titleTag) {
+                const colorPool = ['text-tarkoogleBlue', 'text-tarkoogleRed', 'text-tarkoogleYellow', 'text-tarkoogleGreen'];
+                const titleColors = [];
+                for (let i = 0; i < currentTitle.length; i++) {
+                    const prevColor = i > 0 ? titleColors[i - 1] : null;
+                    const filteredPool = colorPool.filter(c => c !== prevColor);
+                    titleColors.push(filteredPool[Math.floor(Math.random() * filteredPool.length)]);
+                }
+                titleTag.innerHTML = currentTitle.split("").map((char, index) => {
+                    if (char === " ") return "&nbsp;";
+                    return `<span class="${titleColors[index]}">${char}</span>`;
+                }).join("");
+            }
+
+            // Immediately decrypt/render version tag
+            triggerVersionDecrypt();
+        }
+
+        // Send calculated boot load speed cleanly to the serverless function
+        async function saveLoadTimeToServer(timeMs) {
+            try {
+                await fetch('/api/loadingTimesLogging', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        timeMs: timeMs,
+                        version: currentVersion,
+                        title: currentTitle
+                    })
+                });
+            } catch (err) {
+                console.warn('Unable to log metric to Vercel Serverless Function.', err);
+            }
+        }
+
+        // Compute performance stats directly and render instantly
+        async function calculateAndRenderStats(currentMs) {
+            let times = [];
+
+            // 1. Try pulling log registry arrays from Serverless Endpoint (GET or file fetch)
+            try {
+                const response = await fetch('/api/loadingTimesLogging');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        times = data.map(item => item.timeMs);
+                    } else if (data.success && Array.isArray(data.logs)) {
+                        times = data.logs.map(item => item.timeMs);
+                    }
+                }
+            } catch (err) {
+                console.warn('Could not pull stats from Vercel API, applying localized fallback calculations.');
+            }
+
+            // 2. Load LocalStorage client logs registry backup to guarantee calculations
+            try {
+                let localLogs = [];
+                const saved = localStorage.getItem('tarkoogle_load_times');
+                if (saved) {
+                    localLogs = JSON.parse(saved);
+                }
+                localLogs.push(currentMs);
+                localStorage.setItem('tarkoogle_load_times', JSON.stringify(localLogs));
+
+                // If Serverless metrics are empty or unreachable, fall back to localStorage pool
+                if (times.length === 0) {
+                    times = localLogs;
+                }
+            } catch (e) {
+                if (times.length === 0) {
+                    times = [currentMs];
+                }
+            }
+
+            // 3. Compute metric boundaries
+            const low = Math.min(...times);
+            const high = Math.max(...times);
+            const sum = times.reduce((a, b) => a + b, 0);
+            const avg = Math.round(sum / times.length);
+
+            // Determine load speed status color
+            let finalColorClass = 'text-amber-400'; 
+            if (currentMs <= avg * 0.95) {
+                finalColorClass = 'text-emerald-400'; 
+            } else if (currentMs >= avg * 1.15) {
+                finalColorClass = 'text-rose-400'; 
+            }
+
+            // Render LOADED IN tag directly with speed-coded color
+            const loadTimeTag = document.getElementById('load-time-tag');
+            if (loadTimeTag) {
+                loadTimeTag.classList.remove('opacity-0');
+                loadTimeTag.classList.add('opacity-100');
+                loadTimeTag.innerHTML = `<span class="${finalColorClass} font-semibold">LOADED IN</span>: <span class="text-zinc-500">${currentMs}ms</span>`;
+            }
+
+            // Render telemetry logs directly without decryption scrambling
+            const statsTag = document.getElementById('stats-tag');
+            if (statsTag) {
+                statsTag.classList.remove('opacity-0');
+                statsTag.classList.add('opacity-100');
+                statsTag.innerHTML = `
+                    <span class="text-emerald-500 dark:text-emerald-400 font-semibold">LOW</span><span class="text-zinc-500">: ${low}ms </span>
+                    <span class="text-amber-500 dark:text-amber-400 font-semibold">AVG</span><span class="text-zinc-500">: ${avg}ms </span>
+                    <span class="text-rose-500 dark:text-rose-400 font-semibold">HIGH</span><span class="text-zinc-500">: ${high}ms</span>
+                `;
+            }
+
+            // Send performance metric payload to Vercel Serverless API
+            await saveLoadTimeToServer(currentMs);
         }
 
         // --- BOOTSTRAP INITIALIZATION ---
@@ -866,6 +729,10 @@
             await loadResourceData();
             loadDynamicTitleAndSubtitle();
             generateHeroIdentity();
+
+            // Calculate metrics and show them directly
+            const finalLoadTime = Math.round(performance.now() - loadStartTimestamp);
+            await calculateAndRenderStats(finalLoadTime);
         }
 
         document.addEventListener('DOMContentLoaded', initializeHubData);
@@ -940,13 +807,13 @@
 
         function toggleCharacterDrawer() {
             if (charDrawer) {
-                const isOpen = !charDrawer.classList.contains('translate-x-full');
+                const isOpen = !charDrawer.classList.contains('translate-x-[calc(100%+2rem)]');
                 if (isOpen) {
-                    charDrawer.classList.add('translate-x-full');
+                    charDrawer.classList.add('translate-x-[calc(100%+2rem)]');
                 } else {
                     // Re-roll dynamically whenever the drawer is toggled open
                     generateHeroIdentity();
-                    charDrawer.classList.remove('translate-x-full');
+                    charDrawer.classList.remove('translate-x-[calc(100%+2rem)]');
                 }
             }
         }
@@ -962,17 +829,17 @@
         if (closeDrawerBtn) {
             closeDrawerBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (charDrawer) charDrawer.classList.add('translate-x-full');
+                if (charDrawer) charDrawer.classList.add('translate-x-[calc(100%+2rem)]');
             });
         }
 
         // Close character panel drawer if clicked outside of it
         document.addEventListener('click', (e) => {
-            if (charDrawer && !charDrawer.classList.contains('translate-x-full')) {
+            if (charDrawer && !charDrawer.classList.contains('translate-x-[calc(100%+2rem)]')) {
                 const isClickInsideDrawer = charDrawer.contains(e.target);
                 const isClickOnTrigger = profileTrigger && profileTrigger.contains(e.target);
                 if (!isClickInsideDrawer && !isClickOnTrigger) {
-                    charDrawer.classList.add('translate-x-full');
+                    charDrawer.classList.add('translate-x-[calc(100%+2rem)]');
                 }
             }
         });
@@ -987,7 +854,7 @@
                     searchInput.blur();
                 }
                 closeImpressum();
-                if (charDrawer) charDrawer.classList.add('translate-x-full');
+                if (charDrawer) charDrawer.classList.add('translate-x-[calc(100%+2rem)]');
             }
         });
     </script>
