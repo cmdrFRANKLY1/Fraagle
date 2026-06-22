@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prapor Quest Flowchart – Live from tarkov.dev</title>
+    <title>Prapor Quest Flowchart – Optimized</title>
     <style>
-        /* ===== minimal layout – same style ===== */
+        /* ===== minimal layout – same style, no bloat ===== */
         * {
             margin: 0;
             padding: 0;
@@ -79,6 +79,8 @@
             border: 1px solid #ccc;
             border-radius: 12px;
             background: #f0f0f0;
+            transition: all 0.15s;
+            flex-shrink: 0;
         }
         .status-badge.loading {
             background: #e8f0fe;
@@ -93,6 +95,11 @@
             background: #e6f4ea;
             border-color: #81c995;
             color: #1e7e34;
+        }
+        .status-badge.cached {
+            background: #fef9e7;
+            border-color: #f1c40f;
+            color: #7d6608;
         }
 
         .main-content {
@@ -408,659 +415,767 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>📍 Prapor – Quest Flowchart
-            <span class="source">(live data from tarkov.dev)</span>
-        </h1>
-    </header>
+    <div class="container">
+        <header>
+            <h1>📍 Prapor – Quest Flowchart
+                <span class="source">(live data from tarkov.dev)</span>
+            </h1>
+        </header>
 
-    <div class="options-bar">
-        <div class="btn-group">
-            <button class="btn" id="expandAllBtn">[ expand all ]</button>
-            <button class="btn" id="collapseAllBtn">[ collapse all ]</button>
-            <button class="btn" id="resetViewBtn">[ reset view ]</button>
+        <div class="options-bar">
+            <div class="btn-group">
+                <button class="btn" id="expandAllBtn">[ expand all ]</button>
+                <button class="btn" id="collapseAllBtn">[ collapse all ]</button>
+                <button class="btn" id="resetViewBtn">[ reset view ]</button>
+            </div>
+            <select class="view-select" id="viewType">
+                <option value="tree">Tree</option>
+                <option value="accordion">Accordion</option>
+                <option value="flat">Flat List</option>
+                <option value="chain">Chain (selected)</option>
+            </select>
+            <span class="stats" id="stats">⏳ loading…</span>
+            <span class="status-badge loading" id="statusBadge">connecting…</span>
         </div>
-        <select class="view-select" id="viewType">
-            <option value="tree">Tree</option>
-            <option value="accordion">Accordion</option>
-            <option value="flat">Flat List</option>
-            <option value="chain">Chain (selected)</option>
-        </select>
-        <span class="stats" id="stats">⏳ loading…</span>
-        <span class="status-badge loading" id="statusBadge">connecting…</span>
+
+        <div class="main-content" id="mainContent">
+            <div class="panel" id="flowchartPanel">
+                <div class="panel-header">
+                    <span>quest tree</span>
+                    <span class="badge" id="nodeCount">—</span>
+                </div>
+                <div class="panel-body" id="treeContainer">
+                    <div class="loading-placeholder">⏳ Fetching quest data from tarkov.dev API…</div>
+                </div>
+            </div>
+
+            <div class="splitter-h" id="splitter"></div>
+
+            <div class="panel" id="detailPanel">
+                <div class="panel-header">
+                    <span>quest details</span>
+                    <span class="badge">info</span>
+                </div>
+                <div class="panel-body" id="detailBody">
+                    <div class="detail-empty">← click a quest node</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="main-content" id="mainContent">
-        <div class="panel" id="flowchartPanel">
-            <div class="panel-header">
-                <span>quest tree</span>
-                <span class="badge" id="nodeCount">—</span>
-            </div>
-            <div class="panel-body" id="treeContainer">
-                <div class="loading-placeholder">⏳ Fetching quest data from tarkov.dev API…</div>
-            </div>
-        </div>
+    <script>
+        (function() {
+            'use strict';
 
-        <div class="splitter-h" id="splitter"></div>
+            // ================================================================
+            //  CONFIG – only hardcoded values
+            // ================================================================
+            const API_URL = 'https://api.tarkov.dev/graphql';
+            const TRADER_NAME = 'Prapor';
+            const CACHE_KEY = 'tarkov_prapor_quests_v1';
+            const CACHE_TTL = 3600000; // 1 hour
 
-        <div class="panel" id="detailPanel">
-            <div class="panel-header">
-                <span>quest details</span>
-                <span class="badge">info</span>
-            </div>
-            <div class="panel-body" id="detailBody">
-                <div class="detail-empty">← click a quest node</div>
-            </div>
-        </div>
-    </div>
-</div>
+            // ================================================================
+            //  DOM REFS
+            // ================================================================
+            const treeContainer = document.getElementById('treeContainer');
+            const detailBody = document.getElementById('detailBody');
+            const nodeCountSpan = document.getElementById('nodeCount');
+            const statsSpan = document.getElementById('stats');
+            const viewSelect = document.getElementById('viewType');
+            const statusBadge = document.getElementById('statusBadge');
 
-<script>
-    (function() {
-        // ================================================================
-        //  CONFIG – only hardcoded value: API endpoint & trader filter
-        // ================================================================
-        const API_URL = 'https://api.tarkov.dev/graphql';
-        const TRADER_NAME = 'Prapor';
+            // ================================================================
+            //  STATE
+            // ================================================================
+            let questData = null; // virtual root node
+            let selectedNode = null;
+            let selectedNodeName = null;
+            let currentView = 'tree';
+            let isLoading = true;
 
-        // ================================================================
-        //  STATE
-        // ================================================================
-        let questData = null;          // virtual root node: { name, children, requirements, rewards }
-        let selectedNode = null;       // reference to a node in the tree
-        let selectedNodeName = null;
-        let currentView = 'tree';
-        let isLoading = true;
+            // ================================================================
+            //  OPTIMIZED FETCH – server‑side filter + localStorage cache
+            // ================================================================
 
-        // ================================================================
-        //  DOM REFS
-        // ================================================================
-        const treeContainer = document.getElementById('treeContainer');
-        const detailBody = document.getElementById('detailBody');
-        const nodeCountSpan = document.getElementById('nodeCount');
-        const statsSpan = document.getElementById('stats');
-        const viewSelect = document.getElementById('viewType');
-        const statusBadge = document.getElementById('statusBadge');
-
-        // ================================================================
-        //  API FETCH & TREE BUILD
-        // ================================================================
-        async function fetchAndBuildTree() {
-            const query = `
-            query {
-              quests {
-                id
-                name
+            // Build the leanest possible GraphQL query
+            const GRAPHQL_QUERY = `
+          query($trader: String!) {
+            quests(where: { trader: { name: { eq: $trader } } }) {
+              id
+              name
+              description
+              objectives {
                 description
-                objectives {
-                  id
-                  type
-                  description
-                }
-                rewards {
-                  experience
-                  roubles
-                  items {
-                    item {
-                      name
-                      shortName
-                    }
-                    quantity
-                  }
-                  traderStanding {
-                    trader {
-                      name
-                    }
-                    standing
+              }
+              rewards {
+                experience
+                roubles
+                items {
+                  quantity
+                  item {
+                    name
+                    shortName
                   }
                 }
-                trader {
-                  name
-                }
-                predecessorQuests {
-                  id
-                  name
-                }
-                successors {
-                  id
-                  name
+                traderStanding {
+                  standing
+                  trader {
+                    name
+                  }
                 }
               }
+              trader {
+                name
+              }
+              predecessorQuests {
+                id
+                name
+              }
+              successors {
+                id
+                name
+              }
             }
-          `;
+          }
+        `;
 
-            try {
-                statusBadge.textContent = 'fetching…';
-                statusBadge.className = 'status-badge loading';
-
+            async function fetchFromAPI() {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
+                    body: JSON.stringify({
+                        query: GRAPHQL_QUERY,
+                        variables: { trader: TRADER_NAME }
+                    })
                 });
 
-                if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const json = await response.json();
                 if (json.errors) throw new Error(json.errors[0].message);
 
                 const rawQuests = json.data.quests;
-                if (!rawQuests || rawQuests.length === 0) throw new Error('No quests returned from API.');
+                if (!rawQuests || rawQuests.length === 0) {
+                    throw new Error(`No quests returned for trader: ${TRADER_NAME}`);
+                }
+                return rawQuests;
+            }
 
-                // --- filter for Prapor quests ---
-                const praporQuests = rawQuests.filter(q => q.trader && q.trader.name === TRADER_NAME);
-                if (praporQuests.length === 0) throw new Error(`No quests found for trader: ${TRADER_NAME}`);
+            async function fetchWithCache() {
+                // Check cache
+                try {
+                    const cached = localStorage.getItem(CACHE_KEY);
+                    if (cached) {
+                        const { data, timestamp } = JSON.parse(cached);
+                        if (Date.now() - timestamp < CACHE_TTL) {
+                            statusBadge.textContent = 'cached';
+                            statusBadge.className = 'status-badge cached';
+                            return data;
+                        }
+                    }
+                } catch (_) { /* ignore corrupt cache */ }
 
-                // --- build map by id ---
-                const map = {};
-                for (const q of praporQuests) {
-                    map[q.id] = q;
+                // Fetch fresh
+                statusBadge.textContent = 'fetching…';
+                statusBadge.className = 'status-badge loading';
+                const data = await fetchFromAPI();
+
+                // Store in cache
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+                } catch (_) { /* ignore storage errors */ }
+
+                return data;
+            }
+
+            // ================================================================
+            //  OPTIMIZED TREE BUILDER – O(n) using Map
+            // ================================================================
+
+            function buildTree(rawQuests) {
+                // 1. Build a Map for O(1) lookups
+                const questMap = new Map();
+                for (const q of rawQuests) {
+                    questMap.set(q.id, q);
                 }
 
-                // --- helper: map API quest to internal node format ---
+                // 2. Convert raw quest to internal node format (no extra loops)
                 function mapQuest(apiQuest) {
+                    // Build requirements string
                     const reqParts = [];
                     if (apiQuest.description) reqParts.push(apiQuest.description);
-                    if (apiQuest.objectives && apiQuest.objectives.length > 0) {
+                    if (apiQuest.objectives) {
                         for (const obj of apiQuest.objectives) {
                             if (obj.description) reqParts.push(`- ${obj.description}`);
                         }
                     }
+
+                    // Build rewards array
                     const rewardList = [];
-                    if (apiQuest.rewards) {
-                        if (apiQuest.rewards.experience) rewardList.push(`+${apiQuest.rewards.experience} EXP`);
-                        if (apiQuest.rewards.roubles) rewardList.push(`${apiQuest.rewards.roubles} Roubles`);
-                        if (apiQuest.rewards.items) {
-                            for (const ir of apiQuest.rewards.items) {
-                                const name = ir.item.name || ir.item.shortName || 'Unknown Item';
+                    const r = apiQuest.rewards;
+                    if (r) {
+                        if (r.experience) rewardList.push(`+${r.experience} EXP`);
+                        if (r.roubles) rewardList.push(`${r.roubles} Roubles`);
+                        if (r.items) {
+                            for (const ir of r.items) {
+                                const name = ir.item?.name || ir.item?.shortName || 'Unknown Item';
                                 rewardList.push(`${ir.quantity}× ${name}`);
                             }
                         }
-                        if (apiQuest.rewards.traderStanding) {
-                            for (const ts of apiQuest.rewards.traderStanding) {
-                                rewardList.push(`+${ts.standing} standing with ${ts.trader.name}`);
+                        if (r.traderStanding) {
+                            for (const ts of r.traderStanding) {
+                                rewardList.push(`+${ts.standing} standing with ${ts.trader?.name || 'Trader'}`);
                             }
                         }
                     }
+
                     return {
                         name: apiQuest.name,
                         requirements: reqParts.join(' • ') || 'none',
                         rewards: rewardList.length > 0 ? rewardList : ['none'],
                         children: [],
-                        _apiRef: apiQuest // keep for reference
+                        _apiId: apiQuest.id // keep for reference
                     };
                 }
 
-                // --- recursive build ---
-                function buildTree(apiQuest) {
+                // 3. Recursive build with memoization to avoid double‑processing
+                const processed = new Set();
+
+                function buildNode(apiQuest) {
+                    if (processed.has(apiQuest.id)) return null;
+                    processed.add(apiQuest.id);
+
                     const node = mapQuest(apiQuest);
                     if (apiQuest.successors) {
                         for (const succ of apiQuest.successors) {
-                            // only include if the successor is also a Prapor quest (exists in our map)
-                            if (map[succ.id]) {
-                                node.children.push(buildTree(map[succ.id]));
+                            const childApi = questMap.get(succ.id);
+                            if (childApi && !processed.has(childApi.id)) {
+                                const childNode = buildNode(childApi);
+                                if (childNode) node.children.push(childNode);
                             }
                         }
                     }
                     return node;
                 }
 
-                // --- find roots (quests with no predecessors among Prapor quests) ---
-                const rootIds = new Set();
-                for (const q of praporQuests) {
-                    let hasPredecessor = false;
+                // 4. Find roots (quests with no predecessor *within* our filtered set)
+                const rootIds = [];
+                for (const q of rawQuests) {
+                    let hasPred = false;
                     if (q.predecessorQuests) {
                         for (const pred of q.predecessorQuests) {
-                            if (map[pred.id]) {
-                                hasPredecessor = true;
+                            if (questMap.has(pred.id)) {
+                                hasPred = true;
                                 break;
                             }
                         }
                     }
-                    if (!hasPredecessor) rootIds.add(q.id);
+                    if (!hasPred) rootIds.push(q.id);
                 }
 
+                // 5. Build root nodes
                 const rootNodes = [];
                 for (const id of rootIds) {
-                    rootNodes.push(buildTree(map[id]));
+                    const node = buildNode(questMap.get(id));
+                    if (node) rootNodes.push(node);
                 }
 
-                // --- create virtual root ---
-                const virtualRoot = {
+                // 6. Create virtual root
+                return {
                     name: `🪖 ${TRADER_NAME} (All Quests)`,
-                    requirements: `Quest tree for ${TRADER_NAME} – data fetched live from tarkov.dev`,
-                    rewards: [`${praporQuests.length} total quests`],
+                    requirements: `Quest tree for ${TRADER_NAME} – fetched live from tarkov.dev`,
+                    rewards: [`${rawQuests.length} total quests`],
                     children: rootNodes
                 };
-
-                return virtualRoot;
-
-            } catch (err) {
-                statusBadge.textContent = 'error';
-                statusBadge.className = 'status-badge error';
-                throw err;
             }
-        }
 
-        // ================================================================
-        //  RENDER FUNCTIONS (unchanged logic, uses questData)
-        // ================================================================
+            // ================================================================
+            //  RENDER FUNCTIONS – optimized with document fragments
+            // ================================================================
 
-        function countAllNodes(node) {
-            if (!node) return 0;
-            let count = 1;
-            if (node.children) {
-                for (const child of node.children) {
-                    count += countAllNodes(child);
-                }
-            }
-            return count;
-        }
-
-        function collectNodesWithParent(node, parent = null) {
-            const list = [];
-            list.push({ node, parent });
-            if (node.children) {
-                for (const child of node.children) {
-                    list.push(...collectNodesWithParent(child, node));
-                }
-            }
-            return list;
-        }
-
-        function findNodeByName(root, name) {
-            if (root.name === name) return root;
-            if (root.children) {
-                for (const child of root.children) {
-                    const found = findNodeByName(child, name);
-                    if (found) return found;
-                }
-            }
-            return null;
-        }
-
-        function getPath(root, target) {
-            function search(node, path) {
-                path.push(node);
-                if (node === target) return path;
+            function countAllNodes(node) {
+                if (!node) return 0;
+                let count = 1;
                 if (node.children) {
                     for (const child of node.children) {
-                        const result = search(child, path.slice());
-                        if (result) return result;
+                        count += countAllNodes(child);
+                    }
+                }
+                return count;
+            }
+
+            function collectNodesWithParent(node, parent = null) {
+                const list = [];
+                list.push({ node, parent });
+                if (node.children) {
+                    for (const child of node.children) {
+                        list.push(...collectNodesWithParent(child, node));
+                    }
+                }
+                return list;
+            }
+
+            function findNodeByName(root, name) {
+                if (root.name === name) return root;
+                if (root.children) {
+                    for (const child of root.children) {
+                        const found = findNodeByName(child, name);
+                        if (found) return found;
                     }
                 }
                 return null;
             }
-            return search(root, []);
-        }
 
-        // --- shared: create node element ---
-        function createNodeElement(node, highlight = false) {
-            const span = document.createElement('span');
-            span.className = 'quest-node' + (highlight ? ' active' : '');
-            span.dataset.quest = node.name;
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'node-name';
-            nameSpan.textContent = node.name;
-            span.appendChild(nameSpan);
-            if (node.children && node.children.length > 0) {
-                const badge = document.createElement('span');
-                badge.className = 'node-badge';
-                badge.textContent = `(${node.children.length})`;
-                span.appendChild(badge);
-            }
-            span.addEventListener('click', function(e) {
-                e.stopPropagation();
-                selectNode(node);
-                renderView(currentView);
-            });
-            return span;
-        }
-
-        // --- Tree view ---
-        function renderTreeView(root, selectedName) {
-            const container = document.createElement('div');
-            container.className = 'tree-root';
-
-            function buildTree(node) {
-                const ul = document.createElement('ul');
-                if (node.children) {
-                    for (const child of node.children) {
-                        const li = document.createElement('li');
-                        const el = createNodeElement(child, child.name === selectedName);
-                        li.appendChild(el);
-                        if (child.children && child.children.length > 0) {
-                            const childUl = buildTree(child);
-                            childUl.className = 'child-list';
-                            childUl.style.display = 'block';
-                            li.appendChild(childUl);
+            function getPath(root, target) {
+                function search(node, path) {
+                    path.push(node);
+                    if (node === target) return path;
+                    if (node.children) {
+                        for (const child of node.children) {
+                            const result = search(child, path.slice());
+                            if (result) return result;
                         }
-                        ul.appendChild(li);
                     }
+                    return null;
                 }
-                return ul;
+                return search(root, []);
             }
 
-            const rootHeader = document.createElement('div');
-            rootHeader.style.padding = '0.2rem 0.5rem';
-            rootHeader.style.fontWeight = '500';
-            rootHeader.style.borderBottom = '1px solid #ddd';
-            rootHeader.style.marginBottom = '0.5rem';
-            const rootEl = createNodeElement(root, root.name === selectedName);
-            rootHeader.appendChild(rootEl);
-            container.appendChild(rootHeader);
+            // --- Create a single node element (reused) ---
+            function createNodeElement(node, highlight) {
+                const span = document.createElement('span');
+                span.className = 'quest-node' + (highlight ? ' active' : '');
+                span.dataset.quest = node.name;
 
-            const childrenUl = buildTree(root);
-            container.appendChild(childrenUl);
-            return container;
-        }
-
-        // --- Accordion view ---
-        function renderAccordionView(root, selectedName) {
-            const container = document.createElement('div');
-            container.className = 'accordion-root';
-
-            function buildAccordion(node, depth = 0) {
-                const details = document.createElement('details');
-                if (depth === 0) details.open = true;
-                const summary = document.createElement('summary');
-                const el = createNodeElement(node, node.name === selectedName);
-                summary.appendChild(el);
-                details.appendChild(summary);
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'node-name';
+                nameSpan.textContent = node.name;
+                span.appendChild(nameSpan);
 
                 if (node.children && node.children.length > 0) {
-                    const childContainer = document.createElement('div');
-                    childContainer.className = 'child-container';
-                    for (const child of node.children) {
-                        childContainer.appendChild(buildAccordion(child, depth + 1));
-                    }
-                    details.appendChild(childContainer);
+                    const badge = document.createElement('span');
+                    badge.className = 'node-badge';
+                    badge.textContent = `(${node.children.length})`;
+                    span.appendChild(badge);
                 }
-                return details;
+
+                span.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectNode(node);
+                    renderView(currentView);
+                });
+
+                return span;
             }
 
-            const rootAcc = buildAccordion(root, 0);
-            container.appendChild(rootAcc);
-            return container;
-        }
+            // --- Tree view ---
+            function renderTreeView(root, selectedName) {
+                const container = document.createElement('div');
+                container.className = 'tree-root';
 
-        // --- Flat view ---
-        function renderFlatView(root, selectedName) {
-            const container = document.createElement('div');
-            container.className = 'flat-root';
-            const all = collectNodesWithParent(root);
-            const ul = document.createElement('ul');
-            for (const { node, parent } of all) {
-                const li = document.createElement('li');
-                const el = createNodeElement(node, node.name === selectedName);
-                li.appendChild(el);
-                const meta = document.createElement('span');
-                meta.className = 'meta';
-                const parentName = parent ? parent.name : '(root)';
-                const childCount = (node.children && node.children.length) || 0;
-                meta.textContent = `← ${parentName} · ${childCount} unlocks`;
-                li.appendChild(meta);
-                ul.appendChild(li);
-            }
-            container.appendChild(ul);
-            return container;
-        }
+                const frag = document.createDocumentFragment();
 
-        // --- Chain view ---
-        function renderChainView(root, selectedNodeObj) {
-            const container = document.createElement('div');
-            container.className = 'chain-root';
+                // Root header
+                const header = document.createElement('div');
+                header.style.padding = '0.2rem 0.5rem';
+                header.style.fontWeight = '500';
+                header.style.borderBottom = '1px solid #ddd';
+                header.style.marginBottom = '0.5rem';
+                header.appendChild(createNodeElement(root, root.name === selectedName));
+                frag.appendChild(header);
 
-            if (!selectedNodeObj) {
-                container.innerHTML = '<div style="opacity:0.6;font-style:italic;">select a quest to see its chain</div>';
+                // Build children recursively
+                function buildTree(node) {
+                    const ul = document.createElement('ul');
+                    if (node.children) {
+                        for (const child of node.children) {
+                            const li = document.createElement('li');
+                            li.appendChild(createNodeElement(child, child.name === selectedName));
+
+                            if (child.children && child.children.length > 0) {
+                                const childUl = buildTree(child);
+                                childUl.className = 'child-list';
+                                childUl.style.display = 'block';
+                                li.appendChild(childUl);
+                            }
+                            ul.appendChild(li);
+                        }
+                    }
+                    return ul;
+                }
+
+                frag.appendChild(buildTree(root));
+                container.appendChild(frag);
                 return container;
             }
 
-            const path = getPath(root, selectedNodeObj);
-            if (path) {
-                const pathDiv = document.createElement('div');
-                pathDiv.className = 'path';
-                for (let i = 0; i < path.length; i++) {
-                    const node = path[i];
-                    const el = createNodeElement(node, node.name === selectedNodeObj.name);
-                    pathDiv.appendChild(el);
-                    if (i < path.length - 1) {
-                        const arrow = document.createElement('span');
-                        arrow.className = 'arrow';
-                        arrow.textContent = '→';
-                        pathDiv.appendChild(arrow);
+            // --- Accordion view ---
+            function renderAccordionView(root, selectedName) {
+                const container = document.createElement('div');
+                container.className = 'accordion-root';
+                const frag = document.createDocumentFragment();
+
+                function buildAccordion(node, depth) {
+                    const details = document.createElement('details');
+                    if (depth === 0) details.open = true;
+
+                    const summary = document.createElement('summary');
+                    summary.appendChild(createNodeElement(node, node.name === selectedName));
+                    details.appendChild(summary);
+
+                    if (node.children && node.children.length > 0) {
+                        const childContainer = document.createElement('div');
+                        childContainer.className = 'child-container';
+                        for (const child of node.children) {
+                            childContainer.appendChild(buildAccordion(child, depth + 1));
+                        }
+                        details.appendChild(childContainer);
                     }
+                    return details;
                 }
-                container.appendChild(pathDiv);
+
+                frag.appendChild(buildAccordion(root, 0));
+                container.appendChild(frag);
+                return container;
             }
 
-            const childrenSection = document.createElement('div');
-            childrenSection.className = 'children-section';
-            const header = document.createElement('h4');
-            header.textContent = 'Unlocked quests:';
-            childrenSection.appendChild(header);
-            const childList = document.createElement('div');
-            childList.className = 'child-list';
-            if (selectedNodeObj.children && selectedNodeObj.children.length > 0) {
-                for (const child of selectedNodeObj.children) {
-                    const el = createNodeElement(child, child.name === selectedNodeObj.name);
-                    childList.appendChild(el);
+            // --- Flat view ---
+            function renderFlatView(root, selectedName) {
+                const container = document.createElement('div');
+                container.className = 'flat-root';
+                const frag = document.createDocumentFragment();
+
+                const all = collectNodesWithParent(root);
+                const ul = document.createElement('ul');
+                for (const { node, parent } of all) {
+                    const li = document.createElement('li');
+                    li.appendChild(createNodeElement(node, node.name === selectedName));
+
+                    const meta = document.createElement('span');
+                    meta.className = 'meta';
+                    const parentName = parent ? parent.name : '(root)';
+                    const childCount = (node.children && node.children.length) || 0;
+                    meta.textContent = `← ${parentName} · ${childCount} unlocks`;
+                    li.appendChild(meta);
+                    ul.appendChild(li);
                 }
+                frag.appendChild(ul);
+                container.appendChild(frag);
+                return container;
+            }
+
+            // --- Chain view ---
+            function renderChainView(root, selectedNodeObj) {
+                const container = document.createElement('div');
+                container.className = 'chain-root';
+                const frag = document.createDocumentFragment();
+
+                if (!selectedNodeObj) {
+                    const msg = document.createElement('div');
+                    msg.style.opacity = '0.6';
+                    msg.style.fontStyle = 'italic';
+                    msg.textContent = 'select a quest to see its chain';
+                    frag.appendChild(msg);
+                    container.appendChild(frag);
+                    return container;
+                }
+
+                // Path
+                const path = getPath(root, selectedNodeObj);
+                if (path) {
+                    const pathDiv = document.createElement('div');
+                    pathDiv.className = 'path';
+                    for (let i = 0; i < path.length; i++) {
+                        const node = path[i];
+                        pathDiv.appendChild(createNodeElement(node, node.name === selectedNodeObj.name));
+                        if (i < path.length - 1) {
+                            const arrow = document.createElement('span');
+                            arrow.className = 'arrow';
+                            arrow.textContent = '→';
+                            pathDiv.appendChild(arrow);
+                        }
+                    }
+                    frag.appendChild(pathDiv);
+                }
+
+                // Children
+                const childrenSection = document.createElement('div');
+                childrenSection.className = 'children-section';
+                const header = document.createElement('h4');
+                header.textContent = 'Unlocked quests:';
+                childrenSection.appendChild(header);
+
+                const childList = document.createElement('div');
+                childList.className = 'child-list';
+                if (selectedNodeObj.children && selectedNodeObj.children.length > 0) {
+                    for (const child of selectedNodeObj.children) {
+                        childList.appendChild(createNodeElement(child, false));
+                    }
+                } else {
+                    const none = document.createElement('span');
+                    none.style.opacity = '0.5';
+                    none.textContent = 'none';
+                    childList.appendChild(none);
+                }
+                childrenSection.appendChild(childList);
+                frag.appendChild(childrenSection);
+
+                container.appendChild(frag);
+                return container;
+            }
+
+            // ================================================================
+            //  RENDER DISPATCHER
+            // ================================================================
+            function renderView(viewType) {
+                if (!questData) {
+                    treeContainer.textContent = '';
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'loading-placeholder';
+                    placeholder.textContent = '⏳ Loading quest data…';
+                    treeContainer.appendChild(placeholder);
+                    return;
+                }
+
+                const root = questData;
+                const selectedName = selectedNode ? selectedNode.name : null;
+
+                let viewElement;
+                switch (viewType) {
+                    case 'tree':
+                        viewElement = renderTreeView(root, selectedName);
+                        break;
+                    case 'accordion':
+                        viewElement = renderAccordionView(root, selectedName);
+                        break;
+                    case 'flat':
+                        viewElement = renderFlatView(root, selectedName);
+                        break;
+                    case 'chain':
+                        viewElement = renderChainView(root, selectedNode);
+                        break;
+                    default:
+                        viewElement = renderTreeView(root, selectedName);
+                }
+
+                // Replace content efficiently
+                treeContainer.replaceChildren(viewElement);
+
+                const total = countAllNodes(root);
+                nodeCountSpan.textContent = total;
+                statsSpan.textContent = `${total} quests · ${viewType} view`;
+                statusBadge.textContent = 'ready';
+                statusBadge.className = 'status-badge success';
+            }
+
+            // ================================================================
+            //  SELECTION & DETAILS
+            // ================================================================
+            function selectNode(node) {
+                selectedNode = node;
+                selectedNodeName = node.name;
+                renderDetails(node);
+            }
+
+            function renderDetails(node) {
+                if (!node) {
+                    detailBody.replaceChildren();
+                    const empty = document.createElement('div');
+                    empty.className = 'detail-empty';
+                    empty.textContent = '← click a quest node';
+                    detailBody.appendChild(empty);
+                    return;
+                }
+
+                const frag = document.createDocumentFragment();
+
+                // Title
+                const title = document.createElement('div');
+                title.className = 'detail-title';
+                title.textContent = node.name;
+                frag.appendChild(title);
+
+                // Requirements
+                const reqSection = document.createElement('div');
+                reqSection.className = 'detail-section';
+                const reqH = document.createElement('h4');
+                reqH.textContent = 'requirements';
+                reqSection.appendChild(reqH);
+                const reqP = document.createElement('p');
+                reqP.textContent = node.requirements || 'none';
+                reqSection.appendChild(reqP);
+                frag.appendChild(reqSection);
+
+                // Rewards
+                if (node.rewards && node.rewards.length > 0) {
+                    const rewSection = document.createElement('div');
+                    rewSection.className = 'detail-section detail-rewards';
+                    const rewH = document.createElement('h4');
+                    rewH.textContent = 'rewards';
+                    rewSection.appendChild(rewH);
+                    const ul = document.createElement('ul');
+                    for (const reward of node.rewards) {
+                        const li = document.createElement('li');
+                        li.textContent = reward;
+                        ul.appendChild(li);
+                    }
+                    rewSection.appendChild(ul);
+                    frag.appendChild(rewSection);
+                }
+
+                // Unlocks info
+                const childCount = (node.children && node.children.length) || 0;
+                const info = document.createElement('div');
+                info.className = 'detail-section';
+                info.style.marginTop = '1rem';
+                info.style.opacity = '0.6';
+                info.style.fontSize = '0.8rem';
+                info.textContent = `unlocks ${childCount} quest${childCount !== 1 ? 's' : ''}`;
+                if (childCount > 0) {
+                    info.textContent += `: ${node.children.map(c => c.name).join(', ')}`;
+                }
+                frag.appendChild(info);
+
+                detailBody.replaceChildren(frag);
+            }
+
+            // ================================================================
+            //  VIEW CONTROLS
+            // ================================================================
+            function setView(view) {
+                currentView = view;
+                renderView(view);
+            }
+
+            function expandAll() {
+                if (!questData) return;
+                if (currentView === 'tree') {
+                    document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'block');
+                } else if (currentView === 'accordion') {
+                    document.querySelectorAll('.accordion-root details').forEach(d => d.open = true);
+                }
+            }
+
+            function collapseAll() {
+                if (!questData) return;
+                if (currentView === 'tree') {
+                    document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'none');
+                } else if (currentView === 'accordion') {
+                    document.querySelectorAll('.accordion-root details').forEach(d => d.open = false);
+                    const rootDetails = document.querySelector('.accordion-root details');
+                    if (rootDetails) rootDetails.open = true;
+                }
+            }
+
+            function resetView() {
+                selectedNode = null;
+                selectedNodeName = null;
+                renderDetails(null);
+                if (currentView === 'tree' || currentView === 'accordion') {
+                    expandAll();
+                }
+                renderView(currentView);
+                document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
+            }
+
+            // ================================================================
+            //  SPLITTER (lightweight)
+            // ================================================================
+            function initSplitter() {
+                const splitter = document.getElementById('splitter');
+                const leftPanel = document.getElementById('flowchartPanel');
+                const rightPanel = document.getElementById('detailPanel');
+                let dragging = false,
+                    startX, startLeftWidth, startRightWidth;
+
+                splitter.addEventListener('mousedown', function(e) {
+                    dragging = true;
+                    splitter.classList.add('active');
+                    startX = e.clientX;
+                    startLeftWidth = leftPanel.offsetWidth;
+                    startRightWidth = rightPanel.offsetWidth;
+                    document.body.style.cursor = 'ew-resize';
+                    document.body.style.userSelect = 'none';
+                    e.preventDefault();
+                });
+
+                document.addEventListener('mousemove', function(e) {
+                    if (!dragging) return;
+                    const delta = e.clientX - startX;
+                    let newLeft = startLeftWidth + delta;
+                    let newRight = startRightWidth - delta;
+                    const minW = 120;
+                    if (newLeft < minW) { newLeft = minW;
+                        newRight = startLeftWidth + startRightWidth - newLeft; }
+                    if (newRight < minW) { newRight = minW;
+                        newLeft = startLeftWidth + startRightWidth - newRight; }
+                    leftPanel.style.flex = `0 0 ${newLeft}px`;
+                    rightPanel.style.flex = `0 0 ${newRight}px`;
+                });
+
+                document.addEventListener('mouseup', function() {
+                    if (dragging) {
+                        dragging = false;
+                        splitter.classList.remove('active');
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                    }
+                });
+
+                splitter.addEventListener('dblclick', function() {
+                    leftPanel.style.flex = '';
+                    rightPanel.style.flex = '';
+                });
+            }
+
+            // ================================================================
+            //  INIT
+            // ================================================================
+            async function init() {
+                // Event listeners
+                viewSelect.addEventListener('change', function() {
+                    setView(this.value);
+                });
+                document.getElementById('expandAllBtn').addEventListener('click', expandAll);
+                document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+                document.getElementById('resetViewBtn').addEventListener('click', resetView);
+                initSplitter();
+
+                try {
+                    // Fetch with cache
+                    const rawQuests = await fetchWithCache();
+
+                    // Build tree (O(n) with Map)
+                    questData = buildTree(rawQuests);
+
+                    // Select virtual root by default
+                    selectedNode = questData;
+                    selectedNodeName = questData.name;
+                    renderDetails(questData);
+
+                    currentView = 'tree';
+                    viewSelect.value = 'tree';
+                    renderView('tree');
+
+                } catch (err) {
+                    console.error(err);
+                    treeContainer.replaceChildren();
+                    const errDiv = document.createElement('div');
+                    errDiv.className = 'error-placeholder';
+                    errDiv.textContent = `❌ Failed to load data: ${err.message}`;
+                    treeContainer.appendChild(errDiv);
+                    statusBadge.textContent = 'error';
+                    statusBadge.className = 'status-badge error';
+                    statsSpan.textContent = 'error';
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
             } else {
-                const none = document.createElement('span');
-                none.style.opacity = '0.5';
-                none.textContent = 'none';
-                childList.appendChild(none);
+                init();
             }
-            childrenSection.appendChild(childList);
-            container.appendChild(childrenSection);
-
-            return container;
-        }
-
-        // ================================================================
-        //  RENDER DISPATCHER
-        // ================================================================
-        function renderView(viewType) {
-            if (!questData) {
-                treeContainer.innerHTML = '<div class="loading-placeholder">⏳ Loading quest data…</div>';
-                return;
-            }
-
-            const root = questData;
-            const selectedName = selectedNode ? selectedNode.name : null;
-
-            let viewElement;
-            switch (viewType) {
-                case 'tree':
-                    viewElement = renderTreeView(root, selectedName);
-                    break;
-                case 'accordion':
-                    viewElement = renderAccordionView(root, selectedName);
-                    break;
-                case 'flat':
-                    viewElement = renderFlatView(root, selectedName);
-                    break;
-                case 'chain':
-                    viewElement = renderChainView(root, selectedNode);
-                    break;
-                default:
-                    viewElement = renderTreeView(root, selectedName);
-            }
-
-            treeContainer.innerHTML = '';
-            treeContainer.appendChild(viewElement);
-
-            const total = countAllNodes(root);
-            nodeCountSpan.textContent = total;
-            statsSpan.textContent = `${total} quests · ${viewType} view`;
-            statusBadge.textContent = 'ready';
-            statusBadge.className = 'status-badge success';
-        }
-
-        // ================================================================
-        //  SELECTION & DETAILS
-        // ================================================================
-        function selectNode(node) {
-            selectedNode = node;
-            selectedNodeName = node.name;
-            renderDetails(node);
-        }
-
-        function renderDetails(node) {
-            if (!node) {
-                detailBody.innerHTML = `<div class="detail-empty">← click a quest node</div>`;
-                return;
-            }
-            let html = '';
-            html += `<div class="detail-title">${node.name}</div>`;
-            html += `<div class="detail-section"><h4>requirements</h4><p>${node.requirements || 'none'}</p></div>`;
-            if (node.rewards && node.rewards.length > 0) {
-                html += `<div class="detail-section detail-rewards"><h4>rewards</h4><ul>`;
-                for (const reward of node.rewards) {
-                    html += `<li>${reward}</li>`;
-                }
-                html += `</ul></div>`;
-            }
-            const childCount = (node.children && node.children.length) || 0;
-            html += `<div class="detail-section" style="margin-top:1rem;opacity:0.6;font-size:0.8rem;">`;
-            html += `unlocks ${childCount} quest${childCount !== 1 ? 's' : ''}`;
-            if (childCount > 0) {
-                html += `: ${node.children.map(c => c.name).join(', ')}`;
-            }
-            html += `</div>`;
-            detailBody.innerHTML = html;
-        }
-
-        // ================================================================
-        //  VIEW CONTROL
-        // ================================================================
-        function setView(view) {
-            currentView = view;
-            renderView(view);
-        }
-
-        function expandAll() {
-            if (!questData) return;
-            if (currentView === 'tree') {
-                document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'block');
-            } else if (currentView === 'accordion') {
-                document.querySelectorAll('.accordion-root details').forEach(d => d.open = true);
-            }
-        }
-
-        function collapseAll() {
-            if (!questData) return;
-            if (currentView === 'tree') {
-                document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'none');
-            } else if (currentView === 'accordion') {
-                document.querySelectorAll('.accordion-root details').forEach(d => d.open = false);
-                const rootDetails = document.querySelector('.accordion-root details');
-                if (rootDetails) rootDetails.open = true;
-            }
-        }
-
-        function resetView() {
-            selectedNode = null;
-            selectedNodeName = null;
-            renderDetails(null);
-            if (currentView === 'tree' || currentView === 'accordion') {
-                expandAll();
-            }
-            renderView(currentView);
-            document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
-        }
-
-        // ================================================================
-        //  SPLITTER
-        // ================================================================
-        function initSplitter() {
-            const splitter = document.getElementById('splitter');
-            const leftPanel = document.getElementById('flowchartPanel');
-            const rightPanel = document.getElementById('detailPanel');
-            let dragging = false,
-                startX, startLeftWidth, startRightWidth;
-
-            splitter.addEventListener('mousedown', function(e) {
-                dragging = true;
-                splitter.classList.add('active');
-                startX = e.clientX;
-                startLeftWidth = leftPanel.offsetWidth;
-                startRightWidth = rightPanel.offsetWidth;
-                document.body.style.cursor = 'ew-resize';
-                document.body.style.userSelect = 'none';
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', function(e) {
-                if (!dragging) return;
-                const delta = e.clientX - startX;
-                let newLeft = startLeftWidth + delta;
-                let newRight = startRightWidth - delta;
-                const minW = 120;
-                if (newLeft < minW) { newLeft = minW;
-                    newRight = startLeftWidth + startRightWidth - newLeft; }
-                if (newRight < minW) { newRight = minW;
-                    newLeft = startLeftWidth + startRightWidth - newRight; }
-                leftPanel.style.flex = `0 0 ${newLeft}px`;
-                rightPanel.style.flex = `0 0 ${newRight}px`;
-            });
-
-            document.addEventListener('mouseup', function() {
-                if (dragging) {
-                    dragging = false;
-                    splitter.classList.remove('active');
-                    document.body.style.cursor = '';
-                    document.body.style.userSelect = '';
-                }
-            });
-
-            splitter.addEventListener('dblclick', function() {
-                leftPanel.style.flex = '';
-                rightPanel.style.flex = '';
-            });
-        }
-
-        // ================================================================
-        //  INIT
-        // ================================================================
-        async function init() {
-            // Set up event listeners
-            viewSelect.addEventListener('change', function() {
-                setView(this.value);
-            });
-
-            document.getElementById('expandAllBtn').addEventListener('click', expandAll);
-            document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
-            document.getElementById('resetViewBtn').addEventListener('click', resetView);
-
-            initSplitter();
-
-            // Load data from API
-            try {
-                questData = await fetchAndBuildTree();
-                // Select the virtual root by default so details show something
-                selectedNode = questData;
-                selectedNodeName = questData.name;
-                renderDetails(questData);
-                currentView = 'tree';
-                viewSelect.value = 'tree';
-                renderView('tree');
-            } catch (err) {
-                console.error(err);
-                treeContainer.innerHTML = `<div class="error-placeholder">❌ Failed to load data: ${err.message}</div>`;
-                statusBadge.textContent = 'error';
-                statusBadge.className = 'status-badge error';
-                statsSpan.textContent = 'error';
-            }
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-    })();
-</script>
+        })();
+    </script>
 </body>
 </html>

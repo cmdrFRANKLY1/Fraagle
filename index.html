@@ -729,7 +729,15 @@
                 corsNotice.classList.add('hidden');
             }
 
-            const randomName = dndNames[Math.floor(Math.random() * dndNames.length)];
+            // Always select at least 2 and at most 3 names randomly
+            const nameSegmentsCount = Math.floor(Math.random() * 2) + 2; // Resolves to either 2 or 3
+            const chosenNames = [];
+            for (let i = 0; i < nameSegmentsCount; i++) {
+                const randomSingleName = dndNames[Math.floor(Math.random() * dndNames.length)];
+                chosenNames.push(randomSingleName);
+            }
+            const randomName = chosenNames.join(' ');
+
             const randomProfession = dndProfessions[Math.floor(Math.random() * dndProfessions.length)];
             const randomRace = dndRaces[Math.floor(Math.random() * dndRaces.length)];
             const randomPlace = dndPlaces[Math.floor(Math.random() * dndPlaces.length)];
