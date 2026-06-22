@@ -10,7 +10,7 @@
         // Force dark mode context always
         document.documentElement.classList.add('dark');
 
-        // Tailwind configuration for premium stealth dark mode with colorful brand accents on the logo
+        // Tailwind configuration for premium stealth dark mode with colorful brand accents
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -38,16 +38,31 @@
             background-color: #09090b;
             color: #f4f4f5;
         }
-        h1 {
+        h1, h2, h3 {
             font-family: 'Space Grotesk', sans-serif;
         }
 
-        /* Unified Transition Setup for premium tactical elements with white shadows */
+        /* Unified Transition Setup with soft shadows */
         #search-box-inner {
             transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, background-color 0.3s ease;
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.08);
             background-color: #18181b;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
         }
     </style>
 </head>
@@ -60,17 +75,22 @@
             <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">T.</span>
         </div>
 
-        <!-- Center: Modern Live Clock & Date (Now with optimized visual scale hierarchy) -->
+        <!-- Center: Modern Live Clock & Date -->
         <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center">
             <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100">00:00:00</span>
             <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5 whitespace-nowrap">Loading Date...</span>
         </div>
 
-        <!-- Right Side: Profile Indicator -->
+        <!-- Right Side: Profile & Character Sheet Trigger -->
         <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl overflow-hidden border border-darkBorder shadow-sm hover:border-zinc-500/30 transition-all duration-200 cursor-pointer">
-                <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
-            </div>
+            <button id="profile-trigger-btn" class="group flex items-center space-x-2 bg-darkCard/60 border border-darkBorder hover:border-zinc-500/40 px-3 py-1.5 rounded-xl transition duration-200 focus:outline-none" title="Open Character Sheet">
+                <span class="text-xs text-zinc-400 font-mono hidden md:inline group-hover:text-zinc-200">SYS_HERO</span>
+                <div class="w-8 h-8 rounded-lg overflow-hidden border border-zinc-700/50 shadow-sm relative">
+                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80" alt="Profile" class="w-full h-full object-cover">
+                    <!-- Little Google status indicator -->
+                    <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkCard rounded-full"></span>
+                </div>
+            </button>
         </div>
     </header>
 
@@ -120,7 +140,82 @@
 
     </main>
 
-    <!-- Bottom Left HUD Performance Metric Overlay (Fixed height container prevents layout-shifting) -->
+    <!-- Side-Drawer Character Sheet -->
+    <div id="character-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-darkCard/95 border-l border-darkBorder backdrop-blur-lg shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <!-- Drawer Header -->
+        <div class="p-6 border-b border-darkBorder flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span class="text-xs px-2 py-1 bg-tarkoogleBlue/10 text-tarkoogleBlue border border-tarkoogleBlue/20 rounded font-mono">D&D Core V1</span>
+                <h2 class="text-lg font-bold tracking-tight text-zinc-100">Hero Profile</h2>
+            </div>
+            <button id="close-drawer-btn" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Drawer Content -->
+        <div class="flex-grow overflow-y-auto p-6 space-y-6">
+            <!-- Hero Card Header -->
+            <div class="relative bg-zinc-900/50 rounded-2xl p-5 border border-darkBorder overflow-hidden group">
+                <!-- Decorative absolute grid lines -->
+                <div class="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none"></div>
+                <div class="flex items-center space-x-4 relative z-10">
+                    <div class="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-tarkoogleBlue">
+                        <img id="char-avatar" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80" alt="Character Avatar" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <h3 id="char-name" class="text-xl font-bold text-zinc-100 tracking-tight">Loading...</h3>
+                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                            <span id="char-race" class="text-xs px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded font-semibold border border-zinc-700">Race</span>
+                            <span id="char-profession" class="text-xs px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded font-semibold border border-zinc-700">Profession</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location block -->
+                <div class="mt-4 pt-3 border-t border-zinc-800/80 flex items-center text-xs text-zinc-400 relative z-10">
+                    <svg class="w-4 h-4 text-tarkoogleRed mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span id="char-location" class="font-medium text-zinc-300 truncate">Loading coordinates...</span>
+                </div>
+            </div>
+
+            <!-- Google-Style Attributes Grid -->
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-widest text-zinc-500 font-mono">Attributes & Stats</span>
+                    <span class="text-[10px] text-zinc-400 font-mono">SYSTEM_STABLE</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3" id="attributes-grid">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Bio Description Card -->
+            <div class="bg-zinc-900/30 border border-darkBorder rounded-xl p-4 text-xs space-y-2">
+                <span class="font-mono text-[10px] text-zinc-500 uppercase tracking-wider block">Generated Narrative Bio</span>
+                <p id="char-bio" class="text-zinc-400 leading-relaxed italic">
+                    Calculating narrative parameters...
+                </p>
+            </div>
+        </div>
+
+        <!-- Drawer Footer with Re-roll Button -->
+        <div class="p-6 border-t border-darkBorder bg-zinc-950/60 flex space-x-3">
+            <button id="reroll-btn" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-tarkoogleBlue to-tarkoogleGreen hover:opacity-95 text-zinc-900 font-bold text-xs tracking-wider uppercase transition focus:outline-none flex items-center justify-center space-x-2 shadow-lg shadow-tarkoogleBlue/10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18"></path>
+                </svg>
+                <span>Re-Roll Identity</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bottom Left HUD Performance Metric Overlay -->
     <div class="fixed bottom-6 left-6 flex flex-col items-start justify-start select-none z-20 h-12 w-[320px] sm:w-[400px]">
         <!-- Load time tag -->
         <span id="load-time-tag" class="text-[9px] sm:text-xs font-mono font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_3px_rgba(255,255,255,0.1)] h-5 inline-block"></span>
@@ -185,6 +280,20 @@
         let currentVersion = "v0.1 (alpha)";
         let currentTitle = "Tarkoogle";
 
+        // Fallbacks for D&D Module JSON targets
+        let dndNames = ["Kaelen Hearthfield", "Jaxson Vane", "Theron Ironfist", "Lyra Whispersmith", "Brogden Stonefury", "Zariel Stormweaver", "Fiona Oakheart", "Nikos Shadowmend"];
+        let dndProfessions = ["Net-Weaver", "Cyber-Mage", "Relic-Hunter", "Grid-Stalker", "Spell-Compiler", "Shadow-Broker", "Chrono-Architect", "Bio-Engineer"];
+        let dndRaces = ["Deep Gnome", "Elf-Cyborg", "Holographic Construct", "Silicon Dwarf", "Neon Half-Orc", "Hyper-Tiefling", "Synth-Human"];
+        let dndPlaces = ["Menzoberranzan Neon Grid", "The Zenith Spire", "Sector 7 Storage Vaults", "Aether Nexus Terminal", "Cyber-Dungeon 404", "Quantum Basin Base Camp"];
+        let dndAttributes = [
+            { name: "Strength", code: "STR", color: "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5" },
+            { name: "Dexterity", code: "DEX", color: "border-tarkoogleGreen/50 hover:bg-tarkoogleGreen/5" },
+            { name: "Constitution", code: "CON", color: "border-tarkoogleYellow/50 hover:bg-tarkoogleYellow/5" },
+            { name: "Intelligence", code: "INT", color: "border-tarkoogleBlue/50 hover:bg-tarkoogleBlue/5" },
+            { name: "Wisdom", code: "WIS", color: "border-zinc-500/50 hover:bg-zinc-500/5" },
+            { name: "Charisma", code: "CHA", color: "border-purple-500/50 hover:bg-purple-500/5" }
+        ];
+
         async function loadResourceData() {
             // Fetch titles JSON
             const titlesData = await fetchFileJSON('resources/rndTitles.json') || await fetchFileJSON('rndTitles.json') || await fetchFileJSON('/resources/rndTitles.json');
@@ -209,6 +318,41 @@
                 } else if (typeof versionData === 'string') {
                     currentVersion = versionData;
                 }
+            }
+
+            // --- FETCH D&D DATASETS WITH ROBUST PATH RESOLUTION ---
+            const dndNamesData = await fetchFileJSON('resources/dnd/listNames.json') || await fetchFileJSON('dnd/listNames.json') || await fetchFileJSON('/resources/dnd/listNames.json');
+            if (dndNamesData && Array.isArray(dndNamesData)) dndNames = dndNamesData;
+
+            const dndProfessionsData = await fetchFileJSON('resources/dnd/listProfession.json') || await fetchFileJSON('dnd/listProfession.json') || await fetchFileJSON('/resources/dnd/listProfession.json');
+            if (dndProfessionsData && Array.isArray(dndProfessionsData)) dndProfessions = dndProfessionsData;
+
+            const dndRacesData = await fetchFileJSON('resources/dnd/listRace.json') || await fetchFileJSON('dnd/listRace.json') || await fetchFileJSON('/resources/dnd/listRace.json');
+            if (dndRacesData && Array.isArray(dndRacesData)) dndRaces = dndRacesData;
+
+            const dndPlacesData = await fetchFileJSON('resources/dnd/listPlace.json') || await fetchFileJSON('dnd/listPlace.json') || await fetchFileJSON('/resources/dnd/listPlace.json');
+            if (dndPlacesData && Array.isArray(dndPlacesData)) dndPlaces = dndPlacesData;
+
+            const dndAttributesData = await fetchFileJSON('resources/dnd/listAttributes.json') || await fetchFileJSON('dnd/listAttributes.json') || await fetchFileJSON('/resources/dnd/listAttributes.json');
+            if (dndAttributesData && Array.isArray(dndAttributesData)) {
+                // Keep the structural schema safe, map simple strings to structural configuration if needed
+                dndAttributes = dndAttributesData.map((attr, index) => {
+                    const presetColors = [
+                        "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5",
+                        "border-tarkoogleGreen/50 hover:bg-tarkoogleGreen/5",
+                        "border-tarkoogleYellow/50 hover:bg-tarkoogleYellow/5",
+                        "border-tarkoogleBlue/50 hover:bg-tarkoogleBlue/5",
+                        "border-zinc-500/50 hover:bg-zinc-500/5",
+                        "border-purple-500/50 hover:bg-purple-500/5"
+                    ];
+                    const name = typeof attr === 'string' ? attr : (attr.name || "Attribute");
+                    const code = typeof attr === 'string' ? attr.substring(0, 3).toUpperCase() : (attr.code || "ATT");
+                    return {
+                        name: name,
+                        code: code,
+                        color: presetColors[index % presetColors.length]
+                    };
+                });
             }
         }
 
@@ -540,10 +684,58 @@
             }
         }
 
+        // --- D&D HERO SYSTEM LOGIC ---
+        function generateHeroIdentity() {
+            const randomName = dndNames[Math.floor(Math.random() * dndNames.length)];
+            const randomProfession = dndProfessions[Math.floor(Math.random() * dndProfessions.length)];
+            const randomRace = dndRaces[Math.floor(Math.random() * dndRaces.length)];
+            const randomPlace = dndPlaces[Math.floor(Math.random() * dndPlaces.length)];
+
+            document.getElementById('char-name').textContent = randomName;
+            document.getElementById('char-race').textContent = randomRace;
+            document.getElementById('char-profession').textContent = randomProfession;
+            document.getElementById('char-location').textContent = randomPlace;
+
+            // Generate customized stats
+            const attributesGrid = document.getElementById('attributes-grid');
+            if (attributesGrid) {
+                attributesGrid.innerHTML = '';
+                dndAttributes.forEach(attr => {
+                    // Standard d&d stats generator (3d6 plus class adjustments)
+                    const baseScore = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 3;
+                    const modifier = Math.floor((baseScore - 10) / 2);
+                    const formattedModifier = modifier >= 0 ? `+${modifier}` : modifier;
+
+                    const attrBlock = document.createElement('div');
+                    attrBlock.className = `p-3 bg-zinc-900/60 rounded-xl border border-darkBorder ${attr.color} transition-all duration-300 flex items-center justify-between select-none`;
+                    attrBlock.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">${attr.name}</span>
+                            <span class="text-sm font-bold text-zinc-200 mt-0.5">${attr.code}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-lg font-extrabold font-mono text-zinc-100">${baseScore}</span>
+                            <span class="text-[10px] font-mono block text-zinc-400 font-semibold">${formattedModifier}</span>
+                        </div>
+                    `;
+                    attributesGrid.appendChild(attrBlock);
+                });
+            }
+
+            // Create contextual Bio narrative based on generated criteria
+            const bios = [
+                `A seasoned ${randomRace} operating as a clandestine ${randomProfession} under the neon-lit canopy of ${randomPlace}. System records indicate high-risk tracking protocols.`,
+                `Originating from ${randomPlace}, this ${randomRace} ${randomProfession} utilizes highly-threaded security bypasses to harvest intelligence caches.`,
+                `This elusive ${randomRace} has achieved legendary status in ${randomPlace} as a rogue ${randomProfession}, running on localized overdrive kernels.`
+            ];
+            document.getElementById('char-bio').textContent = bios[Math.floor(Math.random() * bios.length)];
+        }
+
         // --- BOOTSTRAP INITIALIZATION ---
         async function initializeHubData() {
             await loadResourceData();
             loadDynamicTitleAndSubtitle();
+            generateHeroIdentity();
         }
 
         document.addEventListener('DOMContentLoaded', initializeHubData);
@@ -611,6 +803,42 @@
             });
         }
 
+        // --- 6. DRAWER SLIDE CONTROLS ---
+        const profileTrigger = document.getElementById('profile-trigger-btn');
+        const charDrawer = document.getElementById('character-drawer');
+        const closeDrawerBtn = document.getElementById('close-drawer-btn');
+        const rerollBtn = document.getElementById('reroll-btn');
+
+        function toggleCharacterDrawer() {
+            if (charDrawer) {
+                const isOpen = !charDrawer.classList.contains('translate-x-full');
+                if (isOpen) {
+                    charDrawer.classList.add('translate-x-full');
+                } else {
+                    charDrawer.classList.remove('translate-x-full');
+                }
+            }
+        }
+
+        if (profileTrigger) {
+            profileTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleCharacterDrawer();
+            });
+        }
+
+        if (closeDrawerBtn) {
+            closeDrawerBtn.addEventListener('click', () => {
+                if (charDrawer) charDrawer.classList.add('translate-x-full');
+            });
+        }
+
+        if (rerollBtn) {
+            rerollBtn.addEventListener('click', () => {
+                generateHeroIdentity();
+            });
+        }
+
         window.addEventListener('keydown', (e) => {
             if (e.key === '/' && document.activeElement !== searchInput && searchInput) {
                 e.preventDefault();
@@ -621,6 +849,7 @@
                     searchInput.blur();
                 }
                 closeImpressum();
+                if (charDrawer) charDrawer.classList.add('translate-x-full');
             }
         });
     </script>
