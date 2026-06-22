@@ -395,6 +395,9 @@
         let currentVersion = "";
         let currentTitle = "";
 
+        // Fallback version name pool
+        let versionNamesList = ["alpha", "beta", "gamma", "delta", "epsilon", "omega"];
+
         // Pure RPG fantasy names entirely clean of Tarkov terms
         let dndNames = ["Eldrin", "Lyra", "Valen", "Aethelgard", "Sariel", "Thorne", "Zephyr", "Maeve", "Garrick", "Kaelen", "Rowena", "Baelor", "Fara", "Doran", "Kaelthas", "Alister", "Elysia", "Theron", "Vael", "Gideon", "Mireia"];
 
@@ -574,7 +577,11 @@
             versionTag.classList.remove('opacity-0');
             versionTag.classList.add('opacity-100');
 
-            const targetText = currentVersion;
+            // Select a random version name to stitch into standard formatting
+            const randomName = versionNamesList[Math.floor(Math.random() * versionNamesList.length)] || "alpha";
+
+            // Pattern format: <versionNumber> (<versionName>)
+            const targetText = `${currentVersion} (${randomName})`;
             const possibleChars = "0123456789_#@*&%$?![]=+/\\";
             let iterations = 0;
 
@@ -582,7 +589,7 @@
 
             versionTag.decryptInterval = setInterval(() => {
                 let displayText = targetText.split("").map((char, index) => {
-                    if (char === " ") return " ";
+                    if (char === " " || char === "(" || char === ")") return char;
                     if (index < iterations) return targetText[index];
                     return possibleChars[Math.floor(Math.random() * possibleChars.length)];
                 }).join("");
@@ -1106,22 +1113,40 @@
                 if (bioData.secrets) bioSecrets = bioData.secrets;
             }
 
-            // Retrieve version information purely dynamically from indexVersion.json or indexVersion.html
-            const versionData = await fetchFileJSON('./resources/text/indexVersion.json') ||
-                                await fetchFileJSON('indexVersion.json') ||
-                                await fetchFileJSON('./resources/text/indexVersion.html') ||
-                                await fetchFileJSON('indexVersion.html');
+            // Retrieve version information purely dynamically from indexVersionNumber.html or indexVersionNumber.json
+            const versionData = await fetchFileJSON('./resources/text/indexVersionNumber.json') ||
+                                await fetchFileJSON('indexVersionNumber.json') ||
+                                await fetchFileJSON('./resources/text/indexVersionNumber.html') ||
+                                await fetchFileJSON('indexVersionNumber.html');
             if (versionData) {
                 if (typeof versionData === 'object' && versionData.version) {
                     currentVersion = versionData.version;
                 } else if (typeof versionData === 'string') {
-                    currentVersion = versionData;
+                    // Extract version line directly from HTML list/text format if retrieved raw
+                    currentVersion = versionData.trim().split('\n')[0];
                 } else if (typeof versionData === 'object') {
                     for (let key in versionData) {
                         if (typeof versionData[key] === 'string') {
                             currentVersion = versionData[key];
                             break;
                         }
+                    }
+                }
+            }
+
+            // Retrieve version names purely dynamically from indexVersionName.html or indexVersionName.json
+            const nameData = await fetchFileJSON('./resources/text/indexVersionName.json') ||
+                             await fetchFileJSON('indexVersionName.json') ||
+                             await fetchFileJSON('./resources/text/indexVersionName.html') ||
+                             await fetchFileJSON('indexVersionName.html');
+            if (nameData) {
+                if (Array.isArray(nameData)) {
+                    versionNamesList = nameData;
+                } else if (typeof nameData === 'string') {
+                    // Extract lines directly from HTML raw text format
+                    const parsedLines = nameData.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    if (parsedLines.length > 0) {
+                        versionNamesList = parsedLines;
                     }
                 }
             }
