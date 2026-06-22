@@ -102,7 +102,7 @@
 
         <!-- Center: Modern Live Clock & Date -->
         <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center">
-            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100">00:00:00</span>
+            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100 font-mono">00:00:00</span>
             <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5 whitespace-nowrap">Loading Date...</span>
         </div>
 
@@ -119,18 +119,18 @@
     </header>
 
     <!-- Unified Split Sidebar & Content Container -->
-    <div class="flex-grow flex flex-col lg:flex-row w-full max-w-5xl mx-auto px-6 gap-12 py-4 z-10 relative items-stretch">
+    <div class="flex-grow w-full max-w-5xl mx-auto px-6 py-4 z-10 relative flex items-center justify-center min-h-[70vh]">
 
-        <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons) -->
-        <aside id="left-sidebar-links" class="hidden lg:flex flex-col w-52 flex-shrink-0 select-none text-left pt-20">
+        <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, positioned absolutely to prevent layout shifts) -->
+        <aside id="left-sidebar-links" class="hidden lg:flex absolute left-6 top-32 flex-col w-52 select-none text-left">
             <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4 border-b border-darkBorder pb-1.5">Directory</h4>
-            <nav id="quick-links-list" class="flex flex-col gap-3">
+            <nav id="quick-links-list" class="flex flex-col gap-2">
                 <!-- Loaded dynamically -->
             </nav>
         </aside>
 
-        <!-- Main Search Container -->
-        <main id="main-container" class="flex-grow flex flex-col items-center justify-center w-full text-center">
+        <!-- Main Search Container (Remains perfectly centered) -->
+        <main id="main-container" class="w-full max-w-2xl mx-auto flex flex-col items-center justify-center text-center">
 
             <!-- Logo Header -->
             <div class="mb-6 select-none text-center flex flex-col items-center justify-center w-full relative">
@@ -452,6 +452,7 @@
         // Fetcher Utility with safe handling - Upgraded to handle raw text list formats cleanly
         async function fetchFileJSON(url) {
             try {
+                if (!url || url.trim() === "" || url.trim() === "/") return null;
                 const response = await fetch(url);
                 if (response.ok) {
                     const text = await response.text();
@@ -1077,56 +1078,41 @@
 
         // --- DYNAMIC RENDERING OF OFFICIAL COMMUNITY LINKS ---
         function renderOfficialDirectories() {
-            const dock = document.getElementById('quick-links-dock');
+            const sidebarList = document.getElementById('quick-links-list');
             const modalGrid = document.getElementById('impressum-directory-grid');
-            if (!dock || !modalGrid) return;
+            if (!sidebarList || !modalGrid) return;
 
-            dock.innerHTML = '';
+            sidebarList.innerHTML = '';
             modalGrid.innerHTML = '';
 
             const parentHeading = modalGrid.previousElementSibling; // h4 element in impressum directory
+            const sidebarAside = document.getElementById('left-sidebar-links');
 
             // If there's nothing to show, show nothing
             if (!officialLinks || officialLinks.length === 0) {
                 if (parentHeading) parentHeading.classList.add('hidden');
-                dock.classList.add('hidden');
+                if (sidebarAside) sidebarAside.classList.add('hidden');
                 return;
             } else {
                 if (parentHeading) parentHeading.classList.remove('hidden');
-                dock.classList.remove('hidden');
+                if (sidebarAside) {
+                    sidebarAside.classList.remove('hidden');
+                    sidebarAside.classList.add('lg:flex');
+                }
             }
 
-            // Render home dock shortcuts (select the first 6 crucial links to retain clean visual ratios)
-            const dockShortcuts = officialLinks.slice(0, 6);
+            // Render left sidebar text-based shortcuts (No icons, aligned left, clean list, Verdana)
             const dockFragment = document.createDocumentFragment();
-
-            dockShortcuts.forEach((link, idx) => {
-                let hostname = "";
-                try {
-                    hostname = new URL(link.url).hostname;
-                } catch(e) {
-                    hostname = "escapefromtarkov.com";
-                }
-
-                // High-resolution clean site symbol from standard service
-                const faviconSrc = `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
-                const fallbackLetter = link.name.charAt(0);
+            officialLinks.forEach(link => {
                 const btn = document.createElement('a');
                 btn.href = link.url;
                 btn.target = "_blank";
                 btn.rel = "noopener noreferrer";
-                btn.className = `group flex flex-col items-center justify-center text-center transition focus:outline-none w-14`;
-
-                btn.innerHTML = `
-                    <div class="w-12 h-12 rounded-full border border-darkBorder bg-darkCard/60 hover:bg-darkCard hover:border-zinc-500 hover:text-white flex items-center justify-center p-2.5 transition-all duration-300 group-hover:scale-105 group-hover:bg-darkCard group-hover:shadow-[0_0_12px_rgba(255,255,255,0.03)] relative overflow-hidden text-white">
-                        <img src="${faviconSrc}" alt="${link.name}" class="w-full h-full object-contain filter brightness-95 group-hover:brightness-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="hidden text-sm font-bold uppercase">${fallbackLetter}</span>
-                    </div>
-                    <span class="text-[9px] font-medium text-zinc-500 group-hover:text-zinc-300 mt-2 truncate w-full tracking-wider transition-colors">${link.name}</span>
-                `;
+                btn.className = "text-[11px] font-medium text-zinc-400 hover:text-white transition-colors duration-200 block py-1 text-left";
+                btn.textContent = link.name;
                 dockFragment.appendChild(btn);
             });
-            dock.appendChild(dockFragment);
+            sidebarList.appendChild(dockFragment);
 
             // Render complete list of items inside Impressum modal grid (static load)
             const modalFragment = document.createDocumentFragment();
