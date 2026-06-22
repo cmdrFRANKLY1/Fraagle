@@ -84,7 +84,7 @@
 
         /* ==========================================================================
            1. DARK MODE STYLING SCHEMES
-           ========================================================================== */
+           ========================================================================= */
 
         /* 1.1 DARK MODE + NO GRADIENT (White Shadow) */
         html.dark body[data-gradient="disabled"] #search-box-inner,
@@ -117,7 +117,7 @@
 
         /* ==========================================================================
            2. LIGHT MODE STYLING SCHEMES
-           ========================================================================== */
+           ========================================================================= */
 
         /* 2.1 LIGHT MODE + NO GRADIENT (Black Shadow) */
         html:not(.dark) body[data-gradient="disabled"] #search-box-inner,
@@ -662,7 +662,7 @@
                 "at the speed of a startled twilight twilight turtle.", "inside a comfortable pocket dimension.",
                 "approved by intergalactic wizards.", "optimized for maximum coziness.",
                 "with a gentle sprinkle of stardust.", "without breaking the space-time continuum.",
-                "just for the pure joy of discovery.", "conceived by well-meaning calculators.",
+                "just for the joy of discovery.", "conceived by well-meaning calculators.",
                 "under the soft glow of friendly neon signs.", "strictly for entertainment purposes.",
                 "because why not?", "in a strangely soothing manner.", "with absolutely no instruction manual.",
                 "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon.",
@@ -763,6 +763,104 @@
                 });
             });
 
+            // 1.5 POPULATE POPULAR THIRD-PARTY UTILITY WEBSITES IN SEARCH INDEX
+            const thirdPartyWebsites = [
+                {
+                    id: "web-db4tarkov",
+                    title: "DB4Tarkov",
+                    shortName: "db4tarkov.com",
+                    type: "website",
+                    url: "https://db4tarkov.com/",
+                    description: "High-performance all-in-one Tarkov assistant database. Slices together item prices, quick ammunition ballistics stats, quest lines, and hideout checklists.",
+                    category: "Companion Site",
+                    tags: ["Guides", "Database", "Quests", "Flea Prices"]
+                },
+                {
+                    id: "web-eftammo",
+                    title: "EFT-Ammo",
+                    shortName: "eft-ammo.com eftammo",
+                    type: "website",
+                    url: "https://www.eft-ammo.com/",
+                    description: "The gold standard interactive ballistics analysis dashboard. Compare bullet penetration power, damage values, and armor protection tables dynamically.",
+                    category: "Ammo Charts",
+                    tags: ["Ballistics", "Ammo Comparer", "Armor Damage"]
+                },
+                {
+                    id: "web-tarkovmarket",
+                    title: "Tarkov Market",
+                    shortName: "tarkov-market.com",
+                    type: "website",
+                    url: "https://tarkov-market.com/",
+                    description: "Live Flea Market price tracker offering history charts, profit calculators, item comparisons, and interactive bartering margin tools.",
+                    category: "Price Tracker",
+                    tags: ["Flea Market", "Price Trends", "Barter Profits"]
+                },
+                {
+                    id: "web-tarkovtracker",
+                    title: "Tarkov Tracker",
+                    shortName: "tarkovtracker.io",
+                    type: "website",
+                    url: "https://tarkovtracker.io/",
+                    description: "Personal hideout and quest planner. Input your current progression level to map out quest prerequisites, hideout upgrade materials, and item unlock paths.",
+                    category: "Quest Tracker",
+                    tags: ["Progression Tracker", "Hideout List", "Quest Trees"]
+                },
+                {
+                    id: "web-mapgenie",
+                    title: "MapGenie Tarkov (Map-Genie / Map Genie)",
+                    shortName: "mapgenie.io map-genie map genie maps",
+                    type: "website",
+                    url: "https://mapgenie.io/tarkov",
+                    description: "Highly comprehensive interactive map suites for Customs, Streets of Tarkov, Reserve, Woods, Interchange, Shoreline, Ground Zero, Lighthouse, and Labs.",
+                    category: "Interactive Maps",
+                    tags: ["Loot Spawns", "Extraction Points", "Key Guides", "PMC Spawns"]
+                },
+                {
+                    id: "web-tarkovhelp",
+                    title: "Tarkov Help",
+                    shortName: "tarkov.help maps",
+                    type: "website",
+                    url: "https://tarkov.help/",
+                    description: "Dynamic resource covering quests, bullet effectiveness, customized maps, spawn locators, and weapon modification blueprints.",
+                    category: "Guides Platform",
+                    tags: ["Quest Blueprints", "Spawn Maps", "Ammo Tables"]
+                },
+                {
+                    id: "web-tarkovgunsmith",
+                    title: "Tarkov Gunsmith",
+                    shortName: "tarkovgunsmith.com",
+                    type: "website",
+                    url: "https://tarkovgunsmith.com/",
+                    description: "Community weapon preset simulator. Calculate ergonomic and recoil tradeoffs on weapon builds to fit Gunsmith task checklists.",
+                    category: "Modding Tool",
+                    tags: ["Weapon Builds", "Preset Simulator", "Ergonomics Calculator"]
+                },
+                {
+                    id: "web-tarkovwiki",
+                    title: "Official Escape from Tarkov Wiki",
+                    shortName: "tarkov wiki encyclopedia fandom",
+                    type: "website",
+                    url: "https://escapefromtarkov.fandom.com/wiki/Escape_from_Tarkov_Wiki",
+                    description: "The definitive community-run encyclopedia covering items, lore, detailed quest guides, extraction details, and historical update logs.",
+                    category: "Encyclopedia",
+                    tags: ["Wiki Guides", "Item Tables", "Extraction Coordinates"]
+                }
+            ];
+
+            thirdPartyWebsites.forEach(site => {
+                searchIndex.push({
+                    id: site.id,
+                    title: site.title,
+                    shortName: site.shortName,
+                    type: site.type,
+                    url: site.url,
+                    description: site.description,
+                    category: site.category,
+                    iconLink: "https://tarkov.dev/images/traders/therapist-portrait.png", // Safe neutral fallback template icon
+                    tags: site.tags
+                });
+            });
+
             try {
                 const response = await fetch('/api/tarkov-data');
                 if (response.ok) {
@@ -773,6 +871,7 @@
                     throw new Error();
                 }
             } catch (e) {
+                // Corrected lang: e to lang: en (English) to fix failure to load data fallback
                 const fallbackItemsQuery = `query {
                     pvp: items(lang: en, gameMode: regular) {
                         id name shortName wikiLink iconLink basePrice weight avg24hPrice category { name }
@@ -1009,6 +1108,14 @@
                         </div>
                     </div>
                 `;
+            } else if (item.type === 'website') {
+                previewCard.innerHTML = `
+                    <div class="flex flex-col space-y-2 animate-fade-in select-none p-1">
+                        <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">${item.category}</h4>
+                        <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">${item.title}</span>
+                        <p class="text-[11px] text-zinc-500 dark:text-zinc-400 leading-normal">${item.shortName}</p>
+                    </div>
+                `;
             }
         }
 
@@ -1033,7 +1140,8 @@
                 stats: `<svg class="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`,
                 weight: `<svg class="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.5 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.5 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg>`,
                 trader: `<svg class="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`,
-                level: `<svg class="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>`
+                level: `<svg class="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>`,
+                web: `<svg class="w-4 h-4 text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>`
             };
 
             let specsList = [];
@@ -1054,6 +1162,12 @@
                 if (item.minPlayerLevel) specsList.push({ icon: icons.level, label: 'Min. Level', value: item.minPlayerLevel });
             } else if (item.type === 'trader') {
                 specsList.push({ icon: icons.trader, label: 'Role', value: 'Trader / Coordinator' });
+            } else if (item.type === 'website') {
+                specsList.push({ icon: icons.web, label: 'Portal Link', value: item.shortName.split(' ')[0] });
+                specsList.push({ icon: icons.level, label: 'Resource Type', value: item.category });
+                if (item.tags && item.tags.length > 0) {
+                    specsList.push({ icon: icons.stats, label: 'Main Focus', value: item.tags.slice(0, 2).join(', ') });
+                }
             }
 
             let specsHtml = '';
@@ -1076,10 +1190,13 @@
                 `;
             }
 
-            // Safe avatar rendering path fallback for traders
-            const fallbackAvatarUrl = item.type === 'trader' 
-                ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=128&auto=format&fit=crop&q=60'
-                : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=128&auto=format&fit=crop&q=60';
+            // Safe avatar rendering path fallback for traders and websites
+            let fallbackAvatarUrl = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=128&auto=format&fit=crop&q=60';
+            if (item.type === 'trader') {
+                fallbackAvatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=128&auto=format&fit=crop&q=60';
+            } else if (item.type === 'website') {
+                fallbackAvatarUrl = 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=128&auto=format&fit=crop&q=60';
+            }
 
             panel.innerHTML = `
                 <!-- Google Knowledge Graph Header Block (Borderless with transparent clean image details) -->
@@ -1088,7 +1205,7 @@
                         <p class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">${item.category || item.type}</p>
                         <h2 class="text-xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight tracking-tight hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                             <a href="${item.url}" target="_blank" title="Open wiki page" class="hover:underline inline-flex items-center gap-1.5">
-                                ${item.title}
+                                ${item.title.split(' (')[0]}
                                 <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-60 hover:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                 </svg>
@@ -1109,7 +1226,7 @@
 
                 <div class="mt-4 pt-3 border-t border-lightBorder dark:border-darkBorder/40">
                     <a href="${item.url}" target="_blank" class="inline-flex items-center text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors group">
-                        <span>Go to official fandom wiki page</span>
+                        <span>Go to official companion page</span>
                         <svg class="w-3.5 h-3.5 ml-1 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path>
                         </svg>
@@ -1139,7 +1256,8 @@
             let matches = searchIndex.filter(item => {
                 const title = (item?.title || '').toLowerCase();
                 const category = (item?.category || '').toLowerCase();
-                return title.includes(normalizedQuery) || category.includes(normalizedQuery);
+                const shortName = (item?.shortName || '').toLowerCase();
+                return title.includes(normalizedQuery) || category.includes(normalizedQuery) || shortName.includes(normalizedQuery);
             });
 
             // If forcedExactItem is passed, prioritize it first and rearrange adjacent matches below it
@@ -1226,7 +1344,7 @@
             renderKnowledgePanel(knowledgePanelItem || matches[0]);
 
             const hasTarkovResults = matches.some(item => 
-                item && (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest')
+                item && (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest' || item.type === 'website')
             );
 
             if (hasTarkovResults && bsgChannelsBar) {
@@ -1241,7 +1359,7 @@
             if (matches.length === 0) {
                 googleResultsContainer.innerHTML = `
                     <div class="text-left py-4 text-zinc-500 dark:text-zinc-400 text-sm">
-                        <p class="mb-2">Your search - <strong class="text-zinc-900 dark:text-zinc-100">${queryText}</strong> - did not match any documents or Tarkov items.</p>
+                        <p class="mb-2">Your search - <strong class="text-zinc-900 dark:text-zinc-100">${queryText}</strong> - did not match any companion platforms, traders, or items.</p>
                     </div>
                 `;
                 return;
@@ -1266,7 +1384,9 @@
                 // Compact padding of each search result element from p-4 to p-2.5 px-3.5. Added class 'search-result-card' for glow styles.
                 resultBlock.className = "search-result-card text-left w-full p-2.5 px-3.5 border border-transparent rounded-xl cursor-pointer group";
 
-                let breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${(item.shortName && item.shortName !== item.title) ? item.shortName : 'Item'}`;
+                let breadcrumbPath = item.type === 'website' 
+                    ? `utility-suite › ${item.shortName.split(' ')[0]}`
+                    : `escapefromtarkov.fandom.com › wiki › ${(item.shortName && item.shortName !== item.title) ? item.shortName : 'Item'}`;
 
                 let tagsHtml = '';
                 if (item.type === 'tarkov') {
@@ -1307,6 +1427,12 @@
                             ${tags.join('')}
                         </div>
                     `;
+                } else if (item.type === 'website' && item.tags) {
+                    tagsHtml = `
+                        <div class="flex flex-wrap items-center gap-1 mt-1">
+                            ${item.tags.map(t => `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/10">${t}</span>`).join('')}
+                        </div>
+                    `;
                 }
 
                 // If this is the active primary selection item, give it a prominent tag
@@ -1322,11 +1448,11 @@
                         ${primaryTagHtml}
                         <a href="${item.url}" target="_blank" class="block mb-0.5 search-result-item-link">
                             <h3 class="text-[17px] sm:text-[18px] text-blue-600 dark:text-blue-400 hover:underline font-normal leading-snug group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                                ${item.title || 'Untitled'}
+                                ${item.title.split(' (')[0] || 'Untitled'}
                             </h3>
                         </a>
                     </div>
-                    ${item.type === 'tarkov' ? tagsHtml : `
+                    ${(item.type === 'tarkov' || item.type === 'website') ? tagsHtml : `
                     <p class="text-[13px] text-zinc-600 dark:text-zinc-400 leading-normal">
                         <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[9px] tracking-wider px-1 py-0.5 rounded mr-1 select-none uppercase">
                             ${item.category || 'General'}
@@ -1337,7 +1463,7 @@
                 `;
 
                 // Set up mouse events for pre-viewing
-                if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest') {
+                if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest' || item.type === 'website') {
                     const hoverTarget = resultBlock.querySelector('.search-result-item-link');
                     hoverTarget.addEventListener('mouseenter', (e) => startHoverPreview(e, item));
                     hoverTarget.addEventListener('mousemove', (e) => positionPreviewCard(e));
@@ -1404,12 +1530,14 @@
                 let badgeColor = 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 dark:border-indigo-500/30';
                 if (item.type === 'tarkov') {
                     badgeColor = 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/20 dark:border-amber-500/30';
+                } else if (item.type === 'website') {
+                    badgeColor = 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20 dark:border-blue-500/30';
                 }
 
                 element.innerHTML = `
                     <div class="flex items-center space-x-3 truncate">
                         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500/40 flex-shrink-0"></div>
-                        <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">${item.title || 'Untitled'}</span>
+                        <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">${item.title.split(' (')[0] || 'Untitled'}</span>
                     </div>
                     <span class="text-[10px] font-semibold border ${badgeColor} uppercase tracking-wider px-2 py-0.5 rounded-full select-none max-w-[120px] truncate">
                         ${item.category || 'General'}
@@ -1421,15 +1549,15 @@
                     e.stopPropagation();
                     
                     // Set search value and trigger the search
-                    searchInput.value = item.title || '';
+                    searchInput.value = item.title.split(' (')[0] || '';
                     if (clearBtn) clearBtn.classList.remove('hidden');
                     if (dropdownResults) dropdownResults.classList.add('hidden');
                     
                     // Execute search and pass item for knowledge panel rendering
-                    executeSearch(item.title || '', item);
+                    executeSearch(item.title.split(' (')[0] || '', item);
                 });
 
-                if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest') {
+                if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest' || item.type === 'website') {
                     element.addEventListener('mouseenter', (e) => startHoverPreview(e, item));
                     element.addEventListener('mousemove', (e) => positionPreviewCard(e));
                     element.addEventListener('mouseleave', cancelHoverTooltip);
@@ -1459,9 +1587,13 @@
                 const query = e.target.value.toLowerCase().trim();
 
                 if (query.length > 0) {
-                    if (clearBtn) clearBtn.classList.remove('hidden');
+                    if (clearBtn) {
+                        clearBtn.classList.remove('hidden');
+                    }
                 } else {
-                    if (clearBtn) clearBtn.classList.add('hidden');
+                    if (clearBtn) {
+                        clearBtn.classList.add('hidden');
+                    }
                     if (dropdownResults) dropdownResults.classList.add('hidden');
                     if (googleResultsView) googleResultsView.classList.add('hidden');
                     cancelHoverPreview();
@@ -1471,7 +1603,8 @@
                 matchedResultsBuffer = searchIndex.filter(item => {
                     const title = (item?.title || '').toLowerCase();
                     const category = (item?.category || '').toLowerCase();
-                    return title.includes(query) || category.includes(query);
+                    const shortName = (item?.shortName || '').toLowerCase();
+                    return title.includes(query) || category.includes(query) || shortName.includes(query);
                 });
 
                 renderAutocompleteDropdown(matchedResultsBuffer, true);
@@ -1520,13 +1653,17 @@
         const closeImpressumOkBtn = document.getElementById('close-impressum-ok-btn');
 
         function openImpressum() {
-            if (impressumModal) impressumModal.classList.remove('hidden');
+            if (impressumModal) {
+                impressumModal.classList.remove('hidden');
+            }
             document.body.classList.add('overflow-hidden');
         }
 
         // Close popup dialog gracefully
         function closeImpressum() {
-            if (impressumModal) impressumModal.classList.add('hidden');
+            if (impressumModal) {
+                impressumModal.classList.add('hidden');
+            }
             document.body.classList.remove('overflow-hidden');
         }
 
