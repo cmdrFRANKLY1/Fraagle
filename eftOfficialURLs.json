@@ -1,0 +1,17 @@
+[
+  { "name": "Official Website", "url": "https://www.escapefromtarkov.com" },
+  { "name": "Official Support", "url": "https://www.escapefromtarkov.com/support" },
+  { "name": "Arena Website", "url": "https://arena.tarkov.com" },
+  { "name": "Official Wiki", "url": "https://escapefromtarkov.fandom.com" },
+  { "name": "Steam Store Page", "url": "https://store.steampowered.com/app/3932890/Escape_from_Tarkov" },
+  { "name": "Twitter", "url": "https://twitter.com/bstategames" },
+  { "name": "Facebook", "url": "https://www.facebook.com/escapefromtarkov" },
+  { "name": "Instagram", "url": "https://www.instagram.com/escapefromtarkovofficial" },
+  { "name": "YouTube", "url": "https://www.youtube.com/channel/UC5QGploHhl9_XaxDiHZKamg" },
+  { "name": "Twitch", "url": "https://www.twitch.tv/escapefromtarkov" },
+  { "name": "Discord", "url": "https://discord.gg/escapefromtarkovofficial" },
+  { "name": "VK", "url": "https://vk.com/escapefromtarkov" },
+  { "name": "Telegram", "url": "https://t.me/escapefromtarkov" },
+  { "name": "Telegram Arena", "url": "https://t.me/escapefromtarkovarena" },
+  { "name": "Reddit", "url": "https://www.reddit.com/r/EscapefromTarkov" }
+]

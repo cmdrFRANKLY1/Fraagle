@@ -10,7 +10,7 @@
         // Force dark mode context always
         document.documentElement.classList.add('dark');
 
-        // Tailwind configuration for premium stealth dark mode with colorful brand accents on the logo
+        // Tailwind configuration for premium stealth dark mode with colorful brand accents
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -45,7 +45,7 @@
         /* Unified Transition Setup with soft shadows */
         #search-box-inner {
             transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, background-color 0.3s ease;
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             border-color: rgba(255, 255, 255, 0.08);
             background-color: #18181b;
         }
@@ -53,6 +53,7 @@
         /* Custom Scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: #09090b;
@@ -63,6 +64,13 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #3f3f46;
+        }
+
+        /* Backdrop Blur Adjustments */
+        .glass-panel {
+            background: rgba(24, 24, 27, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
     </style>
 </head>
@@ -76,7 +84,7 @@
             <!-- Inner branding label pulsing -->
             <div class="absolute text-sm font-bold font-mono tracking-tight text-zinc-400 animate-pulse">T.</div>
         </div>
-        <span class="text-xs font-mono font-bold tracking-widest text-zinc-500 mt-4 uppercase animate-pulse">Syncing Database...</span>
+        <span class="text-xs font-mono font-bold tracking-widest text-zinc-500 mt-4 uppercase animate-pulse" id="loading-status">Syncing Databases...</span>
     </div>
 
     <!-- Top Navigation Bar -->
@@ -88,17 +96,22 @@
 
         <!-- Center: Modern Live Clock & Date -->
         <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center">
-            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100">00:00:00</span>
+            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100 font-mono">00:00:00</span>
             <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5 whitespace-nowrap">Loading Date...</span>
         </div>
 
         <!-- Right Side: Profile & Character Sheet Trigger -->
         <div class="flex items-center space-x-3">
-            <button id="profile-trigger-btn" class="group flex items-center justify-center bg-darkCard/60 p-1.5 rounded-xl transition duration-200 focus:outline-none" title="Open Character Sheet">
+            <!-- Quick Database State Tag -->
+            <div id="db-status-badge" class="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-zinc-800/60 border border-zinc-700/50 text-[10px] font-mono text-zinc-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-tarkoogleGreen inline-block"></span>
+                <span id="db-items-count">0 Items</span>
+            </div>
+
+            <button id="profile-trigger-btn" class="group flex items-center justify-center bg-darkCard/60 p-1.5 rounded-xl border border-darkBorder hover:border-zinc-700 transition duration-200 focus:outline-none" title="Open Character Sheet">
                 <div class="w-8 h-8 rounded-lg overflow-hidden shadow-sm relative">
-                    <!-- Added id to header profile image for synchronized updates -->
-                    <img id="header-profile-img" src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
-                    <!-- Dynamic Google Status Indicator Dot -->
+                    <img id="header-profile-img" src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=100&auto=format&fit=crop&q=80" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
+                    <!-- Dynamic Status Indicator Dot -->
                     <span id="profile-status-dot" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkCard rounded-full transition-colors duration-300"></span>
                 </div>
             </button>
@@ -106,10 +119,10 @@
     </header>
 
     <!-- Main Content Container -->
-    <main id="main-container" class="flex-grow flex flex-col items-center justify-center px-4 w-full max-w-3xl mx-auto z-10">
+    <main id="main-container" class="flex-grow flex flex-col items-center justify-center px-4 w-full max-w-4xl mx-auto z-10 py-8">
 
         <!-- Logo Header -->
-        <div class="mb-8 select-none text-center flex flex-col items-center justify-center w-full relative">
+        <div class="mb-6 select-none text-center flex flex-col items-center justify-center w-full relative">
             <div class="relative inline-flex items-center justify-center">
                 <!-- Title is strictly centered by wrapper. Min-height prevents layout shift while waiting for load -->
                 <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex justify-center items-center drop-shadow-sm z-10 min-h-[48px] sm:min-h-[72px]">
@@ -128,33 +141,113 @@
         </div>
 
         <!-- Sleek Search Box Wrapper -->
-        <div class="w-full max-w-[584px] relative group z-30" id="search-container">
-            <div id="search-box-inner" class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-darkBorder bg-darkCard/75 backdrop-blur-md focus-within:bg-darkCard shadow-sm hover:shadow-lg focus-within:shadow-lg focus-within:border-zinc-500/50 transition-all duration-300">
+        <div class="w-full max-w-[640px] relative group z-30" id="search-container">
+            <div id="search-box-inner" class="flex items-center w-full h-[54px] px-5 rounded-2xl border border-darkBorder bg-darkCard/80 backdrop-blur-md focus-within:bg-darkCard focus-within:shadow-xl focus-within:border-zinc-600 transition-all duration-300">
                 <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 <input
                     type="text"
                     id="search-input"
-                    placeholder="Search the web..."
+                    placeholder="Search Tarkov items, ammo, gear..."
                     class="w-full bg-transparent border-none outline-none text-[16px] text-zinc-100 placeholder-zinc-500"
                     autocomplete="off"
                     autofocus
                 >
-                <button id="clear-search" class="hidden p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 focus:outline-none mr-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="clear-search" class="hidden p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 focus:outline-none mr-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
+
+            <!-- Dynamic Live Suggestions / Results Drawer -->
+            <div id="suggestions-box" class="hidden absolute top-full left-0 right-0 mt-2 bg-darkCard/95 border border-darkBorder rounded-2xl shadow-2xl glass-panel overflow-hidden z-40 transition-all duration-200">
+                <!-- Live Categories / Filter Pills inside Suggestions -->
+                <div class="flex items-center space-x-2 p-3 border-b border-darkBorder overflow-x-auto text-xs whitespace-nowrap scrollbar-none" id="filter-pills-container">
+                    <!-- Loaded dynamically -->
+                </div>
+
+                <!-- Suggestions Feed Container -->
+                <div id="suggestions-feed" class="max-h-[380px] overflow-y-auto divide-y divide-darkBorder/60">
+                    <!-- Loaded dynamically in Realtime -->
+                </div>
+
+                <!-- Footer with search metrics and counts -->
+                <div class="p-2.5 px-4 bg-darkBg/60 border-t border-darkBorder flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+                    <span id="results-count-stats">Type to start querying...</span>
+                    <span>Press <kbd class="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400 font-semibold">ESC</kbd> to dismiss</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Bookmark / Tactical Quick Links Dock (Loaded from eftOfficialURLs.json) -->
+        <div id="quick-links-dock" class="w-full max-w-[640px] mt-8 flex flex-wrap items-center justify-center gap-6 select-none">
+            <!-- Loaded dynamically with high-speed rendering -->
         </div>
 
     </main>
 
+    <!-- Item Preview Modal Overlay -->
+    <div id="item-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-darkCard border border-darkBorder rounded-2xl max-w-lg w-full shadow-2xl backdrop-blur-xl p-6 relative transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+            <button id="close-item-btn" class="absolute top-4 right-4 p-1.5 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <div class="flex items-start gap-4 mb-5">
+                <div class="w-16 h-16 rounded-xl bg-darkBg border border-darkBorder p-2 flex items-center justify-center flex-shrink-0">
+                    <img id="modal-item-icon" src="" alt="" class="max-w-full max-h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=100&auto=format&fit=crop&q=80'">
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span id="modal-item-category" class="text-[9px] font-mono tracking-widest font-bold uppercase text-tarkoogleBlue">Category</span>
+                    <h2 id="modal-item-name" class="text-xl font-bold tracking-tight text-zinc-100 truncate">Item Name</h2>
+                    <p id="modal-item-short" class="text-xs text-zinc-400 font-medium mt-0.5">Short Name</p>
+                </div>
+            </div>
+
+            <!-- Price Analysis Cards -->
+            <div class="grid grid-cols-2 gap-3 mb-5 select-none">
+                <div class="p-3.5 rounded-xl bg-darkBg border border-darkBorder">
+                    <span class="text-[10px] font-mono font-bold tracking-wider text-tarkoogleBlue uppercase">PvP Market Price</span>
+                    <div class="text-lg font-extrabold text-zinc-100 font-mono mt-1" id="modal-item-pvp">₽0</div>
+                    <span class="text-[9px] text-zinc-500 block">24h average market pricing</span>
+                </div>
+                <div class="p-3.5 rounded-xl bg-darkBg border border-darkBorder">
+                    <span class="text-[10px] font-mono font-bold tracking-wider text-tarkoogleGreen uppercase">PvE Market Price</span>
+                    <div class="text-lg font-extrabold text-zinc-100 font-mono mt-1" id="modal-item-pve">₽0</div>
+                    <span class="text-[9px] text-zinc-500 block">24h average market pricing</span>
+                </div>
+            </div>
+
+            <!-- Specific Properties Panel -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-mono font-bold text-zinc-500 uppercase tracking-widest border-b border-darkBorder pb-1">Specifications</h4>
+                <div class="grid grid-cols-2 gap-3 text-xs" id="modal-properties-grid">
+                    <!-- Sourced Dynamically -->
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="mt-6 pt-4 border-t border-darkBorder flex justify-between items-center">
+                <a id="modal-wiki-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 text-xs font-semibold rounded-xl bg-zinc-800 hover:bg-zinc-700 hover:text-zinc-100 text-zinc-300 transition flex items-center gap-1.5">
+                    View Wiki
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+                <button id="close-modal-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-tarkoogleBlue hover:bg-blue-600 text-white transition focus:outline-none">Done</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Premium Floating Side-Drawer Character Sheet -->
     <div id="character-drawer" class="fixed top-4 bottom-4 right-4 w-[calc(100%-2rem)] sm:w-[380px] md:w-[420px] bg-darkBg border border-darkBorder rounded-2xl backdrop-blur-xl shadow-2xl z-50 translate-x-[120%] transition-transform duration-300 ease-in-out flex flex-col">
-        <!-- Compact Drawer Header (Lowered in height) -->
-        <div class="py-1 px-3 border-b border-darkBorder flex items-center justify-end bg-darkCard/40">
+        <!-- Compact Drawer Header -->
+        <div class="py-2.5 px-3.5 border-b border-darkBorder flex items-center justify-between bg-darkCard/40">
+            <span class="text-xs font-bold uppercase tracking-widest text-zinc-400 font-mono">Identity Matrix</span>
             <button id="close-drawer-btn" class="p-1 rounded-xl text-zinc-400 hover:bg-darkBg hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -166,18 +259,16 @@
         <div class="flex-grow overflow-y-auto p-4 space-y-4">
             <!-- CORS Notice Help Panel -->
             <div id="cors-notice" class="hidden p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-200 space-y-1.5">
-                <span class="font-bold font-mono block text-amber-400">⚠️ CORS/LOCAL SECURITY BLOCK</span>
-                <p class="leading-relaxed">Browsers automatically block reading local JSON files directly via the <code class="bg-black/30 px-1 rounded font-mono">file://</code> protocol.</p>
-                <p class="font-semibold text-amber-300">To fix this: Run a simple local web server in your project folder (e.g., Live Server in VS Code, or run <code class="bg-black/30 px-1 rounded font-mono">python -m http.server</code> in this directory).</p>
+                <span class="font-bold font-mono block text-amber-400">⚠️ DATA ENGINE DEGRADATION</span>
+                <p class="leading-relaxed">Direct proxy calls failed. Running with native client-side fallback system architecture.</p>
             </div>
 
             <!-- Compact Hero Card Header -->
             <div class="relative bg-darkCard border border-darkBorder rounded-2xl p-4 overflow-hidden group">
-                <!-- Decorative absolute grid lines -->
                 <div class="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none"></div>
                 <div class="flex items-center space-x-4 relative z-10">
-                    <div class="relative w-14 h-16 rounded-xl overflow-hidden">
-                        <img id="char-avatar" src="https://thispersondoesnotexist.com" alt="Character Avatar" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'">
+                    <div class="relative w-14 h-16 rounded-xl overflow-hidden bg-darkBg border border-darkBorder">
+                        <img id="char-avatar" src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=150&auto=format&fit=crop&q=80" alt="Character Avatar" class="w-full h-full object-cover">
                     </div>
                     <div class="min-w-0 flex-1">
                         <h3 id="char-name" class="text-base md:text-lg font-bold text-zinc-100 tracking-tight truncate">Loading...</h3>
@@ -191,11 +282,31 @@
 
                 <!-- Location block -->
                 <div class="mt-3 pt-2.5 border-t border-darkBorder flex items-center text-xs text-zinc-400 relative z-10">
-                    <svg class="w-3.5 h-3.5 text-tarkoogleRed mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 text-tarkoogleRed mr-1.5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                     <span id="char-location" class="font-medium text-zinc-300 truncate">Loading coordinates...</span>
+                </div>
+            </div>
+
+            <!-- Equipped Gear (Dynamically bound to database items!) -->
+            <div class="p-3.5 bg-darkCard border border-darkBorder rounded-xl space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-widest">Active Equipment Loadout</span>
+                    <span class="text-[8px] font-mono font-bold text-tarkoogleBlue uppercase" id="equipped-indicator">Connecting Link</span>
+                </div>
+                <div class="flex items-center gap-3 bg-darkBg/50 p-2 border border-darkBorder/60 rounded-xl" id="equipped-item-wrapper">
+                    <div class="w-10 h-10 rounded-lg bg-darkBg border border-darkBorder/40 p-1 flex items-center justify-center flex-shrink-0">
+                        <img id="equipped-icon" src="" alt="" class="max-w-full max-h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=50&auto=format&fit=crop&q=80'">
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="text-[11px] font-semibold text-zinc-200 truncate" id="equipped-name">Syncing database assets...</div>
+                        <div class="text-[9px] text-zinc-500 font-mono mt-0.5 flex items-center justify-between">
+                            <span id="equipped-spec">Analyzing metrics</span>
+                            <span id="equipped-price" class="text-tarkoogleYellow font-semibold">₽0</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -228,37 +339,54 @@
 
     <!-- Impressum Popup Modal Overlay -->
     <div id="impressum-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300">
-        <div class="bg-darkCard border border-darkBorder rounded-2xl max-w-md w-full shadow-2xl backdrop-blur-xl p-6 relative transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+        <div class="bg-darkCard border border-darkBorder rounded-2xl max-w-lg w-full shadow-2xl backdrop-blur-xl p-6 relative transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
             <button id="close-impressum-btn" class="absolute top-4 right-4 p-1.5 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none cursor-pointer">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-            <div class="mb-5 select-none">
+            <div class="mb-4 select-none">
                 <h2 class="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">ℹ️ Impressum & Credits</h2>
-                <p class="text-xs text-zinc-500 mt-1">Project reference data and technical attributes.</p>
+                <p class="text-xs text-zinc-500 mt-1">Project reference data, databases, and official community directories.</p>
             </div>
-            <div class="space-y-4 text-sm text-zinc-300">
-                <div class="p-3 rounded-xl border border-darkBorder bg-darkBg/30 flex items-start gap-3">
+
+            <div class="space-y-4 text-xs text-zinc-300">
+                <div class="p-3.5 rounded-xl border border-darkBorder bg-darkBg/30 flex items-start gap-3">
                     <span class="text-lg mt-0.5 select-none">🌐</span>
                     <div>
-                        <h3 class="font-semibold text-zinc-200">Credits</h3>
-                        <p class="text-xs text-zinc-500 mt-0.5">High-performance lightweight single-session search hub layout.</p>
+                        <h3 class="font-semibold text-zinc-200 text-sm">Tarkoogle Platform</h3>
+                        <p class="text-[11px] text-zinc-500 mt-0.5">High-performance lightweight single-session search hub layout.</p>
                         <p class="text-xs text-zinc-400 hover:underline font-medium inline-block mt-1">Tarkoogle Hub Portal</p>
                     </div>
                 </div>
+
+                <!-- Complete Dynamic Official Links Listing in Impressum Modal -->
+                <div>
+                    <h4 class="text-[10px] font-mono font-bold tracking-widest text-zinc-500 uppercase mb-2">Complete Directory (eftOfficialURLs)</h4>
+                    <div id="impressum-directory-grid" class="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
             </div>
+
             <div class="mt-6 pt-4 border-t border-darkBorder flex justify-end">
                 <button id="close-impressum-ok-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition focus:outline-none cursor-pointer">Close</button>
             </div>
         </div>
     </div>
 
+    <!-- Data Engine JavaScript -->
     <script>
         // Start measuring load metrics immediately on script initialization
         const loadStartTimestamp = performance.now();
 
-        // --- 2. LIVE CLOCK & DATE ENGINE ---
+        // High-speed Global In-Memory state for Tarkov Data
+        let tarkovItemsMap = new Map();
+        let activeCategoryFilter = "All";
+        let loadedCategoriesList = ["All"];
+        let officialLinks = []; // Store the high-performance URL array
+
+        // Live Clock Engine
         function updateClock() {
             const now = new Date();
             document.getElementById('clock-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -267,62 +395,46 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Fallbacks that are overwritten if custom JSON files are loaded
-        let generalSearchTitles = ["Tarkoogle", "Seeker", "Nexus", "Portal", "Horizon", "Discover", "Sleek", "Explore", "Infinity", "Orbit", "Unified", "Clarity", "Apex", "Vortex", "Stellar", "Cosmos", "Zenith", "Aether", "Pulse", "Catalyst", "Nova", "Beacon", "Chronos", "Elysium", "Solace", "Summit", "Enigma", "Quantum", "Prism", "Echo", "Mirage", "Aura"];
-        let subtitleIntros = ["Your friendly guide to", "Instantly teleporting through", "A whimsical window into", "An optimized catalyst for", "The premier launchpad for", "Gently navigating the", "A hyper-dimensional key to", "Your daily dose of", "A customized springboard toward", "A cozy digital hammock for", "A futuristic portal serving", "The most reliable source for", "A secret garden full of", "The ultimate playground of", "An astronomical orbit around", "Crafting high-quality queries for", "The legendary archives of", "Delving fearlessly into", "Sailing the cybernetic seas of", "Unlocking the mysteries of", "A sanctuary dedicated to", "The definitive roadmap for", "Orbiting the dynamic realms of", "An elegant gateway into", "Sifting through the cosmic dust of", "Unraveling the deep syntax of", "Peering through the multi-threaded looking glass of"];
-        let subtitleAdjectives = ["wobbly", "bubbly", "quantum-entangled", "neomorphic", "retro-futuristic", "gravity-defying", "fluffy", "hyper-threaded", "pixel-perfect", "sub-atomic", "cyber-organic", "laser-focused", "stellar", "glowing", "cloud-native", "whimsical", "magnetic", "kaleidoscopic", "polychromatic", "giggle-powered", "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful", "gravitationally-skewed", "helium-filled", "neon-bathed", "spark-emitting", "polymorphic", "exquisite"];
-        let subtitleSubjects = ["bubble-tea recipes", "robotic penguin blueprints", "neomorphic button shadows", "clandestine cookie jars", "cosmic potato logic", "gravity-free space socks", "digital dandelion dreams", "underwater firefly networks", "secret hamster space programs", "virtual origami instructions", "sentient marshmallow algorithms", "quantum pancake configurations", "acoustic pizza vibrations", "sub-aquatic bicycle repair guides", "hovercraft cat grooming manuals", "invisible ink ingredient lists", "philosophical donut holes", "nebulous cloud formations", "digital jellyfish orchestras", "interdimensional coffee brewing", "time-traveling toasters", "tactical rubber ducks", "cybernetic cheese wheels", "sub-atomic particle salads", "galactic map coordinates", "advanced bubblewrap physics", "glowing microchip ecosystems", "neon-tinted matrix indexes"];
-        let subtitleEndings = ["using pure imagination.", "while drinking warm cocoa.", "powered by friendly space sloths.", "at the speed of a startled twilight twilight turtle.", "inside a comfortable pocket dimension.", "approved by intergalactic wizards.", "optimized for maximum coziness.", "with a gentle sprinkle of stardust.", "without breaking the space-time continuum.", "just for the joy of discovery.", "conceived by well-meaning calculators.", "under the soft glow of friendly neon signs.", "strictly for entertainment purposes.", "because why not?", "in a strangely soothing manner.", "with absolutely no instruction manual.", "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon.", "to satisfy your curiosity parameters.", "while standing on one foot.", "guaranteed to spark joy.", "under the supervision of cybernetic kittens."];
-        let currentVersion = "v0.1 (alpha)";
+        // Fallbacks (overwritten dynamically if text JSON blocks load successfully)
+        let generalSearchTitles = ["Tarkoogle", "TarkovSearch", "EFT-Google", "PMC-Nexus", "ScavSearch", "HideoutNet", "TarkoSearch", "KillaFinder", "SlickFinder", "TraderNet"];
+        let subtitleIntros = ["Your friendly tactical guide to", "Instantly indexing the ruins of", "A stylized visual lookup into", "The optimized market directory for", "Connecting your scav network with"];
+        let subtitleAdjectives = ["high-tier", "low-recoil", "over-priced", "meticulously-sorted", "fleamarket-indexed", "custom-chambered", "armored", "vital", "highly-volatile"];
+        let subtitleSubjects = ["military hardware", "class-6 body armors", "proprietary 7.62 ammunition", "rare intelligence folders", "scavened graphics cards", "proprietary Labs cards", "purified water canisters"];
+        let subtitleEndings = ["with real-time updates.", "straight from the flea market.", "to avoid getting head-eyes'd.", "powered by Tarkov Dev API.", "verified by Fence."];
+        let currentVersion = "v1.2 (live)";
         let currentTitle = "Tarkoogle";
 
-        // Fallbacks for procedural biography parser
-        let bioIntros = ["Known across the realm as a formidable presence,", "Whispered about in hushed tones around tavern hearths,", "A mysterious figure with a highly classified file,", "Records indicate this individual is a wild card,", "Regarded by peers as a brilliant but unpredictable soul,"];
-        let bioBackgrounds = ["they spent their formative years decoding ancient cyphers in hidden archives,", "they once guarded the outer boundary of a forgotten sky-citadel,", "they survived by outwitting rival guilds in the deepest subterranean alleys,", "they dedicated half a lifetime to charting wild, unmappable magical anomalies,"];
-        let bioMotivations = ["driven by a relentless quest to find a legendary lost chronometer.", "constantly searching for the missing piece of a shattered family heirloom.", "seeking to restore balance to the chaotic magic flowing through the local ley lines.", "quietly working to pay off an old debt to a mysterious guild patron."];
-        let bioSecrets = ["They are rumored to carry a compass that points only to what they fear most.", "They secretly keep a mechanical pocket watch that ticks backwards.", "Some say their shadow occasionally moves half a second slower than they do.", "They carry a sealed letter that they have sworn never to open."];
-
-        // Fallback gender list
-        let dndGenders = ["Male", "Female", "Non-Binary", "Genderfluid", "Agender", "Androgynous"];
-
-        // Fallback color palette
+        let dndNames = ["Killa", "Reshala", "Shturman", "Glukhar", "Sanitar", "Tagilla", "Knight", "Birdeye", "Big Pipe", "Kabhal", "Frank", "Vadim", "Yury", "Dimitri", "Nikita"];
+        let dndProfessions = ["PMC Bear", "PMC Usec", "Scav Raider", "Rogue Leader", "Labs Guard", "Sherpa Scout", "Flea Market Broker", "Scav Boss Hand", "Stash Runner", "Hideout Engineer"];
+        let dndRaces = ["Eastern European", "North American", "Western European", "Scandinavian", "Baltic Freelancer"];
+        let dndPlaces = ["Customs Boiler", "Reserve Bunker D2", "Interchange Ultra", "Streets LexOs", "Shoreline Resort East Wing", "Labs Red Room", "Woods Sniper Rock", "Factory Silos"];
+        let dndAttributes = null;
+        let dndGenders = ["Male", "Female", "Classified"];
         let logoColorPalette = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
 
-        // Dynamic target variables - Populated natively by folder fetch
-        let dndNames = [];
-        let dndProfessions = [];
-        let dndRaces = [];
-        let dndPlaces = [];
-        let dndAttributes = null; // Stored as Key-Value descriptor object
+        // Procedural bios
+        let bioIntros = ["Once a highly decorated officer in the territorial defence forces,", "Known on the radio net by a classified tactical callsign,", "A rogue contractor who chose to stay behind when the blockades fell,", "A specialized black-market supply courier working for the traders,"];
+        let bioBackgrounds = ["they survived the initial evacuation by barricading a key factory floor,", "they spent months mapping the subterranean sewage pipelines underneath Tarkov,", "they once escaped an ambush at the Lighthouse docks using nothing but smoke bombs,", "they became famous for selling clean bottled water when the municipal grid crashed,"];
+        let bioMotivations = ["now driven solely by a personal vendetta against Terragroup operators.", "quietly planning a breakout route towards the outer international green line.", "collecting physical hard drives to reconstruct what really happened in Laboratory X.", "saving enough roubles to purchase a legal passage permit out of Norvinsk."];
+        let bioSecrets = ["They are rumored to hide a keycard behind a false metal plate in their boots.", "They never sleep without a cocked Tokarev pistol tucked under their tactical pack.", "Some say they can predict snipers by checking the behavior of local crows.", "They carry an old photograph of an empty house in St. Petersburg."];
 
-        // Universal File Fetcher with helpful console reporting
+        // Fetcher Utility with safe handling
         async function fetchFileJSON(url) {
             try {
                 const response = await fetch(url);
-                if (response.ok) {
-                    return await response.json();
-                }
-            } catch (e) {
-                // Fetch attempts reported silently
-            }
+                if (response.ok) return await response.json();
+            } catch (e) {}
             return null;
         }
 
-        // Smart Array Extractor: Checks variations of file paths, and digs through wrapper structures
         async function loadResourceArray(paths) {
             for (let path of paths) {
                 const data = await fetchFileJSON(path);
                 if (data) {
-                    // Scenario A: Standard array e.g., ["Item 1", "Item 2"]
-                    if (Array.isArray(data)) {
-                        return data;
-                    }
-                    // Scenario B: Array is stored inside an object wrapper e.g., { "list": ["Item 1"] }
+                    if (Array.isArray(data)) return data;
                     if (typeof data === 'object') {
                         for (let key in data) {
-                            if (Array.isArray(data[key])) {
-                                return data[key];
-                            }
+                            if (Array.isArray(data[key])) return data[key];
                         }
                     }
                 }
@@ -330,26 +442,113 @@
             return [];
         }
 
-        // Object Parser: Grabs the Key-Value schema from listAttributes.json
-        async function loadAttributesData() {
-            const paths = [
-                './resources/dnd/listAttributes.json',
-                'resources/dnd/listAttributes.json',
-                '/resources/dnd/listAttributes.json',
-                'listAttributes.json'
-            ];
-            for (let path of paths) {
-                const data = await fetchFileJSON(path);
-                if (data && typeof data === 'object' && !Array.isArray(data)) {
-                    return data;
+        // --- EXTREMELY RESILIENT TARKOV DATA STREAM ENGINE ---
+        async function gatherTarkovData() {
+            const statusLabel = document.getElementById('loading-status');
+            if (statusLabel) statusLabel.textContent = "Connecting to Tarkov Grid...";
+
+            let queryResult = null;
+
+            try {
+                // Priority A: Fetch from your highly optimized local cached proxy
+                const response = await fetch('/api/tarkov-data');
+                if (response.ok) {
+                    queryResult = await response.json();
+                }
+            } catch (err) {
+                console.warn("Proxy route unavailable. Initiating direct GraphQL fallback routing...");
+            }
+
+            // Fallback Priority B: Hit primary database natively if proxy isn't available
+            if (!queryResult || !queryResult.data) {
+                try {
+                    const fallbackQuery = `query {
+                        pvp: items(lang: en, gameMode: regular) {
+                            id name shortName wikiLink iconLink basePrice weight avg24hPrice types
+                            category { name }
+                            properties { __typename
+                                ... on ItemPropertiesWeapon { caliber fireRate ergonomics recoilVertical }
+                                ... on ItemPropertiesArmor { class durability }
+                            }
+                        }
+                        pve: items(lang: en, gameMode: pve) { id avg24hPrice }
+                    }`;
+
+                    const directResponse = await fetch('https://api.tarkov.dev/graphql', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ query: fallbackQuery })
+                    });
+                    if (directResponse.ok) {
+                        queryResult = await directResponse.json();
+                        const corsNotice = document.getElementById('cors-notice');
+                        if (corsNotice) corsNotice.classList.remove('hidden');
+                    }
+                } catch (fallbackErr) {
+                    console.error("Critical: Direct connection blocked by local security or networking issues.", fallbackErr);
                 }
             }
-            return null;
+
+            const rawData = queryResult?.data;
+            if (!rawData) {
+                console.warn("Tarkov API datasets loaded with 0 values due to complete network blocking.");
+                return false;
+            }
+
+            // Create linear index mapping for instant O(1) PvE matching
+            const pvePriceMap = new Map();
+            if (Array.isArray(rawData.pve)) {
+                for (let i = 0; i < rawData.pve.length; i++) {
+                    const item = rawData.pve[i];
+                    pvePriceMap.set(item.id, item.avg24hPrice);
+                }
+            }
+
+            // Merge datasets seamlessly in memory
+            const detectedCategories = new Set();
+            if (Array.isArray(rawData.pvp)) {
+                for (let i = 0; i < rawData.pvp.length; i++) {
+                    const item = rawData.pvp[i];
+                    const categoryName = item.category?.name || 'Other';
+                    detectedCategories.add(categoryName);
+
+                    tarkovItemsMap.set(item.id, {
+                        id: item.id,
+                        name: item.name,
+                        shortName: item.shortName,
+                        category: categoryName,
+                        icon: item.iconLink,
+                        wiki: item.wikiLink,
+                        weight: item.weight,
+                        basePrice: item.basePrice,
+                        pvpPrice: item.avg24hPrice || 0,
+                        pvePrice: pvePriceMap.get(item.id) || 0,
+                        types: item.types || [],
+                        properties: item.properties || null
+                    });
+                }
+            }
+
+            loadedCategoriesList = ["All", ...Array.from(detectedCategories).sort()];
+
+            // Render database stats indicator
+            const statusBadge = document.getElementById('db-status-badge');
+            const itemsCount = document.getElementById('db-items-count');
+            if (statusBadge && itemsCount) {
+                itemsCount.textContent = `${tarkovItemsMap.size} Tarkov Items`;
+                statusBadge.classList.remove('hidden');
+                statusBadge.classList.add('flex');
+            }
+
+            return true;
         }
 
-        // Helper: Generates a custom dynamic favicon based on character name
+        // Favicon procedure generator
         function setRandomFavicon(title) {
-            const letter = title ? title.charAt(0) : 'F';
+            const letter = title ? title.charAt(0) : 'T';
             const colors = logoColorPalette;
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             const svg = `
@@ -368,7 +567,6 @@
             link.href = `data:image/svg+xml,${svg.trim()}`;
         }
 
-        // Helper: Generates a permutated subtitle
         function generatePermutatedSubtitle() {
             const intro = subtitleIntros[Math.floor(Math.random() * subtitleIntros.length)];
             const adj = subtitleAdjectives[Math.floor(Math.random() * subtitleAdjectives.length)];
@@ -377,123 +575,7 @@
             return `${intro} ${adj} ${subject} ${ending}`;
         }
 
-        async function loadResourceData() {
-            // Fetch dynamic color palette array
-            const colorsData = await loadResourceArray([
-                './resources/colors/indexColorPalette.json',
-                'resources/colors/indexColorPalette.json',
-                '/resources/colors/indexColorPalette.json',
-                'indexColorPalette.json'
-            ]);
-            if (colorsData && colorsData.length > 0) {
-                logoColorPalette = colorsData;
-            }
-
-            // Fetch titles JSON
-            const titlesData = await fetchFileJSON('./resources/text/indexTitles.json') || await fetchFileJSON('resources/text/indexTitles.json') || await fetchFileJSON('indexTitles.json') || await fetchFileJSON('/resources/text/indexTitles.json');
-            if (titlesData && Array.isArray(titlesData)) {
-                generalSearchTitles = titlesData;
-            } else if (titlesData && typeof titlesData === 'object') {
-                for (let key in titlesData) {
-                    if (Array.isArray(titlesData[key])) {
-                        generalSearchTitles = titlesData[key];
-                        break;
-                    }
-                }
-            }
-
-            // Fetch subtitles JSON
-            const subsData = await fetchFileJSON('./resources/text/listSubtitles.json') || await fetchFileJSON('resources/text/listSubtitles.json') || await fetchFileJSON('listSubtitles.json') || await fetchFileJSON('/resources/text/listSubtitles.json');
-            if (subsData && typeof subsData === 'object') {
-                if (subsData.intros) subtitleIntros = subsData.intros;
-                if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
-                if (subsData.subjects) subtitleSubjects = subsData.subjects;
-                if (subsData.endings) subtitleEndings = subsData.endings;
-            }
-
-            // Fetch procedural bio categories JSON cleanly from multiple local path candidates
-            const bioData = await fetchFileJSON('./resources/dnd/listBiography.json') ||
-                            await fetchFileJSON('resources/dnd/listBiography.json') ||
-                            await fetchFileJSON('listBiography.json') ||
-                            await fetchFileJSON('/resources/dnd/listBiography.json');
-            if (bioData && typeof bioData === 'object') {
-                if (bioData.intros) bioIntros = bioData.intros;
-                if (bioData.backgrounds) bioBackgrounds = bioData.backgrounds;
-                if (bioData.motivations) bioMotivations = bioData.motivations;
-                if (bioData.secrets) bioSecrets = bioData.secrets;
-            }
-
-            // Fetch version number JSON
-            const versionData = await fetchFileJSON('./resources/text/indexVersion.json') || await fetchFileJSON('resources/text/indexVersion.json') || await fetchFileJSON('/resources/text/indexVersion.json') || await fetchFileJSON('indexVersion.json');
-            if (versionData) {
-                if (typeof versionData === 'object' && versionData.version) {
-                    currentVersion = versionData.version;
-                } else if (typeof versionData === 'string') {
-                    currentVersion = versionData;
-                } else if (typeof versionData === 'object') {
-                    for (let key in versionData) {
-                        if (typeof versionData[key] === 'string') {
-                            currentVersion = versionData[key];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // --- D&D MODULE DYNAMIC DATASETS RESOLUTION (Plural-first filenames check) ---
-            dndNames = await loadResourceArray([
-                './resources/dnd/listNames.json',
-                'resources/dnd/listNames.json',
-                '/resources/dnd/listNames.json',
-                'listNames.json'
-            ]);
-            dndProfessions = await loadResourceArray([
-                './resources/dnd/listProfessions.json',
-                'resources/dnd/listProfessions.json',
-                '/resources/dnd/listProfessions.json',
-                'listProfessions.json',
-                './resources/dnd/listProfession.json',
-                'resources/dnd/listProfession.json',
-                '/resources/dnd/listProfession.json',
-                'listProfession.json'
-            ]);
-            dndRaces = await loadResourceArray([
-                './resources/dnd/listRaces.json',
-                'resources/dnd/listRaces.json',
-                '/resources/dnd/listRaces.json',
-                'listRaces.json',
-                './resources/dnd/listRace.json',
-                'resources/dnd/listRace.json',
-                '/resources/dnd/listRace.json',
-                'listRace.json'
-            ]);
-            dndPlaces = await loadResourceArray([
-                './resources/dnd/listPlaces.json',
-                'resources/dnd/listPlaces.json',
-                '/resources/dnd/listPlaces.json',
-                'listPlaces.json',
-                './resources/dnd/listPlace.json',
-                'resources/dnd/listPlace.json',
-                '/resources/dnd/listPlace.json',
-                'listPlace.json'
-            ]);
-
-            // Load Attribute descriptor mapping
-            dndAttributes = await loadAttributesData();
-
-            // Load dynamic gender resource
-            const genderData = await loadResourceArray([
-                './resources/dnd/listGender.json',
-                'resources/dnd/listGender.json',
-                '/resources/dnd/listGender.json',
-                'listGender.json'
-            ]);
-            if (genderData && genderData.length > 0) {
-                dndGenders = genderData;
-            }
-        }
-
-        // --- DECRYPT VERSION NUMBER ONLY ---
+        // Decrypt code animation for version
         function triggerVersionDecrypt() {
             const versionTag = document.getElementById('version-tag');
             if (!versionTag) return;
@@ -523,38 +605,15 @@
             }, 25);
         }
 
-        // --- D&D HERO SYSTEM LOGIC ---
+        // Procedural Character Generation linked directly to items matrix
         function generateHeroIdentity() {
-            const corsNotice = document.getElementById('cors-notice');
-
-            // Guard clause with UI feedback if data hasn't arrived/resolved from the JSON streams
-            if (!dndNames.length || !dndProfessions.length || !dndRaces.length || !dndPlaces.length) {
-                document.getElementById('char-name').textContent = "Database Offline";
-                document.getElementById('char-race').textContent = "Check URL";
-                document.getElementById('char-profession').textContent = "Fetch Failed";
-                document.getElementById('char-location').textContent = "CORS Blocked (Local File Protocol)";
-
-                // Show the helpful custom CORS guide if we are currently loading locally
-                if (corsNotice) {
-                    corsNotice.classList.remove('hidden');
-                }
-                return;
-            }
-
-            // Hide warning if resources were loaded successfully
-            if (corsNotice) {
-                corsNotice.classList.add('hidden');
-            }
-
-            // Always select at least 2 and at most 3 names randomly
-            const nameSegmentsCount = Math.floor(Math.random() * 2) + 2; // Resolves to either 2 or 3
+            // Roll name, occupation, background
+            const chosenNameSegments = Math.floor(Math.random() * 2) + 2;
             const chosenNames = [];
-            for (let i = 0; i < nameSegmentsCount; i++) {
-                const randomSingleName = dndNames[Math.floor(Math.random() * dndNames.length)];
-                chosenNames.push(randomSingleName);
+            for (let i = 0; i < chosenNameSegments; i++) {
+                chosenNames.push(dndNames[Math.floor(Math.random() * dndNames.length)]);
             }
             const randomName = chosenNames.join(' ');
-
             const randomProfession = dndProfessions[Math.floor(Math.random() * dndProfessions.length)];
             const randomRace = dndRaces[Math.floor(Math.random() * dndRaces.length)];
             const randomPlace = dndPlaces[Math.floor(Math.random() * dndPlaces.length)];
@@ -566,20 +625,49 @@
             document.getElementById('char-location').textContent = randomPlace;
             document.getElementById('char-gender').textContent = randomGender;
 
-            // Generate procedural tactical bio sentence
+            // Generate procedural bio sentence
             const intro = bioIntros[Math.floor(Math.random() * bioIntros.length)];
             const bg = bioBackgrounds[Math.floor(Math.random() * bioBackgrounds.length)];
             const motivation = bioMotivations[Math.floor(Math.random() * bioMotivations.length)];
             const secret = bioSecrets[Math.floor(Math.random() * bioSecrets.length)];
-
             document.getElementById('char-bio').textContent = `${intro} ${bg} ${motivation} ${secret}`;
 
-            // Generate customized stats
+            // Bind a live Tarkov item loadout dynamically
+            const equippedIndicator = document.getElementById('equipped-indicator');
+            const equippedIcon = document.getElementById('equipped-icon');
+            const equippedName = document.getElementById('equipped-name');
+            const equippedSpec = document.getElementById('equipped-spec');
+            const equippedPrice = document.getElementById('equipped-price');
+
+            if (tarkovItemsMap.size > 0) {
+                // Filter weapons or rare keys to select as active gear
+                const itemsList = Array.from(tarkovItemsMap.values());
+                const weaponCandidates = itemsList.filter(it => it.category === "Weapon" || it.types.includes("weapon"));
+                const fallbackGear = weaponCandidates.length > 0 ? weaponCandidates : itemsList;
+                const selectedGear = fallbackGear[Math.floor(Math.random() * fallbackGear.length)];
+
+                equippedIndicator.textContent = "GRID STABILIZED";
+                equippedIcon.src = selectedGear.icon;
+                equippedName.textContent = selectedGear.name;
+                equippedSpec.textContent = `${selectedGear.category} (${selectedGear.shortName})`;
+                equippedPrice.textContent = selectedGear.pvpPrice > 0 ? `₽${selectedGear.pvpPrice.toLocaleString()}` : `Base: ₽${selectedGear.basePrice.toLocaleString()}`;
+
+                // Add click listener on active gear block to showcase item details
+                const gearWrapper = document.getElementById('equipped-item-wrapper');
+                gearWrapper.onclick = () => openItemDetail(selectedGear.id);
+                gearWrapper.style.cursor = 'pointer';
+            } else {
+                equippedIndicator.textContent = "LOCAL EMULATION";
+                equippedIcon.src = "";
+                equippedName.textContent = "EBR Custom Kit (Offline)";
+                equippedSpec.textContent = "Sniper Rifle (7.62x51)";
+                equippedPrice.textContent = "₽280,000";
+            }
+
+            // Render stats grid
             const attributesGrid = document.getElementById('attributes-grid');
             if (attributesGrid) {
                 attributesGrid.innerHTML = '';
-
-                // Pre-configured style colors mapping for standard attributes
                 const styleColors = {
                     "Strength": "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5 text-tarkoogleRed",
                     "Dexterity": "border-tarkoogleGreen/50 hover:bg-tarkoogleGreen/5 text-tarkoogleGreen",
@@ -589,32 +677,27 @@
                     "Charisma": "border-purple-500/50 hover:bg-purple-500/5 text-purple-400"
                 };
 
-                // Determine schema: Parse loaded object or generate defaults if attributes file is blocked
                 const attributesObj = dndAttributes || {
-                    "Strength": ["Power", "Force"],
-                    "Dexterity": ["Agility", "Reflexes"],
-                    "Constitution": ["Stamina", "Endurance"],
-                    "Intelligence": ["Logic", "Knowledge"],
-                    "Wisdom": ["Perception", "Insight"],
-                    "Charisma": ["Presence", "Charm"]
+                    "Strength": ["Power", "Recoil Management"],
+                    "Dexterity": ["Ergonomics Mastery", "Sprinting Speed"],
+                    "Constitution": ["Stamina capacity", "Pain tolerance"],
+                    "Intelligence": ["Crafting Logic", "Barter value index"],
+                    "Wisdom": ["Perception range", "Hearing distance"],
+                    "Charisma": ["Trader discount", "Fence loyalty"]
                 };
 
                 for (let attrName in attributesObj) {
                     const descriptors = attributesObj[attrName];
-                    const randomDescriptor = Array.isArray(descriptors) ? Math.floor(Math.random() * descriptors.length) : "";
-                    const chosenDesc = Array.isArray(descriptors) ? descriptors[randomDescriptor] : "";
-
-                    // Standard D&D stats generator (3d6 roll)
+                    const chosenDesc = Array.isArray(descriptors) ? descriptors[Math.floor(Math.random() * descriptors.length)] : "";
                     const baseScore = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 3;
                     const modifier = Math.floor((baseScore - 10) / 2);
                     const formattedModifier = modifier >= 0 ? `+${modifier}` : modifier;
-
                     const colorClasses = styleColors[attrName] || "border-zinc-500/50 hover:bg-zinc-500/5 text-zinc-400";
 
                     const attrBlock = document.createElement('div');
                     attrBlock.className = `p-2 bg-darkBg/60 rounded-xl border ${colorClasses.split(' ')[0]} ${colorClasses.split(' ')[1]} transition-all duration-300 flex items-center justify-between select-none`;
                     attrBlock.innerHTML = `
-                        <div class="flex flex-col">
+                        <div class="flex flex-col min-w-0">
                             <span class="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider">${attrName}</span>
                             <span class="text-[8px] font-semibold text-zinc-400 font-mono italic truncate max-w-[110px]" title="${chosenDesc}">${chosenDesc}</span>
                         </div>
@@ -627,31 +710,23 @@
                 }
             }
 
-            // Create a shared unique timestamp query parameter key so the image shifts on reroll, but stays identical across both elements
+            // Sync the side drawer avatar and top right header profile avatar
             const uniqueAvatarUrl = `https://thispersondoesnotexist.com?nocache=${Date.now()}`;
-
-            // Sync the side drawer avatar
             const avatarImg = document.getElementById('char-avatar');
-            if (avatarImg) {
-                avatarImg.src = uniqueAvatarUrl;
-            }
-
-            // Sync the top right header profile avatar
+            if (avatarImg) avatarImg.src = uniqueAvatarUrl;
             const headerImg = document.getElementById('header-profile-img');
-            if (headerImg) {
-                headerImg.src = uniqueAvatarUrl;
-            }
+            if (headerImg) headerImg.src = uniqueAvatarUrl;
 
-            // Assign a random online status color: Green, Yellow, or Red
+            // Online indicator shift
             const statusDot = document.getElementById('profile-status-dot');
             if (statusDot) {
-                statusDot.classList.remove('bg-tarkoogleGreen', 'bg-tarkoogleYellow', 'bg-tarkoogleRed', 'bg-emerald-500');
+                statusDot.className = "absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-darkCard rounded-full transition-colors duration-300";
                 const statusColors = ['bg-tarkoogleGreen', 'bg-tarkoogleYellow', 'bg-tarkoogleRed'];
-                const randomColor = statusColors[Math.floor(Math.random() * statusColors.length)];
-                statusDot.classList.add(randomColor);
+                statusDot.classList.add(statusColors[Math.floor(Math.random() * statusColors.length)]);
             }
         }
 
+        // Set up dynamic title styles dynamically
         function loadDynamicTitleAndSubtitle() {
             const logoSubtitle = document.getElementById('logo-subtitle');
             currentTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)] || "Tarkoogle";
@@ -661,7 +736,6 @@
 
             setRandomFavicon(currentTitle);
 
-            // Title display: Letters are picked at random from indexColorPalette.json
             const titleTag = document.getElementById('logo-title');
             if (titleTag) {
                 const titleColors = [];
@@ -673,20 +747,295 @@
                 titleTag.innerHTML = currentTitle.split("").map((char, index) => {
                     if (char === " ") return "&nbsp;";
                     const col = titleColors[index];
-                    // Check if color is hex or Tailwind text class
-                    if (col.startsWith('#')) {
-                        return `<span style="color: ${col};">${char}</span>`;
-                    } else {
-                        return `<span class="${col}">${char}</span>`;
-                    }
+                    return `<span style="color: ${col};">${char}</span>`;
                 }).join("");
             }
 
-            // Immediately decrypt/render version tag
             triggerVersionDecrypt();
         }
 
-        // Send calculated boot load speed cleanly to the serverless function (kept for logging purposes)
+        // --- EXTREMELY FAST LIVE SEARCH & AUTOCOMPLETE RENDER ENGINE ---
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('clear-search');
+        const suggestionsBox = document.getElementById('suggestions-box');
+        const suggestionsFeed = document.getElementById('suggestions-feed');
+        const resultsCountStats = document.getElementById('results-count-stats');
+        const filterPillsContainer = document.getElementById('filter-pills-container');
+
+        // Dynamic category filters generator
+        function buildCategoryFilters() {
+            if (!filterPillsContainer) return;
+            filterPillsContainer.innerHTML = '';
+
+            loadedCategoriesList.slice(0, 15).forEach(cat => {
+                const pill = document.createElement('button');
+                const isSelected = activeCategoryFilter === cat;
+                pill.className = `px-3 py-1 rounded-full text-[10px] font-semibold transition ${
+                    isSelected
+                        ? 'bg-tarkoogleBlue text-white border border-tarkoogleBlue'
+                        : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/50'
+                }`;
+                pill.textContent = cat;
+                pill.onclick = (e) => {
+                    e.stopPropagation();
+                    activeCategoryFilter = cat;
+                    buildCategoryFilters();
+                    triggerRealtimeSearch();
+                };
+                filterPillsContainer.appendChild(pill);
+            });
+        }
+
+        // Perform instant search in client state mapping
+        function triggerRealtimeSearch() {
+            const query = searchInput.value.trim().toLowerCase();
+            if (query.length === 0) {
+                suggestionsBox.classList.add('hidden');
+                return;
+            }
+
+            const itemsArray = Array.from(tarkovItemsMap.values());
+
+            // Fast filter match sequence
+            let matches = itemsArray.filter(item => {
+                const textMatch = item.name.toLowerCase().includes(query) ||
+                                  item.shortName.toLowerCase().includes(query) ||
+                                  item.category.toLowerCase().includes(query);
+
+                if (activeCategoryFilter === "All") {
+                    return textMatch;
+                } else {
+                    return textMatch && item.category === activeCategoryFilter;
+                }
+            });
+
+            // Sort matched elements by shortest name closeness or price
+            matches.sort((a, b) => a.name.length - b.name.length);
+
+            // Limit suggestions for layout performance
+            const totalMatches = matches.length;
+            const renderingLimit = 100;
+            const displaySlice = matches.slice(0, renderingLimit);
+
+            suggestionsFeed.innerHTML = '';
+
+            if (displaySlice.length === 0) {
+                suggestionsFeed.innerHTML = `
+                    <div class="p-8 text-center text-zinc-500">
+                        <svg class="w-10 h-10 mx-auto text-zinc-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-xs font-semibold">No active listings matching your query found.</p>
+                        <p class="text-[10px] text-zinc-600 mt-1">Try resetting the filter category parameters above.</p>
+                    </div>
+                `;
+                resultsCountStats.textContent = `Found 0 matching entries`;
+            } else {
+                const fragment = document.createDocumentFragment();
+                displaySlice.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = "flex items-center justify-between p-3.5 hover:bg-zinc-800/40 cursor-pointer transition border-b border-darkBorder/40";
+                    row.onclick = () => openItemDetail(item.id);
+
+                    // Price highlights calculations
+                    const pvpFormatted = item.pvpPrice > 0 ? `₽${item.pvpPrice.toLocaleString()}` : 'N/A';
+                    const pveFormatted = item.pvePrice > 0 ? `₽${item.pvePrice.toLocaleString()}` : 'N/A';
+
+                    let priceRatioIndicator = '';
+                    if (item.pvpPrice > 0 && item.pvePrice > 0) {
+                        const diffPercent = Math.round(((item.pvePrice - item.pvpPrice) / item.pvpPrice) * 100);
+                        if (diffPercent > 0) {
+                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-tarkoogleGreen font-mono">+${diffPercent}% PvE</span>`;
+                        } else if (diffPercent < 0) {
+                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-tarkoogleRed font-mono">${diffPercent}% PvE</span>`;
+                        }
+                    }
+
+                    row.innerHTML = `
+                        <div class="flex items-center space-x-3 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-lg bg-darkBg border border-darkBorder p-1 flex items-center justify-center flex-shrink-0">
+                                <img src="${item.icon}" alt="" class="max-w-full max-h-full object-contain" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=50&auto=format&fit=crop&q=80'">
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-xs font-bold text-zinc-100 truncate">${item.name}</div>
+                                <div class="flex items-center space-x-2 mt-0.5 text-[9px] font-mono text-zinc-500">
+                                    <span class="text-tarkoogleBlue font-semibold uppercase">${item.shortName}</span>
+                                    <span>•</span>
+                                    <span>${item.category}</span>
+                                    <span>•</span>
+                                    <span>${item.weight} kg</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right flex-shrink-0 pl-3">
+                            <div class="text-xs font-bold font-mono text-zinc-300">PvP: ${pvpFormatted}</div>
+                            <div class="text-[10px] font-mono text-zinc-400 mt-0.5">PvE: ${pveFormatted}</div>
+                            <div class="mt-0.5">${priceRatioIndicator}</div>
+                        </div>
+                    `;
+                    fragment.appendChild(row);
+                });
+                suggestionsFeed.appendChild(fragment);
+                resultsCountStats.textContent = `Displaying ${displaySlice.length} of ${totalMatches} total results matches`;
+            }
+
+            suggestionsBox.classList.remove('hidden');
+        }
+
+        // --- SPECIFIC ITEM DETAIL INTERACTIVE POPUP ---
+        const itemModal = document.getElementById('item-modal');
+
+        function openItemDetail(itemId) {
+            const item = tarkovItemsMap.get(itemId);
+            if (!item) return;
+
+            document.getElementById('modal-item-icon').src = item.icon;
+            document.getElementById('modal-item-category').textContent = item.category;
+            document.getElementById('modal-item-name').textContent = item.name;
+            document.getElementById('modal-item-short').textContent = `${item.name} (${item.shortName})`;
+
+            document.getElementById('modal-item-pvp').textContent = item.pvpPrice > 0 ? `₽${item.pvpPrice.toLocaleString()}` : 'No PvP Market Data';
+            document.getElementById('modal-item-pve').textContent = item.pvePrice > 0 ? `₽${item.pvePrice.toLocaleString()}` : 'No PvE Market Data';
+
+            // Build dynamic weapon specs or armor properties details list
+            const propertiesGrid = document.getElementById('modal-properties-grid');
+            propertiesGrid.innerHTML = '';
+
+            const specs = [
+                { label: 'Base Vendor Value', val: item.basePrice > 0 ? `₽${item.basePrice.toLocaleString()}` : 'Unknown' },
+                { label: 'Item Weight', val: `${item.weight} kg` }
+            ];
+
+            // Extract dynamic sub-schema properties depending on equipment classification
+            if (item.properties) {
+                if (item.properties.caliber) specs.push({ label: 'Caliber', val: item.properties.caliber.replace("Caliber", "") });
+                if (item.properties.fireRate) specs.push({ label: 'Rate of Fire', val: `${item.properties.fireRate} rpm` });
+                if (item.properties.ergonomics) specs.push({ label: 'Ergonomics Index', val: item.properties.ergonomics });
+                if (item.properties.recoilVertical) specs.push({ label: 'Vertical Recoil', val: item.properties.recoilVertical });
+                if (item.properties.class) specs.push({ label: 'Armor Protection Class', val: `Class ${item.properties.class}` });
+                if (item.properties.durability) specs.push({ label: 'Max Durability', val: `${item.properties.durability} points` });
+            }
+
+            specs.forEach(spec => {
+                const cell = document.createElement('div');
+                cell.className = "p-2.5 bg-darkBg border border-darkBorder/60 rounded-xl";
+                cell.innerHTML = `
+                    <span class="text-[9px] font-mono uppercase tracking-wider text-zinc-500 block">${spec.label}</span>
+                    <span class="text-xs font-semibold text-zinc-200 mt-0.5 block">${spec.val}</span>
+                `;
+                propertiesGrid.appendChild(cell);
+            });
+
+            // Bind wiki trigger link
+            const wikiBtn = document.getElementById('modal-wiki-btn');
+            if (item.wiki) {
+                wikiBtn.href = item.wiki;
+                wikiBtn.classList.remove('hidden');
+            } else {
+                wikiBtn.classList.add('hidden');
+            }
+
+            if (itemModal) itemModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeItemDetail() {
+            if (itemModal) itemModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        const closeItemBtn = document.getElementById('close-item-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        if (closeItemBtn) closeItemBtn.onclick = closeItemDetail;
+        if (closeModalBtn) closeModalBtn.onclick = closeItemDetail;
+
+        if (itemModal) {
+            itemModal.onclick = (e) => {
+                if (e.target === itemModal) closeItemDetail();
+            };
+        }
+
+        // --- DYNAMIC RENDERING OF OFFICIAL COMMUNITY LINKS ---
+        function renderOfficialDirectories() {
+            const dock = document.getElementById('quick-links-dock');
+            const modalGrid = document.getElementById('impressum-directory-grid');
+            if (!dock || !modalGrid) return;
+
+            dock.innerHTML = '';
+            modalGrid.innerHTML = '';
+
+            // Render home dock shortcuts (select the first 6 crucial links to retain clean visual ratios)
+            const dockShortcuts = officialLinks.slice(0, 6);
+            const dockFragment = document.createDocumentFragment();
+
+            dockShortcuts.forEach((link, idx) => {
+                let hostname = "";
+                try {
+                    hostname = new URL(link.url).hostname;
+                } catch(e) {
+                    hostname = "escapefromtarkov.com";
+                }
+
+                // High-resolution clean site symbol from standard service
+                const faviconSrc = `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
+                const fallbackLetter = link.name.charAt(0);
+                const btn = document.createElement('a');
+                btn.href = link.url;
+                btn.target = "_blank";
+                btn.rel = "noopener noreferrer";
+                btn.className = `group flex flex-col items-center justify-center text-center transition focus:outline-none w-14`;
+
+                // Distinct fallback text colors for standard styling
+                const textColors = [
+                    'text-tarkoogleBlue',
+                    'text-tarkoogleRed',
+                    'text-tarkoogleYellow',
+                    'text-tarkoogleGreen',
+                    'text-purple-500',
+                    'text-pink-500'
+                ];
+                const textClass = textColors[idx % textColors.length];
+
+                btn.innerHTML = `
+                    <div class="w-12 h-12 rounded-full border border-darkBorder bg-darkCard/60 hover:bg-darkCard hover:border-zinc-500 flex items-center justify-center p-2.5 transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_0_12px_rgba(255,255,255,0.03)] relative overflow-hidden">
+                        <img src="${faviconSrc}" alt="${link.name}" class="w-full h-full object-contain filter brightness-95 group-hover:brightness-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span class="hidden ${textClass} text-sm font-bold font-mono uppercase">${fallbackLetter}</span>
+                    </div>
+                    <span class="text-[9px] font-medium text-zinc-500 group-hover:text-zinc-300 mt-2 truncate w-full tracking-wider transition-colors">${link.name}</span>
+                `;
+                dockFragment.appendChild(btn);
+            });
+            dock.appendChild(dockFragment);
+
+            // Render complete list of 17 items inside Impressum modal grid (static load)
+            const modalFragment = document.createDocumentFragment();
+            officialLinks.forEach(link => {
+                let hostname = "escapefromtarkov.com";
+                try {
+                    hostname = new URL(link.url).hostname;
+                } catch(e) {}
+                const faviconSrc = `https://www.google.com/s2/favicons?sz=32&domain=${hostname}`;
+
+                const linkCard = document.createElement('a');
+                linkCard.href = link.url;
+                linkCard.target = "_blank";
+                linkCard.rel = "noopener noreferrer";
+                linkCard.className = "p-2 rounded-lg border border-darkBorder bg-darkBg/50 hover:bg-zinc-800/20 hover:border-zinc-700 text-zinc-300 hover:text-tarkoogleBlue transition text-[11px] font-medium flex items-center justify-between gap-2";
+                linkCard.innerHTML = `
+                    <div class="flex items-center gap-2 min-w-0">
+                        <img src="${faviconSrc}" class="w-4 h-4 object-contain flex-shrink-0" onerror="this.style.display='none';">
+                        <span class="truncate">${link.name}</span>
+                    </div>
+                    <svg class="w-3 h-3 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                `;
+                modalFragment.appendChild(linkCard);
+            });
+            modalGrid.appendChild(modalFragment);
+        }
+
+        // --- BOOTSTRAP INITIALIZATION ---
         async function saveLoadTimeToServer(timeMs) {
             try {
                 await fetch('/api/loadingTimesLogging', {
@@ -698,26 +1047,102 @@
                         title: currentTitle
                     })
                 });
-            } catch (err) {
-                // Silently drop logging errors to keep console pristine
-            }
+            } catch (err) {}
         }
 
-        // --- BOOTSTRAP INITIALIZATION ---
-        async function initializeHubData() {
+        async function loadResourceData() {
+            // Simultaneously fetch config arrays
+            const colorsData = await loadResourceArray([
+                './resources/colors/indexColorPalette.json',
+                'resources/colors/indexColorPalette.json',
+                'indexColorPalette.json'
+            ]);
+            if (colorsData && colorsData.length > 0) logoColorPalette = colorsData;
+
+            const titlesData = await fetchFileJSON('./resources/text/indexTitles.json') || await fetchFileJSON('indexTitles.json');
+            if (titlesData && Array.isArray(titlesData)) generalSearchTitles = titlesData;
+
+            const subsData = await fetchFileJSON('./resources/text/listSubtitles.json') || await fetchFileJSON('listSubtitles.json');
+            if (subsData && typeof subsData === 'object') {
+                if (subsData.intros) subtitleIntros = subsData.intros;
+                if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
+                if (subsData.subjects) subtitleSubjects = subsData.subjects;
+                if (subsData.endings) subtitleEndings = subsData.endings;
+            }
+
+            const bioData = await fetchFileJSON('./resources/dnd/listBiography.json') || await fetchFileJSON('listBiography.json');
+            if (bioData && typeof bioData === 'object') {
+                if (bioData.intros) bioIntros = bioData.intros;
+                if (bioData.backgrounds) bioBackgrounds = bioData.backgrounds;
+                if (bioData.motivations) bioMotivations = bioData.motivations;
+                if (bioData.secrets) bioSecrets = bioData.secrets;
+            }
+
+            const versionData = await fetchFileJSON('./resources/text/indexVersion.json') || await fetchFileJSON('indexVersion.json');
+            if (versionData) {
+                if (typeof versionData === 'object' && versionData.version) currentVersion = versionData.version;
+                else if (typeof versionData === 'string') currentVersion = versionData;
+            }
+
+            // DnD fallback arrays loaders
+            const namesData = await loadResourceArray(['./resources/dnd/listNames.json', 'listNames.json']);
+            if (namesData && namesData.length > 0) dndNames = namesData;
+
+            const profsData = await loadResourceArray(['./resources/dnd/listProfessions.json', 'listProfessions.json']);
+            if (profsData && profsData.length > 0) dndProfessions = profsData;
+
+            const racesData = await loadResourceArray(['./resources/dnd/listRaces.json', 'listRaces.json']);
+            if (racesData && racesData.length > 0) dndRaces = racesData;
+
+            const placesData = await loadResourceArray(['./resources/dnd/listPlaces.json', 'listPlaces.json']);
+            if (placesData && placesData.length > 0) dndPlaces = placesData;
+
+            const genderData = await loadResourceArray(['./resources/dnd/listGender.json', 'listGender.json']);
+            if (genderData && genderData.length > 0) dndGenders = genderData;
+
+            const attribsData = await fetchFileJSON('./resources/dnd/listAttributes.json') || await fetchFileJSON('listAttributes.json');
+            if (attribsData && typeof attribsData === 'object' && !Array.isArray(attribsData)) dndAttributes = attribsData;
+        }
+
+        async function initializeHub() {
             const loadingScreen = document.getElementById('loading-screen');
             try {
-                await loadResourceData();
-                loadDynamicTitleAndSubtitle();
-                generateHeroIdentity(); // Generates the character sheet exactly once here!
+                // Fetch dynamic links directory in parallel with core databases
+                const [linksPayload] = await Promise.all([
+                    loadResourceArray([
+                        './resources/eft/eftOfficialURLs.json',
+                        'resources/eft/eftOfficialURLs.json',
+                        'eftOfficialURLs.json'
+                    ]),
+                    loadResourceData(),
+                    gatherTarkovData()
+                ]);
 
-                // Calculate metrics and send log payload silently
+                // Store or fallback
+                if (linksPayload && linksPayload.length > 0) {
+                    officialLinks = linksPayload;
+                } else {
+                    // Fail-safe static subset fallback
+                    officialLinks = [
+                        { "name": "Official Website", "url": "https://www.escapefromtarkov.com" },
+                        { "name": "Official Forum", "url": "https://forum.escapefromtarkov.com" },
+                        { "name": "Official Support", "url": "https://www.escapefromtarkov.com/support" },
+                        { "name": "Arena Website", "url": "https://arena.tarkov.com" },
+                        { "name": "Profile", "url": "https://profile.tarkov.com" },
+                        { "name": "Official Wiki", "url": "https://escapefromtarkov.fandom.com" }
+                    ];
+                }
+
+                loadDynamicTitleAndSubtitle();
+                buildCategoryFilters();
+                generateHeroIdentity();
+                renderOfficialDirectories(); // Initialize the dynamic Bookmarks interface instantly with real favicons
+
                 const finalLoadTime = Math.round(performance.now() - loadStartTimestamp);
                 await saveLoadTimeToServer(finalLoadTime);
-            } catch (error) {
-                console.error("Initialization failed:", error);
+            } catch (err) {
+                console.error("Initialization pipeline crashed:", err);
             } finally {
-                // Safely fade out and remove the full-screen loading screen
                 if (loadingScreen) {
                     loadingScreen.classList.add('opacity-0');
                     setTimeout(() => {
@@ -727,12 +1152,9 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', initializeHubData);
+        document.addEventListener('DOMContentLoaded', initializeHub);
 
-        // --- SEARCH INPUT & GOOGLE REDIRECT ENGINE ---
-        const searchInput = document.getElementById('search-input');
-        const clearBtn = document.getElementById('clear-search');
-
+        // --- UI EVENT HANDLERS ---
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 if (e.target.value.trim().length > 0) {
@@ -740,13 +1162,15 @@
                 } else {
                     clearBtn.classList.add('hidden');
                 }
+                triggerRealtimeSearch();
             });
 
+            // Intercept enter press to open direct Google fallback if desired
             searchInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     const query = searchInput.value.trim();
                     if (query.length > 0) {
-                        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                        window.open(`https://www.google.com/search?q=eft+${encodeURIComponent(query)}`, '_blank');
                     }
                 }
             });
@@ -756,11 +1180,12 @@
             clearBtn.addEventListener('click', () => {
                 searchInput.value = '';
                 clearBtn.classList.add('hidden');
+                suggestionsBox.classList.add('hidden');
                 searchInput.focus();
             });
         }
 
-        // --- 5. IMPRESSUM POPUP MODAL ENGINE ---
+        // Impressum logic
         const impressumBtn = document.getElementById('impressum-btn');
         const impressumModal = document.getElementById('impressum-modal');
         const closeImpressumBtn = document.getElementById('close-impressum-btn');
@@ -776,23 +1201,16 @@
             document.body.classList.remove('overflow-hidden');
         }
 
-        if (impressumBtn) {
-            impressumBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openImpressum();
-            });
-        }
-        if (closeImpressumBtn) closeImpressumBtn.addEventListener('click', closeImpressum);
-        if (closeImpressumOkBtn) closeImpressumOkBtn.addEventListener('click', closeImpressum);
-
+        if (impressumBtn) impressumBtn.onclick = openImpressum;
+        if (closeImpressumBtn) closeImpressumBtn.onclick = closeImpressum;
+        if (closeImpressumOkBtn) closeImpressumOkBtn.onclick = closeImpressum;
         if (impressumModal) {
-            impressumModal.addEventListener('click', (e) => {
+            impressumModal.onclick = (e) => {
                 if (e.target === impressumModal) closeImpressum();
-            });
+            };
         }
 
-        // --- 6. DRAWER SLIDE CONTROLS ---
+        // Drawer logic
         const profileTrigger = document.getElementById('profile-trigger-btn');
         const charDrawer = document.getElementById('character-drawer');
         const closeDrawerBtn = document.getElementById('close-drawer-btn');
@@ -804,8 +1222,6 @@
                     charDrawer.classList.remove('translate-x-0');
                     charDrawer.classList.add('translate-x-[120%]');
                 } else {
-                    // Re-rolling generation removed here! The character details and images
-                    // will remain exactly as loaded on initialization.
                     charDrawer.classList.remove('translate-x-[120%]');
                     charDrawer.classList.add('translate-x-0');
                 }
@@ -815,7 +1231,7 @@
         if (profileTrigger) {
             profileTrigger.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation(); // Avoid triggering document-level click outside handler
+                e.stopPropagation();
                 toggleCharacterDrawer();
             });
         }
@@ -830,7 +1246,7 @@
             });
         }
 
-        // Close character panel drawer if clicked outside of it
+        // Click outside drawer or suggestions box to dismiss
         document.addEventListener('click', (e) => {
             if (charDrawer && charDrawer.classList.contains('translate-x-0')) {
                 const isClickInsideDrawer = charDrawer.contains(e.target);
@@ -840,10 +1256,18 @@
                     charDrawer.classList.add('translate-x-[120%]');
                 }
             }
+
+            if (suggestionsBox && !suggestionsBox.classList.contains('hidden')) {
+                const isClickInsideSearch = document.getElementById('search-container').contains(e.target);
+                if (!isClickInsideSearch) {
+                    suggestionsBox.classList.add('hidden');
+                }
+            }
         });
 
+        // Global hotkeys
         window.addEventListener('keydown', (e) => {
-            if (e.key === '/' && document.activeElement !== searchInput && searchInput) {
+            if (e.key === '/' && document.activeElement !== searchInput) {
                 e.preventDefault();
                 searchInput.focus();
             }
@@ -852,6 +1276,8 @@
                     searchInput.blur();
                 }
                 closeImpressum();
+                closeItemDetail();
+                if (suggestionsBox) suggestionsBox.classList.add('hidden');
                 if (charDrawer) {
                     charDrawer.classList.remove('translate-x-0');
                     charDrawer.classList.add('translate-x-[120%]');
