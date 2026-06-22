@@ -102,12 +102,6 @@
 
         <!-- Right Side: Profile & Character Sheet Trigger -->
         <div class="flex items-center space-x-3">
-            <!-- Quick Database State Tag -->
-            <div id="db-status-badge" class="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-zinc-800/60 border border-zinc-700/50 text-[10px] font-mono text-zinc-400">
-                <span class="w-1.5 h-1.5 rounded-full bg-tarkoogleGreen inline-block"></span>
-                <span id="db-items-count">0 Items</span>
-            </div>
-
             <button id="profile-trigger-btn" class="group flex items-center justify-center bg-darkCard/60 p-1.5 rounded-xl border border-darkBorder hover:border-zinc-700 transition duration-200 focus:outline-none" title="Open Character Sheet">
                 <div class="w-8 h-8 rounded-lg overflow-hidden shadow-sm relative">
                     <img id="header-profile-img" src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=100&auto=format&fit=crop&q=80" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
@@ -120,12 +114,6 @@
 
     <!-- Main Content Container -->
     <main id="main-container" class="flex-grow flex flex-col items-center justify-center px-4 w-full max-w-4xl mx-auto z-10 py-8">
-
-        <!-- CORS Notice Help Panel (Relocated globally to the top of the main container, clean from RPG sheet) -->
-        <div id="cors-notice" class="hidden w-full max-w-[640px] mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-200 space-y-1.5 select-none animate-pulse">
-            <span class="font-bold font-mono block text-amber-400">⚠️ DATA ENGINE DEGRADATION</span>
-            <p class="leading-relaxed">Direct proxy calls failed. Running with native client-side fallback system architecture.</p>
-        </div>
 
         <!-- Logo Header -->
         <div class="mb-6 select-none text-center flex flex-col items-center justify-center w-full relative">
@@ -251,10 +239,11 @@
 
     <!-- Premium Floating Side-Drawer Character Sheet -->
     <div id="character-drawer" class="fixed top-4 bottom-4 right-4 w-[calc(100%-2rem)] sm:w-[380px] md:w-[420px] bg-darkBg border border-darkBorder rounded-2xl backdrop-blur-xl shadow-2xl z-50 translate-x-[120%] transition-transform duration-300 ease-in-out flex flex-col">
-        <!-- Compact Drawer Header -->
-        <div class="py-2.5 px-3.5 border-b border-darkBorder flex items-center justify-between bg-darkCard/40">
-            <span class="text-xs font-bold uppercase tracking-widest text-zinc-400 font-mono">Identity Matrix</span>
-            <button id="close-drawer-btn" class="p-1 rounded-xl text-zinc-400 hover:bg-darkBg hover:text-zinc-200 transition focus:outline-none">
+        <!-- Compact Drawer Header (Email Centered) -->
+        <div class="py-2.5 px-3.5 border-b border-darkBorder flex items-center justify-center bg-darkCard/40 relative select-none">
+            <!-- Centered Dynamic Randomized Email Display -->
+            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 font-mono truncate max-w-[240px] text-center">connecting...</span>
+            <button id="close-drawer-btn" class="absolute right-3.5 p-1 rounded-xl text-zinc-400 hover:bg-darkBg hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -267,12 +256,25 @@
             <div class="relative bg-darkCard border border-darkBorder rounded-2xl p-4 overflow-hidden group">
                 <div class="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none"></div>
                 <div class="flex items-center space-x-4 relative z-10">
-                    <div class="relative w-14 h-16 rounded-xl overflow-hidden bg-darkBg border border-darkBorder">
-                        <img id="char-avatar" src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=150&auto=format&fit=crop&q=80" alt="Character Avatar" class="w-full h-full object-cover">
+                    <!-- Avatar wrapper with dynamic status dot overlay -->
+                    <div class="relative w-14 h-16 rounded-xl bg-darkBg border border-darkBorder flex-shrink-0">
+                        <div class="w-full h-full rounded-xl overflow-hidden">
+                            <img id="char-avatar" src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=150&auto=format&fit=crop&q=80" alt="Character Avatar" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Synced indicator status dot -->
+                        <span id="char-status-dot" class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-darkCard rounded-full transition-colors duration-300"></span>
                     </div>
                     <div class="min-w-0 flex-1">
                         <h3 id="char-name" class="text-base md:text-lg font-bold text-zinc-100 tracking-tight truncate">Loading...</h3>
-                        <div class="flex flex-wrap items-center gap-1 mt-1">
+
+                        <!-- Dynamic Nickname ID Section with Playing Game status -->
+                        <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                            <span id="char-id" class="text-[10px] font-mono font-bold text-zinc-400 tracking-wider">Loading ID...</span>
+                            <!-- Clean performance: Removed animate-pulse (glowing) from the playing status badge -->
+                            <span id="char-game-status" class="hidden text-[8px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold truncate max-w-[150px]"></span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-1 mt-1.5">
                             <span id="char-race" class="text-[9px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder whitespace-nowrap">Race</span>
                             <span id="char-profession" class="text-[9px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium truncate max-w-[120px]">Profession</span>
                             <span id="char-gender" class="text-[9px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium">Gender</span>
@@ -282,7 +284,8 @@
 
                 <!-- Location block -->
                 <div class="mt-3 pt-2.5 border-t border-darkBorder flex items-center text-xs text-zinc-400 relative z-10">
-                    <svg class="w-3.5 h-3.5 text-tarkoogleRed mr-1.5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <!-- Clean performance: Removed animate-pulse (glowing) from the location icon -->
+                    <svg class="w-3.5 h-3.5 text-tarkoogleRed mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
@@ -340,7 +343,7 @@
                     </div>
                 </div>
 
-                <!-- Complete Dynamic Official Links Listing in Impressum Modal -->
+                <!-- Complete Official Links Listing in Impressum Modal -->
                 <div>
                     <h4 class="text-[10px] font-mono font-bold tracking-widest text-zinc-500 uppercase mb-2">Complete Directory (eftOfficialURLs)</h4>
                     <div id="impressum-directory-grid" class="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
@@ -366,6 +369,12 @@
         let loadedCategoriesList = ["All"];
         let officialLinks = []; // Store the high-performance URL array
 
+        // Clean default email domain fallbacks
+        let emailProvidersList = ["gmail.com", "outlook.com", "yahoo.com", "proton.me", "icloud.com", "mail.com", "zoho.com"];
+
+        // Clean default game title fallbacks
+        let dndGamesList = ["The Witcher 3", "Baldur's Gate 3", "Cyberpunk 2077", "Elden Ring", "Skyrim", "Diablo IV", "Hades II", "Minecraft", "Terraria", "Stardew Valley"];
+
         // Live Clock Engine
         function updateClock() {
             const now = new Date();
@@ -386,6 +395,10 @@
 
         // Pure RPG fantasy names entirely clean of Tarkov terms
         let dndNames = ["Eldrin", "Lyra", "Valen", "Aethelgard", "Sariel", "Thorne", "Zephyr", "Maeve", "Garrick", "Kaelen", "Rowena", "Baelor", "Fara", "Doran", "Kaelthas", "Alister", "Elysia", "Theron", "Vael", "Gideon", "Mireia"];
+
+        // Pure RPG fantasy nicknames
+        let dndNicknames = ["Swift", "Shadow", "Ghost", "Storm", "Phoenix", "Blaze", "Viper", "Slayer", "Spectre", "Rogue", "Glint", "Cipher", "Saber", "Reaver", "Ember", "Frost"];
+
         let dndProfessions = ["Grand Wizard", "Forest Ranger", "Holy Paladin", "Shadow Rogue", "High Cleric", "Fierce Gladiator", "Royal Bard", "Arch Druid", "Mystic Alchemist", "Elite Spellsword"];
         let dndRaces = ["High Elf", "Mountain Dwarf", "Human Vanguard", "Forest Halfling", "Noble Dragonborn", "Starlight Gnome", "Astral Tiefling"];
         let dndPlaces = ["Eldoria Capital", "The Whispering Woods", "Stonehaven Mines", "The Obsidian Spire", "Sunken Crystal Caves", "Shadowfen Swamp", "Dragon's Teeth Peak", "Forgotten Citadel"];
@@ -465,8 +478,6 @@
                     });
                     if (directResponse.ok) {
                         queryResult = await directResponse.json();
-                        const corsNotice = document.getElementById('cors-notice');
-                        if (corsNotice) corsNotice.classList.remove('hidden');
                     }
                 } catch (fallbackErr) {
                     console.error("Critical: Direct connection blocked by local security or networking issues.", fallbackErr);
@@ -514,16 +525,6 @@
             }
 
             loadedCategoriesList = ["All", ...Array.from(detectedCategories).sort()];
-
-            // Render database stats indicator
-            const statusBadge = document.getElementById('db-status-badge');
-            const itemsCount = document.getElementById('db-items-count');
-            if (statusBadge && itemsCount) {
-                itemsCount.textContent = `${tarkovItemsMap.size} Tarkov Items`;
-                statusBadge.classList.remove('hidden');
-                statusBadge.classList.add('flex');
-            }
-
             return true;
         }
 
@@ -589,13 +590,25 @@
 
         // Procedural Character Generation (Fantasy Only)
         function generateHeroIdentity() {
-            // Roll fantasy identity metrics
-            const chosenNameSegments = Math.floor(Math.random() * 2) + 2;
-            const chosenNames = [];
-            for (let i = 0; i < chosenNameSegments; i++) {
-                chosenNames.push(dndNames[Math.floor(Math.random() * dndNames.length)]);
+            if (!dndNames || dndNames.length < 2) {
+                dndNames = ["Eldrin", "Lyra", "Valen", "Aethelgard"];
             }
-            const randomName = chosenNames.join(' ');
+
+            // Select exactly 2 unique names from listNames.json
+            const name1 = dndNames[Math.floor(Math.random() * dndNames.length)];
+            let name2 = dndNames[Math.floor(Math.random() * dndNames.length)];
+            if (dndNames.length > 1 && name2 === name1) {
+                while (name2 === name1) {
+                    name2 = dndNames[Math.floor(Math.random() * dndNames.length)];
+                }
+            }
+
+            // Name pattern: <name1> <name2>
+            const randomName = `${name1} ${name2}`;
+
+            // Select exactly 1 random nickname from listNicknames.json
+            const randomNickname = dndNicknames[Math.floor(Math.random() * dndNicknames.length)] || "Swift";
+
             const randomProfession = dndProfessions[Math.floor(Math.random() * dndProfessions.length)];
             const randomRace = dndRaces[Math.floor(Math.random() * dndRaces.length)];
             const randomPlace = dndPlaces[Math.floor(Math.random() * dndPlaces.length)];
@@ -613,6 +626,28 @@
             const motivation = bioMotivations[Math.floor(Math.random() * bioMotivations.length)];
             const secret = bioSecrets[Math.floor(Math.random() * bioSecrets.length)];
             document.getElementById('char-bio').textContent = `${intro} ${bg} ${motivation} ${secret}`;
+
+            // Email pattern: <nickname>@<email>
+            if (emailProvidersList && emailProvidersList.length > 0) {
+                const randomProvider = emailProvidersList[Math.floor(Math.random() * emailProvidersList.length)];
+                const cleanNickname = randomNickname.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const generatedEmail = `${cleanNickname}@${randomProvider}`;
+
+                const emailHeaderEl = document.getElementById('char-email-header');
+                if (emailHeaderEl) {
+                    emailHeaderEl.textContent = generatedEmail;
+                    emailHeaderEl.title = `Arcane Mail Route: ${generatedEmail}`;
+                }
+            }
+
+            // ID section pattern: <nickname>#<randomNumberBetween0001and9999>
+            const randomNum = Math.floor(Math.random() * 9999) + 1;
+            const paddedNum = String(randomNum).padStart(4, '0');
+            const generatedID = `${randomNickname}#${paddedNum}`;
+            const idEl = document.getElementById('char-id');
+            if (idEl) {
+                idEl.textContent = generatedID;
+            }
 
             // Render stats grid
             const attributesGrid = document.getElementById('attributes-grid');
@@ -668,12 +703,34 @@
             const headerImg = document.getElementById('header-profile-img');
             if (headerImg) headerImg.src = uniqueAvatarUrl;
 
-            // Online indicator shift
+            // Online indicator shift (Rolls Online, Idle, or DND status)
             const statusDot = document.getElementById('profile-status-dot');
+            const charStatusDot = document.getElementById('char-status-dot');
+            const gameStatusEl = document.getElementById('char-game-status');
+
+            const statusConfigurations = [
+                { key: 'online', color: 'bg-tarkoogleGreen' },
+                { key: 'idle', color: 'bg-tarkoogleYellow' },
+                { key: 'dnd', color: 'bg-tarkoogleRed' }
+            ];
+            const rolledStatus = statusConfigurations[Math.floor(Math.random() * statusConfigurations.length)];
+
             if (statusDot) {
-                statusDot.className = "absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-darkCard rounded-full transition-colors duration-300";
-                const statusColors = ['bg-tarkoogleGreen', 'bg-tarkoogleYellow', 'bg-tarkoogleRed'];
-                statusDot.classList.add(statusColors[Math.floor(Math.random() * statusColors.length)]);
+                statusDot.className = `absolute bottom-0 right-0 w-2.5 h-2.5 border-2 border-darkCard rounded-full transition-colors duration-300 ${rolledStatus.color}`;
+            }
+            if (charStatusDot) {
+                charStatusDot.className = `absolute bottom-0 right-0 w-3 h-3 border-2 border-darkCard rounded-full transition-colors duration-300 ${rolledStatus.color}`;
+            }
+
+            // Custom dynamic activity status display when rolled online
+            if (gameStatusEl) {
+                if (rolledStatus.key === 'online' && dndGamesList && dndGamesList.length > 0) {
+                    const chosenGame = dndGamesList[Math.floor(Math.random() * dndGamesList.length)];
+                    gameStatusEl.textContent = `Playing ${chosenGame}`;
+                    gameStatusEl.classList.remove('hidden');
+                } else {
+                    gameStatusEl.classList.add('hidden');
+                }
             }
         }
 
@@ -890,6 +947,7 @@
             document.body.classList.add('overflow-hidden');
         }
 
+        // Close Item Detail Popup
         function closeItemDetail() {
             if (itemModal) itemModal.classList.add('hidden');
             document.body.classList.remove('overflow-hidden');
@@ -1051,6 +1109,14 @@
             const namesData = await loadResourceArray(['./resources/dnd/listNames.json', 'listNames.json']);
             if (namesData && namesData.length > 0) dndNames = namesData;
 
+            // Load custom RPG Nicknames
+            const nicknamesData = await loadResourceArray([
+                './resources/dnd/listNicknames.json',
+                'resources/dnd/listNicknames.json',
+                'listNicknames.json'
+            ]);
+            if (nicknamesData && nicknamesData.length > 0) dndNicknames = nicknamesData;
+
             const profsData = await loadResourceArray(['./resources/dnd/listProfessions.json', 'listProfessions.json']);
             if (profsData && profsData.length > 0) dndProfessions = profsData;
 
@@ -1065,6 +1131,26 @@
 
             const attribsData = await fetchFileJSON('./resources/dnd/listAttributes.json') || await fetchFileJSON('listAttributes.json');
             if (attribsData && typeof attribsData === 'object' && !Array.isArray(attribsData)) dndAttributes = attribsData;
+
+            // Load custom email providers list
+            const emailProvidersPayload = await loadResourceArray([
+                './resources/text/emailProvider.json',
+                'resources/text/emailProvider.json',
+                'emailProvider.json'
+            ]);
+            if (emailProvidersPayload && emailProvidersPayload.length > 0) {
+                emailProvidersList = emailProvidersPayload;
+            }
+
+            // Load custom listGames configuration
+            const gamesPayload = await loadResourceArray([
+                './resources/dnd/listGames.json',
+                'resources/dnd/listGames.json',
+                'listGames.json'
+            ]);
+            if (gamesPayload && gamesPayload.length > 0) {
+                dndGamesList = gamesPayload;
+            }
         }
 
         async function initializeHub() {
@@ -1072,7 +1158,7 @@
             const statusLabel = document.getElementById('loading-status');
 
             try {
-                // Dynamically fetch custom loading screen text first (or alongside key resources)
+                // Dynamically fetch custom loading screen text first
                 const loadingScreenData = await fetchFileJSON('./resources/text/loadingScreen.json') ||
                                           await fetchFileJSON('resources/text/loadingScreen.json') ||
                                           await fetchFileJSON('loadingScreen.json') ||
@@ -1105,7 +1191,7 @@
                     gatherTarkovData()
                 ]);
 
-                // Store or fallback - Completely removed the hardcoded fallback values as requested
+                // Store official links
                 if (linksPayload && linksPayload.length > 0) {
                     officialLinks = linksPayload;
                 } else {
@@ -1115,7 +1201,7 @@
                 loadDynamicTitleAndSubtitle();
                 buildCategoryFilters();
                 generateHeroIdentity();
-                renderOfficialDirectories(); // Initialize the dynamic Bookmarks interface instantly with real favicons
+                renderOfficialDirectories(); // Initialize the dynamic Bookmarks interface
 
                 const finalLoadTime = Math.round(performance.now() - loadStartTimestamp);
                 await saveLoadTimeToServer(finalLoadTime);
