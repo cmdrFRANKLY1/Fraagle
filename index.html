@@ -33,13 +33,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&family=Space+Grotesk:wght=500;700&display=swap" rel="stylesheet">
     <style>
+        /* Force Verdana Globally on Everything */
+        *, body, h1, h2, h3, h4, h5, h6, input, button, select, p, span, kbd, div {
+            font-family: Verdana, Geneva, sans-serif !important;
+        }
+
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #09090b;
             color: #f4f4f5;
-        }
-        h1, h2, h3 {
-            font-family: 'Space Grotesk', sans-serif;
         }
 
         /* Unified Transition Setup with soft shadows */
@@ -82,9 +83,9 @@
             <!-- Outer spinning rings -->
             <div class="w-16 h-16 rounded-full border-4 border-zinc-800 border-t-tarkoogleBlue animate-spin"></div>
             <!-- Inner branding label pulsing -->
-            <div class="absolute text-sm font-bold font-mono tracking-tight text-zinc-400 animate-pulse">T.</div>
+            <div class="absolute text-sm font-bold tracking-tight text-zinc-400 animate-pulse">T.</div>
         </div>
-        <span class="text-xs font-mono font-bold tracking-widest text-zinc-500 mt-4 uppercase animate-pulse" id="loading-status">Syncing Databases...</span>
+        <span class="text-xs font-bold tracking-widest text-zinc-500 mt-4 uppercase animate-pulse" id="loading-status">Syncing Databases...</span>
     </div>
 
     <!-- Top Navigation Bar -->
@@ -96,7 +97,7 @@
 
         <!-- Center: Modern Live Clock & Date -->
         <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center">
-            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100 font-mono">00:00:00</span>
+            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100">00:00:00</span>
             <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5 whitespace-nowrap">Loading Date...</span>
         </div>
 
@@ -104,7 +105,7 @@
         <div class="flex items-center space-x-3">
             <button id="profile-trigger-btn" class="group flex items-center justify-center bg-darkCard/60 p-1.5 rounded-xl border border-darkBorder hover:border-zinc-700 transition duration-200 focus:outline-none" title="Open Character Sheet">
                 <div class="w-8 h-8 rounded-lg overflow-hidden shadow-sm relative">
-                    <img id="header-profile-img" src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=100&auto=format&fit=crop&q=80" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
+                    <img id="header-profile-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Profile" class="w-full h-full object-cover animate-fade-in" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
                     <!-- Dynamic Status Indicator Dot -->
                     <span id="profile-status-dot" class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkCard rounded-full transition-colors duration-300"></span>
                 </div>
@@ -126,9 +127,9 @@
                 <!-- Tactical HUD Sidebar containing Version elements structured vertically -->
                 <div class="absolute left-full ml-3 flex flex-col items-start justify-center text-left whitespace-nowrap top-1/2 -translate-y-1/2 select-none">
                     <!-- Version Number tag -->
-                    <span id="version-number" class="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
+                    <span id="version-number" class="text-[10px] sm:text-xs font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
                     <!-- Version Name tag (moved below the number) -->
-                    <span id="version-name" class="text-[8px] sm:text-[10px] font-mono font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase mt-0.5"></span>
+                    <span id="version-name" class="text-[8px] sm:text-[10px] font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase mt-0.5"></span>
                 </div>
             </div>
 
@@ -170,7 +171,7 @@
                 </div>
 
                 <!-- Footer with search metrics and counts -->
-                <div class="p-2.5 px-4 bg-darkBg/60 border-t border-darkBorder flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+                <div class="p-2.5 px-4 bg-darkBg/60 border-t border-darkBorder flex items-center justify-between text-[10px] text-zinc-500">
                     <span id="results-count-stats">Type to start querying...</span>
                     <span>Press <kbd class="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400 font-semibold">ESC</kbd> to dismiss</span>
                 </div>
@@ -198,7 +199,7 @@
                     <img id="modal-item-icon" src="" alt="" class="max-w-full max-h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=100&auto=format&fit=crop&q=80'">
                 </div>
                 <div class="min-w-0 flex-1">
-                    <span id="modal-item-category" class="text-[9px] font-mono tracking-widest font-bold uppercase text-tarkoogleBlue">Category</span>
+                    <span id="modal-item-category" class="text-[9px] tracking-widest font-bold uppercase text-tarkoogleBlue">Category</span>
                     <h2 id="modal-item-name" class="text-xl font-bold tracking-tight text-zinc-100 truncate">Item Name</h2>
                     <p id="modal-item-short" class="text-xs text-zinc-400 font-medium mt-0.5">Short Name</p>
                 </div>
@@ -207,20 +208,20 @@
             <!-- Price Analysis Cards -->
             <div class="grid grid-cols-2 gap-3 mb-5 select-none">
                 <div class="p-3.5 rounded-xl bg-darkBg border border-darkBorder">
-                    <span class="text-[10px] font-mono font-bold tracking-wider text-tarkoogleBlue uppercase">PvP Market Price</span>
-                    <div class="text-lg font-extrabold text-zinc-100 font-mono mt-1" id="modal-item-pvp">₽0</div>
+                    <span class="text-[10px] font-bold tracking-wider text-tarkoogleBlue uppercase">PvP Market Price</span>
+                    <div class="text-lg font-extrabold text-zinc-100 mt-1" id="modal-item-pvp">₽0</div>
                     <span class="text-[9px] text-zinc-500 block">24h average market pricing</span>
                 </div>
                 <div class="p-3.5 rounded-xl bg-darkBg border border-darkBorder">
-                    <span class="text-[10px] font-mono font-bold tracking-wider text-tarkoogleGreen uppercase">PvE Market Price</span>
-                    <div class="text-lg font-extrabold text-zinc-100 font-mono mt-1" id="modal-item-pve">₽0</div>
+                    <span class="text-[10px] font-bold tracking-wider text-tarkoogleGreen uppercase">PvE Market Price</span>
+                    <div class="text-lg font-extrabold text-zinc-100 mt-1" id="modal-item-pve">₽0</div>
                     <span class="text-[9px] text-zinc-500 block">24h average market pricing</span>
                 </div>
             </div>
 
             <!-- Specific Properties Panel -->
             <div class="space-y-3">
-                <h4 class="text-xs font-mono font-bold text-zinc-500 uppercase tracking-widest border-b border-darkBorder pb-1">Specifications</h4>
+                <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-darkBorder pb-1">Specifications</h4>
                 <div class="grid grid-cols-2 gap-3 text-xs" id="modal-properties-grid">
                     <!-- Sourced Dynamically -->
                 </div>
@@ -244,7 +245,7 @@
         <!-- Compact Drawer Header (Email Centered) -->
         <div class="py-2.5 px-3.5 border-b border-darkBorder flex items-center justify-center bg-darkCard/40 relative select-none">
             <!-- Centered Dynamic Randomized Email Display -->
-            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 font-mono truncate max-w-[240px] text-center">connecting...</span>
+            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 truncate max-w-[240px] text-center">connecting...</span>
             <button id="close-drawer-btn" class="absolute right-3.5 p-1 rounded-xl text-zinc-400 hover:bg-darkBg hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -261,7 +262,7 @@
                     <!-- Avatar wrapper with dynamic status dot overlay -->
                     <div class="relative w-14 h-16 rounded-xl bg-darkBg border border-darkBorder flex-shrink-0">
                         <div class="w-full h-full rounded-xl overflow-hidden">
-                            <img id="char-avatar" src="https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=150&auto=format&fit=crop&q=80" alt="Character Avatar" class="w-full h-full object-cover">
+                            <img id="char-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Character Avatar" class="w-full h-full object-cover">
                         </div>
                         <!-- Synced indicator status dot -->
                         <span id="char-status-dot" class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-darkCard rounded-full transition-colors duration-300"></span>
@@ -272,9 +273,9 @@
                         <!-- Dynamic Nickname ID Section with Playing Game status -->
                         <div class="flex flex-wrap items-center gap-2 mt-0.5">
                             <!-- Increased ID font size by 2 (text-[10px] -> text-[12px]) -->
-                            <span id="char-id" class="text-[12px] font-mono font-bold text-zinc-400 tracking-wider">Loading ID...</span>
+                            <span id="char-id" class="text-[12px] font-bold text-zinc-400 tracking-wider">Loading ID...</span>
                             <!-- Increased Playing Tag font size by 2 (text-[8px] -> text-[10px]) -->
-                            <span id="char-game-status" class="hidden text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold truncate max-w-[150px]"></span>
+                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold truncate max-w-[150px]"></span>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-1 mt-1.5">
@@ -299,7 +300,7 @@
             <!-- Compact Attributes Grid -->
             <div>
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 font-mono">Attributes & Stats</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Attributes & Stats</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2" id="attributes-grid">
                     <!-- Loaded dynamically -->
@@ -308,7 +309,7 @@
 
             <!-- Compact Bio Panel -->
             <div class="bg-darkCard border border-darkBorder rounded-xl p-3.5 text-xs space-y-1.5">
-                <span class="font-mono text-[10px] text-zinc-500 uppercase tracking-wider block">Bio</span>
+                <span class="text-[10px] text-zinc-500 uppercase tracking-wider block">Bio</span>
                 <p id="char-bio" class="text-zinc-400 leading-relaxed italic">
                     Initializing biography matrix...
                 </p>
@@ -348,7 +349,7 @@
 
                 <!-- Complete Official Links Listing in Impressum Modal -->
                 <div>
-                    <h4 class="text-[10px] font-mono font-bold tracking-widest text-zinc-500 uppercase mb-2">Complete Directory (eftOfficialURLs)</h4>
+                    <h4 class="text-[10px] font-bold tracking-widest text-zinc-500 uppercase mb-2">Complete Directory (eftOfficialURLs)</h4>
                     <div id="impressum-directory-grid" class="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
                         <!-- Loaded dynamically -->
                     </div>
@@ -377,6 +378,19 @@
 
         // Clean default game title fallbacks
         let dndGamesList = ["The Witcher 3", "Baldur's Gate 3", "Cyberpunk 2077", "Elden Ring", "Skyrim", "Diablo IV", "Hades II", "Minecraft", "Terraria", "Stardew Valley"];
+
+        // High-Performance curated Unsplash portrait pool to ensure profiles never timeout or fail inside frame sandboxes
+        const portraitUrlPool = [
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80"
+        ];
 
         // Live Clock Engine
         function updateClock() {
@@ -555,7 +569,7 @@
             const svg = `
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
                     <rect width="100" height="100" rx="26" fill="%2318181b"/>
-                    <text x="50" y="55" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="65" fill="${encodeURIComponent(randomColor)}" text-anchor="middle" dominant-baseline="middle">${letter}</text>
+                    <text x="50" y="55" font-family="Verdana, Geneva, sans-serif" font-weight="bold" font-size="65" fill="${encodeURIComponent(randomColor)}" text-anchor="middle" dominant-baseline="middle">${letter}</text>
                 </svg>
             `;
             let link = document.querySelector("link[rel*='icon']");
@@ -733,24 +747,30 @@
                     attrBlock.className = `p-2 bg-darkBg/60 rounded-xl border ${colorClasses.split(' ')[0]} ${colorClasses.split(' ')[1]} transition-all duration-300 flex items-center justify-between select-none`;
                     attrBlock.innerHTML = `
                         <div class="flex flex-col min-w-0">
-                            <span class="text-[9px] font-mono font-bold text-zinc-500 uppercase tracking-wider">${attrName}</span>
-                            <span class="text-[8px] font-semibold text-zinc-400 font-mono italic truncate max-w-[110px]" title="${chosenDesc}">${chosenDesc}</span>
+                            <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">${attrName}</span>
+                            <span class="text-[8px] font-semibold text-zinc-400 italic truncate max-w-[110px]" title="${chosenDesc}">${chosenDesc}</span>
                         </div>
                         <div class="text-right flex-shrink-0 pl-1">
-                            <span class="text-base font-extrabold font-mono text-zinc-100">${baseScore}</span>
-                            <span class="text-[9px] font-mono block text-zinc-400 font-semibold leading-none">${formattedModifier}</span>
+                            <span class="text-base font-extrabold text-zinc-100">${baseScore}</span>
+                            <span class="text-[9px] block text-zinc-400 font-semibold leading-none">${formattedModifier}</span>
                         </div>
                     `;
                     attributesGrid.appendChild(attrBlock);
                 }
             }
 
-            // Sync the side drawer avatar and top right header profile avatar
-            const uniqueAvatarUrl = `https://thispersondoesnotexist.com?nocache=${Date.now()}`;
+            // Sync the side drawer avatar and top right header profile avatar using premium portrait URLs
+            const randomPortraitIdx = Math.floor(Math.random() * portraitUrlPool.length);
+            const selectedPortrait = portraitUrlPool[randomPortraitIdx];
+
             const avatarImg = document.getElementById('char-avatar');
-            if (avatarImg) avatarImg.src = uniqueAvatarUrl;
+            if (avatarImg) {
+                avatarImg.src = selectedPortrait;
+            }
             const headerImg = document.getElementById('header-profile-img');
-            if (headerImg) headerImg.src = uniqueAvatarUrl;
+            if (headerImg) {
+                headerImg.src = selectedPortrait;
+            }
 
             // Online indicator shift (Rolls Online, Idle, or DND status)
             const statusDot = document.getElementById('profile-status-dot');
@@ -902,9 +922,9 @@
                     if (item.pvpPrice > 0 && item.pvePrice > 0) {
                         const diffPercent = Math.round(((item.pvePrice - item.pvpPrice) / item.pvpPrice) * 100);
                         if (diffPercent > 0) {
-                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-tarkoogleGreen font-mono">+${diffPercent}% PvE</span>`;
+                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-tarkoogleGreen">+${diffPercent}% PvE</span>`;
                         } else if (diffPercent < 0) {
-                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-tarkoogleRed font-mono">${diffPercent}% PvE</span>`;
+                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-tarkoogleRed">${diffPercent}% PvE</span>`;
                         }
                     }
 
@@ -915,7 +935,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="text-xs font-bold text-zinc-100 truncate">${item.name}</div>
-                                <div class="flex items-center space-x-2 mt-0.5 text-[9px] font-mono text-zinc-500">
+                                <div class="flex items-center space-x-2 mt-0.5 text-[9px] text-zinc-500">
                                     <span class="text-tarkoogleBlue font-semibold uppercase">${item.shortName}</span>
                                     <span>•</span>
                                     <span>${item.category}</span>
@@ -925,8 +945,8 @@
                             </div>
                         </div>
                         <div class="text-right flex-shrink-0 pl-3">
-                            <div class="text-xs font-bold font-mono text-zinc-300">PvP: ${pvpFormatted}</div>
-                            <div class="text-[10px] font-mono text-zinc-400 mt-0.5">PvE: ${pveFormatted}</div>
+                            <div class="text-xs font-bold text-zinc-300">PvP: ${pvpFormatted}</div>
+                            <div class="text-[10px] text-zinc-400 mt-0.5">PvE: ${pveFormatted}</div>
                             <div class="mt-0.5">${priceRatioIndicator}</div>
                         </div>
                     `;
@@ -977,7 +997,7 @@
                 const cell = document.createElement('div');
                 cell.className = "p-2.5 bg-darkBg border border-darkBorder/60 rounded-xl";
                 cell.innerHTML = `
-                    <span class="text-[9px] font-mono uppercase tracking-wider text-zinc-500 block">${spec.label}</span>
+                    <span class="text-[9px] uppercase tracking-wider text-zinc-500 block">${spec.label}</span>
                     <span class="text-xs font-semibold text-zinc-200 mt-0.5 block">${spec.val}</span>
                 `;
                 propertiesGrid.appendChild(cell);
@@ -1069,7 +1089,7 @@
                 btn.innerHTML = `
                     <div class="w-12 h-12 rounded-full border border-darkBorder bg-darkCard/60 hover:bg-darkCard hover:border-zinc-500 flex items-center justify-center p-2.5 transition-all duration-300 group-hover:scale-105 group-hover:bg-darkCard group-hover:shadow-[0_0_12px_rgba(255,255,255,0.03)] relative overflow-hidden">
                         <img src="${faviconSrc}" alt="${link.name}" class="w-full h-full object-contain filter brightness-95 group-hover:brightness-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="hidden ${textClass} text-sm font-bold font-mono uppercase">${fallbackLetter}</span>
+                        <span class="hidden ${textClass} text-sm font-bold uppercase">${fallbackLetter}</span>
                     </div>
                     <span class="text-[9px] font-medium text-zinc-500 group-hover:text-zinc-300 mt-2 truncate w-full tracking-wider transition-colors">${link.name}</span>
                 `;
@@ -1244,9 +1264,7 @@
             try {
                 // Dynamically fetch custom loading screen text first
                 const loadingScreenData = await fetchFileJSON('./resources/text/loadingScreen.json') ||
-                                          await fetchFileJSON('resources/text/loadingScreen.json') ||
-                                          await fetchFileJSON('loadingScreen.json') ||
-                                          await fetchFileJSON('/resources/text/loadingScreen.json');
+                                          await fetchFileJSON('loadingScreen.json');
 
                 if (loadingScreenData && statusLabel) {
                     let loadingPhrases = [];
@@ -1340,11 +1358,6 @@
         const closeImpressumBtn = document.getElementById('close-impressum-btn');
         const closeImpressumOkBtn = document.getElementById('close-impressum-ok-btn');
 
-        // Close character panel drawer if clicked outside of it
-        const profileTrigger = document.getElementById('profile-trigger-btn');
-        const charDrawer = document.getElementById('character-drawer');
-        const closeDrawerBtn = document.getElementById('close-drawer-btn');
-
         function openImpressum() {
             if (impressumModal) impressumModal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
@@ -1365,6 +1378,10 @@
         }
 
         // Drawer logic
+        const profileTrigger = document.getElementById('profile-trigger-btn');
+        const charDrawer = document.getElementById('character-drawer');
+        const closeDrawerBtn = document.getElementById('close-drawer-btn');
+
         function toggleCharacterDrawer() {
             if (charDrawer) {
                 const isOpen = !charDrawer.classList.contains('translate-x-[120%]');
