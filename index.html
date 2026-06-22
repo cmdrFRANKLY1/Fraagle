@@ -31,9 +31,9 @@
                         darkBg: '#09090b', // Deep zinc dark background
                         darkCard: '#18181b', // Dark card
                         darkBorder: '#27272a', // Subtle dark borders
-                        lightBg: '#f8f9fa', // Pristine soft off-white background
+                        lightBg: '#fafafa', // Improved crisp off-white background
                         lightCard: '#ffffff', // Clean white card
-                        lightBorder: '#e2e8f0', // Crisp slate border
+                        lightBorder: '#e4e4e7', // Crisp zinc border
                         fraagleBlue: '#3b82f6',
                         fraagleRed: '#ef4444',
                         fraagleYellow: '#f59e0b',
@@ -69,9 +69,28 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(156, 163, 175, 0.45);
         }
+
+        /* Dynamic Glow Effects for Search Bar based on gradient state */
+        #search-box-inner {
+            transition: box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+        }
+        
+        /* Light mode with gradient enabled */
+        html:not(.dark) body[data-gradient="enabled"] #search-box-inner {
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.06), 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.08);
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Dark mode with gradient enabled */
+        html.dark body[data-gradient="enabled"] #search-box-inner {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.06), 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(24, 24, 27, 0.6);
+        }
     </style>
 </head>
-<body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
+<body class="bg-lightBg dark:bg-darkBg text-zinc-900 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden" data-gradient="enabled">
 
     <!-- Decorative Ambient Soft Glow Gradients (Colors, shapes, and coordinates dynamically randomized via JS) -->
     <div id="ambient-glow-1" class="absolute pointer-events-none transition-all duration-1000"></div>
@@ -87,13 +106,13 @@
         <!-- Center: Modern Live Clock & Date (Absolute Centered) -->
         <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center select-none z-0">
             <span id="clock-time" class="text-sm font-bold tracking-wider text-zinc-700 dark:text-zinc-200">00:00:00</span>
-            <span id="clock-date" class="text-[9px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mt-0.5 whitespace-nowrap">Sunday, June 21, 2026</span>
+            <span id="clock-date" class="text-[9px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-500 mt-0.5 whitespace-nowrap">Sunday, June 21, 2026</span>
         </div>
 
         <!-- Right Side: Dark Mode Toggle, Gradient Toggle, Launcher & Profile -->
         <div class="flex items-center space-x-2 sm:space-x-3 relative z-10">
             <!-- Gradient Glow Toggle Button -->
-            <button id="gradient-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Glow Gradients">
+            <button id="gradient-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/80 dark:bg-darkCard/50 backdrop-blur-md hover:bg-zinc-50 dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Glow Gradients">
                 <!-- Sparkle/Glow Icon -->
                 <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-300 pointer-events-none transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM17 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2h-2zM5 15a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM17 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2z" />
@@ -101,7 +120,7 @@
             </button>
 
             <!-- Theme Toggle Button -->
-            <button id="theme-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Theme">
+            <button id="theme-toggle" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/80 dark:bg-darkCard/50 backdrop-blur-md hover:bg-zinc-50 dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Toggle Theme">
                 <!-- Sun Icon (visible in dark mode to switch to light) -->
                 <svg id="theme-toggle-sun-icon" class="hidden w-5 h-5 text-yellow-500 dark:text-yellow-400 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M14 12a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -134,12 +153,12 @@
                 <span class="text-fraagleBlue">e</span>
             </h1>
             <!-- Dynamic Permutated Subtitle -->
-            <p id="logo-subtitle" class="text-xs sm:text-sm font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 mt-2 min-h-[1.25rem]"></p>
+            <p id="logo-subtitle" class="text-xs sm:text-sm font-medium tracking-wider text-zinc-500 dark:text-zinc-500 mt-2 min-h-[1.25rem]"></p>
         </div>
 
         <!-- Sleek Search Box Wrapper with Ambient Shadows (z-30 added to stack above footer & credits) -->
         <div class="w-full max-w-[584px] mb-8 relative group z-30" id="search-container">
-            <div class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white/90 dark:bg-darkCard/70 backdrop-blur-md focus-within:bg-white dark:focus-within:bg-darkCard/90 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 focus-within:shadow-xl focus-within:shadow-indigo-500/10 focus-within:border-indigo-500/50 dark:focus-within:border-indigo-400/50 transition-all duration-300">
+            <div id="search-box-inner" class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-lightBorder dark:border-darkBorder bg-white/95 dark:bg-darkCard/70 backdrop-blur-md focus-within:bg-white dark:focus-within:bg-darkCard/90 shadow-sm hover:shadow-lg hover:shadow-indigo-500/5 focus-within:shadow-lg focus-within:shadow-indigo-500/10 focus-within:border-indigo-500/50 dark:focus-within:border-indigo-400/50 transition-all duration-300">
                 <!-- Search Icon -->
                 <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -169,7 +188,7 @@
             </div>
 
             <!-- Autocomplete Search Results Dropdown -->
-            <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-3 bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl overflow-hidden z-40 max-h-80 overflow-y-auto backdrop-blur-xl transition duration-150 transform scale-100">
+            <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-3 bg-white/95 dark:bg-darkCard/95 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-xl dark:shadow-2xl overflow-hidden z-40 max-h-80 overflow-y-auto backdrop-blur-xl transition duration-150 transform scale-100">
                 <div id="dropdown-results-container" class="py-2">
                     <!-- Matches appear here -->
                 </div>
@@ -177,7 +196,7 @@
         </div>
 
         <!-- Google-Style Search Results Dashboard (Hidden by default) -->
-        <div id="google-results-view" class="hidden w-full px-2 mb-12">
+        <div id="google-results-view" class="hidden w-full px-2 mb-12 flex flex-col items-center">
             <!-- Battlestate Games Channels Bar placed at the top of the search site, right below the search bar -->
             <div id="bsg-channels-bar" class="hidden mb-6 flex items-center justify-center gap-6 text-zinc-500 dark:text-zinc-400 bg-transparent py-2 select-none">
                 <!-- BSG EFT Homepage -->
@@ -207,7 +226,7 @@
                     </svg>
                 </a>
                 <!-- TikTok -->
-                <a href="https://www.tiktok.com/@escapefromtarkov" target="_blank" title="Official TikTok" class="hover:text-zinc-800 dark:hover:text-white transition-colors flex items-center justify-center p-1.5 rounded-lg">
+                <a href="https://www.tiktok.com/@escapefromtarkov" target="_blank" title="Official TikTok" class="hover:text-zinc-800 dark:hover:text-zinc-100 transition-colors flex items-center justify-center p-1.5 rounded-lg">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12.525.02c1.31.02 2.61.05 3.91.09.08 1.54.81 2.96 1.99 3.84.01.68.02 1.35.03 2.03-1.22-.02-2.42-.44-3.38-1.25-.03 2.93-.05 5.86-.08 8.79a6.38 6.38 0 0 1-5.11 6.27c-3.13.62-6.27-1.12-7.24-4.14A6.41 6.41 0 0 1 5.8 8.43c.12 1.99.16 3.99.18 5.98a4.42 4.42 0 0 0-2.82 4.14c.03 2.45 2.05 4.41 4.5 4.38s4.41-2.05 4.38-4.5c.03-4.8.05-9.61.08-14.41a6.44 6.41 0 0 1 .58-4z"/>
                     </svg>
@@ -230,12 +249,15 @@
                         <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.03c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.03A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.077 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.01-.09-.024-.124a13.194 13.194 0 0 1-1.875-1.024.084.084 0 0 1-.008-.139c.12-.09.242-.18.354-.275a.075.077 0 0 1 .075-.01c3.986 1.83 8.33 1.83 12.24 0a.075.075 0 0 1 .075.01c.12.095.24.185.354.276a.085.084 0 0 1-.008.139 12.924 12.924 0 0 1-1.875 1.024.082.082 0 0 0-.024.124c.362.7.774 1.364 1.226 1.994a.076.076 0 0 0 .084.028 19.83 19.9 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z"/>
             </div>
 
-            <div class="text-xs text-zinc-400 dark:text-zinc-500 mb-6 flex items-center justify-between">
-                <span id="results-meta-text">About 0 results (0.00 seconds)</span>
-                <button id="results-close-btn" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">Clear Search</button>
-            </div>
-            <div id="google-results-container" class="space-y-6 animate-fade-in">
-                <!-- Search entries populate here dynamically -->
+            <!-- Wrapper to ensure results are correctly horizontally centered without stretching too far -->
+            <div class="w-full max-w-2xl">
+                <div class="text-xs text-zinc-500 dark:text-zinc-500 mb-6 flex items-center justify-between">
+                    <span id="results-meta-text">About 0 results (0.00 seconds)</span>
+                    <button id="results-close-btn" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">Clear Search</button>
+                </div>
+                <div id="google-results-container" class="space-y-6 animate-fade-in w-full">
+                    <!-- Search entries populate here dynamically -->
+                </div>
             </div>
         </div>
 
@@ -265,36 +287,36 @@
                 <h2 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                     ℹ️ Impressum & Credits
                 </h2>
-                <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-1">Project reference data and technical attributes.</p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-500 mt-1">Project reference data and technical attributes.</p>
             </div>
 
             <!-- Modal Credits Body -->
-            <div class="space-y-4 text-sm text-zinc-600 dark:text-zinc-300">
+            <div class="space-y-4 text-sm text-zinc-700 dark:text-zinc-300">
                 <!-- tarkov.dev credit -->
-                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-lightBg/50 dark:bg-darkBg/30 flex items-start gap-3">
+                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-zinc-50 dark:bg-darkBg/30 flex items-start gap-3">
                     <span class="text-lg mt-0.5 select-none">🌐</span>
                     <div>
-                        <h3 class="font-semibold text-zinc-800 dark:text-zinc-200">API Gateway</h3>
+                        <h3 class="font-semibold text-zinc-900 dark:text-zinc-200">API Gateway</h3>
                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Powered by the interactive open-source metadata architecture at:</p>
                         <a href="https://tarkov.dev/" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium inline-block mt-1">tarkov.dev</a>
                     </div>
                 </div>
 
                 <!-- this-person-does-not-exist credit -->
-                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-lightBg/50 dark:bg-darkBg/30 flex items-start gap-3">
+                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-zinc-50 dark:bg-darkBg/30 flex items-start gap-3">
                     <span class="text-lg mt-0.5 select-none">👤</span>
                     <div>
-                        <h3 class="font-semibold text-zinc-800 dark:text-zinc-200">Profile Avatars</h3>
+                        <h3 class="font-semibold text-zinc-900 dark:text-zinc-200">Profile Avatars</h3>
                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Generative realism synthetic styling face vectors sourced via AI networks from:</p>
                         <a href="https://this-person-does-not-exist.com/en" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium inline-block mt-1">this-person-does-not-exist.com</a>
                     </div>
                 </div>
 
                 <!-- tarkovquestie credit -->
-                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-lightBg/50 dark:bg-darkBg/30 flex items-start gap-3">
+                <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-zinc-50 dark:bg-darkBg/30 flex items-start gap-3">
                     <span class="text-lg mt-0.5 select-none">🧭</span>
                     <div>
-                        <h3 class="font-semibold text-zinc-800 dark:text-zinc-200">General Information</h3>
+                        <h3 class="font-semibold text-zinc-900 dark:text-zinc-200">General Information</h3>
                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">General strategic tactical task blueprints and interactive guidance support tools:</p>
                         <a href="https://tarkovquestie.com/" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium inline-block mt-1">tarkovquestie.com</a>
                     </div>
@@ -449,6 +471,9 @@
         }
 
         function applyGradientState(isEnabled) {
+            // Setup data attribute for CSS targeting of inner glow effects
+            document.body.setAttribute('data-gradient', isEnabled);
+            
             if (isEnabled === 'enabled') {
                 ambientGlow1.classList.remove('opacity-0', 'pointer-events-none');
                 ambientGlow2.classList.remove('opacity-0', 'pointer-events-none');
@@ -894,7 +919,7 @@
             if (matches.length === 0) {
                 googleResultsContainer.innerHTML = `
                     <div class="text-left py-4 text-zinc-500 dark:text-zinc-400 text-sm">
-                        <p class="mb-2">Your search - <strong class="text-zinc-800 dark:text-zinc-100">${queryText}</strong> - did not match any documents or Tarkov items.</p>
+                        <p class="mb-2">Your search - <strong class="text-zinc-900 dark:text-zinc-100">${queryText}</strong> - did not match any documents or Tarkov items.</p>
                     </div>
                 `;
                 return;
@@ -903,7 +928,7 @@
             matches.forEach(item => {
                 if (!item) return;
                 const resultBlock = document.createElement('div');
-                resultBlock.className = "text-left max-w-2xl py-2 group";
+                resultBlock.className = "text-left w-full py-2 group";
 
                 let breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${(item.shortName && item.shortName !== item.title) ? item.shortName : 'Item'}`;
 
@@ -920,25 +945,25 @@
                     }
                     
                     if (item.penetrationPower !== null && item.penetrationPower !== undefined) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20">Penetration: ${item.penetrationPower}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">Penetration: ${item.penetrationPower}</span>`);
                     }
                     
                     if (item.avgPrice) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">PVP: ${item.avgPrice.toLocaleString()} ₽</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">PVP: ${item.avgPrice.toLocaleString()} ₽</span>`);
                     } else if (item.basePrice) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">PVP (Base): ${item.basePrice.toLocaleString()} ₽</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">PVP (Base): ${item.basePrice.toLocaleString()} ₽</span>`);
                     }
                     
                     if (item.pvePrice) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
                     }
 
                     if (item.armorClass) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20">Armor Class: ${item.armorClass}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">Armor Class: ${item.armorClass}</span>`);
                     }
 
                     if (item.damage) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20">Damage: ${item.damage}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">Damage: ${item.damage}</span>`);
                     }
 
                     tagsHtml = `
@@ -958,7 +983,7 @@
                         </h3>
                     </a>
                     ${item.type === 'tarkov' ? tagsHtml : `
-                    <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                    <p class="text-sm text-zinc-700 dark:text-zinc-400 leading-relaxed">
                         <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[10px] tracking-wider px-1.5 py-0.5 rounded-md mr-1.5 select-none uppercase">
                             ${item.category || 'General'}
                         </span>
