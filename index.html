@@ -34,8 +34,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&family=Space+Grotesk:wght=500;700&display=swap" rel="stylesheet">
     <style>
         /* Force Verdana Globally on Everything while allowing inline style overrides */
-        *, body, h1, h2, h3, h4, h5, h6, input, button, select, p, span, kbd, div {
-            font-family: Verdana, Geneva, sans-serif;
+        *, body, h1, h2, h3, h4, h5, h6, input, button, select, p, span, kbd, div, span, aside, nav, header, footer {
+            font-family: Verdana, Geneva, sans-serif !important;
+        }
+
+        /* Force Verdana on any elements using monospace typography classes */
+        .font-mono, kbd, code, pre {
+            font-family: Verdana, Geneva, sans-serif !important;
         }
 
         body {
@@ -97,7 +102,7 @@
 
         <!-- Center: Modern Live Clock & Date -->
         <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center">
-            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100 font-mono">00:00:00</span>
+            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100">00:00:00</span>
             <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5 whitespace-nowrap">Loading Date...</span>
         </div>
 
@@ -113,77 +118,84 @@
         </div>
     </header>
 
-    <!-- Main Content Container -->
-    <main id="main-container" class="flex-grow flex flex-col items-center justify-center px-4 w-full max-w-4xl mx-auto z-10 py-8">
+    <!-- Unified Split Sidebar & Content Container -->
+    <div class="flex-grow flex flex-col lg:flex-row w-full max-w-5xl mx-auto px-6 gap-12 py-4 z-10 relative items-stretch">
 
-        <!-- Logo Header -->
-        <div class="mb-6 select-none text-center flex flex-col items-center justify-center w-full relative">
-            <div class="relative inline-flex items-center justify-center">
-                <!-- Title is strictly centered by wrapper. Min-height prevents layout shift while waiting for load -->
-                <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex justify-center items-center drop-shadow-sm z-10 min-h-[48px] sm:min-h-[72px]">
-                    <!-- Text dynamically set into this container -->
-                </h1>
+        <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons) -->
+        <aside id="left-sidebar-links" class="hidden lg:flex flex-col w-52 flex-shrink-0 select-none text-left pt-20">
+            <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-4 border-b border-darkBorder pb-1.5">Directory</h4>
+            <nav id="quick-links-list" class="flex flex-col gap-3">
+                <!-- Loaded dynamically -->
+            </nav>
+        </aside>
 
-                <!-- Tactical HUD Sidebar containing Version elements structured vertically -->
-                <div class="absolute left-full ml-3 flex flex-col items-start justify-center text-left whitespace-nowrap top-1/2 -translate-y-1/2 select-none">
-                    <!-- Version Number tag -->
-                    <span id="version-number" class="text-[10px] sm:text-xs font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
-                    <!-- Version Name tag (moved below the number) -->
-                    <span id="version-name" class="text-[8px] sm:text-[10px] font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase mt-0.5"></span>
+        <!-- Main Search Container -->
+        <main id="main-container" class="flex-grow flex flex-col items-center justify-center w-full text-center">
+
+            <!-- Logo Header -->
+            <div class="mb-6 select-none text-center flex flex-col items-center justify-center w-full relative">
+                <div class="relative inline-flex items-center justify-center">
+                    <!-- Title is centered by wrapper. Min-height prevents layout shift while waiting for load -->
+                    <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex justify-center items-center drop-shadow-sm z-10 min-h-[48px] sm:min-h-[72px]">
+                        <!-- Text dynamically set into this container -->
+                    </h1>
+
+                    <!-- Tactical HUD Sidebar containing Version elements structured vertically -->
+                    <div class="absolute left-full ml-3 flex flex-col items-start justify-center text-left whitespace-nowrap top-1/2 -translate-y-1/2 select-none">
+                        <!-- Version Number tag -->
+                        <span id="version-number" class="text-[10px] sm:text-xs font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
+                        <!-- Version Name tag (moved below the number) -->
+                        <span id="version-name" class="text-[8px] sm:text-[10px] font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase mt-0.5"></span>
+                    </div>
                 </div>
+
+                <!-- Dynamic Permutated Subtitle: Enforced strictly to one line with truncation -->
+                <p id="logo-subtitle" class="text-xs sm:text-sm font-medium tracking-wider text-zinc-500 mt-3 min-h-[1.25rem] text-center max-w-full px-4"></p>
             </div>
 
-            <!-- Dynamic Permutated Subtitle: Enforced strictly to one line with truncation -->
-            <p id="logo-subtitle" class="text-xs sm:text-sm font-medium tracking-wider text-zinc-500 mt-3 min-h-[1.25rem] text-center max-w-full px-4"></p>
-        </div>
-
-        <!-- Sleek Search Box Wrapper -->
-        <div class="w-full max-w-[640px] relative group z-30" id="search-container">
-            <div id="search-box-inner" class="flex items-center w-full h-[54px] px-5 rounded-2xl border border-darkBorder bg-darkCard/80 backdrop-blur-md focus-within:bg-darkCard focus-within:shadow-xl focus-within:border-zinc-600 transition-all duration-300">
-                <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                <input
-                    type="text"
-                    id="search-input"
-                    placeholder="Search Tarkov items, ammo, gear..."
-                    class="w-full bg-transparent border-none outline-none text-[16px] text-zinc-100 placeholder-zinc-500"
-                    autocomplete="off"
-                    autofocus
-                >
-                <button id="clear-search" class="hidden p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 focus:outline-none mr-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            <!-- Sleek Search Box Wrapper -->
+            <div class="w-full max-w-[640px] relative group z-30 mx-auto" id="search-container">
+                <div id="search-box-inner" class="flex items-center w-full h-[54px] px-5 rounded-2xl border border-darkBorder bg-darkCard/80 backdrop-blur-md focus-within:bg-darkCard focus-within:shadow-xl focus-within:border-zinc-600 transition-all duration-300">
+                    <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
-                </button>
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Search Tarkov items, ammo, gear..."
+                        class="w-full bg-transparent border-none outline-none text-[16px] text-zinc-100 placeholder-zinc-500"
+                        autocomplete="off"
+                        autofocus
+                    >
+                    <button id="clear-search" class="hidden p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 focus:outline-none mr-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Dynamic Live Suggestions / Results Drawer -->
+                <div id="suggestions-box" class="hidden absolute top-full left-0 right-0 mt-2 bg-darkCard/95 border border-darkBorder rounded-2xl shadow-2xl glass-panel overflow-hidden z-40 transition-all duration-200">
+                    <!-- Live Categories / Filter Pills inside Suggestions -->
+                    <div class="flex items-center space-x-2 p-3 border-b border-darkBorder overflow-x-auto text-xs whitespace-nowrap scrollbar-none" id="filter-pills-container">
+                        <!-- Loaded dynamically -->
+                    </div>
+
+                    <!-- Suggestions Feed Container -->
+                    <div id="suggestions-feed" class="max-h-[380px] overflow-y-auto divide-y divide-darkBorder/60">
+                        <!-- Loaded dynamically in Realtime -->
+                    </div>
+
+                    <!-- Footer with search metrics and counts -->
+                    <div class="p-2.5 px-4 bg-darkBg/60 border-t border-darkBorder flex items-center justify-between text-[10px] text-zinc-500">
+                        <span id="results-count-stats">Type to start querying...</span>
+                        <span>Press <kbd class="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400 font-semibold">ESC</kbd> to dismiss</span>
+                    </div>
+                </div>
             </div>
 
-            <!-- Dynamic Live Suggestions / Results Drawer -->
-            <div id="suggestions-box" class="hidden absolute top-full left-0 right-0 mt-2 bg-darkCard/95 border border-darkBorder rounded-2xl shadow-2xl glass-panel overflow-hidden z-40 transition-all duration-200">
-                <!-- Live Categories / Filter Pills inside Suggestions -->
-                <div class="flex items-center space-x-2 p-3 border-b border-darkBorder overflow-x-auto text-xs whitespace-nowrap scrollbar-none" id="filter-pills-container">
-                    <!-- Loaded dynamically -->
-                </div>
-
-                <!-- Suggestions Feed Container -->
-                <div id="suggestions-feed" class="max-h-[380px] overflow-y-auto divide-y divide-darkBorder/60">
-                    <!-- Loaded dynamically in Realtime -->
-                </div>
-
-                <!-- Footer with search metrics and counts -->
-                <div class="p-2.5 px-4 bg-darkBg/60 border-t border-darkBorder flex items-center justify-between text-[10px] text-zinc-500">
-                    <span id="results-count-stats">Type to start querying...</span>
-                    <span>Press <kbd class="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-400 font-semibold">ESC</kbd> to dismiss</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Dynamic Bookmark / Tactical Quick Links Dock (Loaded from eftOfficialURLs.json) -->
-        <div id="quick-links-dock" class="w-full max-w-[640px] mt-8 flex flex-wrap items-center justify-center gap-6 select-none">
-            <!-- Loaded dynamically with high-speed rendering -->
-        </div>
-
-    </main>
+        </main>
+    </div>
 
     <!-- Item Preview Modal Overlay -->
     <div id="item-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity duration-300">
@@ -245,7 +257,7 @@
         <!-- Compact Drawer Header (Email Centered) -->
         <div class="py-2.5 px-3.5 border-b border-darkBorder flex items-center justify-center bg-darkCard/40 relative select-none">
             <!-- Centered Dynamic Randomized Email Display -->
-            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 truncate max-w-[240px] text-center font-mono">connecting...</span>
+            <span id="char-email-header" class="text-xs font-medium lowercase tracking-normal text-zinc-400 truncate max-w-[240px] text-center">connecting...</span>
             <button id="close-drawer-btn" class="absolute right-3.5 p-1 rounded-xl text-zinc-400 hover:bg-darkBg hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -273,9 +285,9 @@
                         <!-- Dynamic Nickname ID Section with Playing Game status -->
                         <div class="flex flex-wrap items-center gap-2 mt-0.5">
                             <!-- Increased ID font size by 2 (text-[10px] -> text-[12px]) -->
-                            <span id="char-id" class="text-[12px] font-bold text-zinc-400 tracking-wider font-mono">Loading ID...</span>
+                            <span id="char-id" class="text-[12px] font-bold text-zinc-400 tracking-wider">Loading ID...</span>
                             <!-- Increased Playing Tag font size by 2 (text-[8px] -> text-[10px]) -->
-                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700/50 text-zinc-300 font-semibold truncate max-w-[150px] font-mono animate-pulse"></span>
+                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700/50 text-zinc-300 font-semibold truncate max-w-[150px] animate-pulse"></span>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-1 mt-1.5">
@@ -440,15 +452,9 @@
         // Fetcher Utility with safe handling - Upgraded to handle raw text list formats cleanly
         async function fetchFileJSON(url) {
             try {
-                if (!url || url.trim() === "" || url.trim() === "/") return null;
                 const response = await fetch(url);
                 if (response.ok) {
                     const text = await response.text();
-                    const trimmedText = text.trim();
-                    // Safeguard against SPA fallbacks (HTML pages returned as 404 fallbacks)
-                    if (trimmedText.startsWith("<html") || trimmedText.toLowerCase().startsWith("<!doctype html")) {
-                        return null;
-                    }
                     try {
                         return JSON.parse(text);
                     } catch (jsonErr) {
@@ -750,7 +756,7 @@
             if (attributesGrid) {
                 attributesGrid.innerHTML = '';
 
-                // Pure, high-performance clean white outline styles instead of colorful fallbacks
+                // Pure, high-performance clean white outline styles instead of colorful fallbacks (Verdana inherited globally)
                 const styleColors = {
                     "Strength": "border-zinc-700/50 hover:bg-zinc-800/10 text-white",
                     "Dexterity": "border-zinc-700/50 hover:bg-zinc-800/10 text-white",
@@ -779,14 +785,16 @@
 
                     const attrBlock = document.createElement('div');
                     attrBlock.className = `p-2 bg-darkBg/60 rounded-xl border ${colorClasses.split(' ')[0]} ${colorClasses.split(' ')[1]} transition-all duration-300 flex items-center justify-between select-none`;
+
+                    // Explicitly styled child elements to guarantee Verdana renders with no fallback issues
                     attrBlock.innerHTML = `
-                        <div class="flex flex-col min-w-0">
-                            <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">${attrName}</span>
-                            <span class="text-[8px] font-semibold text-zinc-400 italic truncate max-w-[110px]" title="${chosenDesc}">${chosenDesc}</span>
+                        <div class="flex flex-col min-w-0" style="font-family: Verdana, Geneva, sans-serif !important;">
+                            <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-wider" style="font-family: Verdana, Geneva, sans-serif !important;">${attrName}</span>
+                            <span class="text-[8px] font-semibold text-zinc-400 italic truncate max-w-[110px]" title="${chosenDesc}" style="font-family: Verdana, Geneva, sans-serif !important;">${chosenDesc}</span>
                         </div>
-                        <div class="text-right flex-shrink-0 pl-1">
-                            <span class="text-base font-extrabold text-white">${baseScore}</span>
-                            <span class="text-[9px] block text-zinc-400 font-semibold leading-none">${formattedModifier}</span>
+                        <div class="text-right flex-shrink-0 pl-1" style="font-family: Verdana, Geneva, sans-serif !important;">
+                            <span class="text-base font-extrabold text-white" style="font-family: Verdana, Geneva, sans-serif !important;">${baseScore}</span>
+                            <span class="text-[9px] block text-zinc-400 font-semibold leading-none" style="font-family: Verdana, Geneva, sans-serif !important;">${formattedModifier}</span>
                         </div>
                     `;
                     attributesGrid.appendChild(attrBlock);
