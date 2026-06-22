@@ -83,10 +83,9 @@
 
         <!-- Right Side: Profile & Character Sheet Trigger -->
         <div class="flex items-center space-x-3">
-            <button id="profile-trigger-btn" class="group flex items-center space-x-2 bg-darkCard/60 border border-darkBorder hover:border-zinc-500/40 px-3 py-1.5 rounded-xl transition duration-200 focus:outline-none" title="Open Character Sheet">
-                <span class="text-xs text-zinc-400 font-mono hidden md:inline group-hover:text-zinc-200">SYS_HERO</span>
-                <div class="w-8 h-8 rounded-lg overflow-hidden border border-zinc-700/50 shadow-sm relative">
-                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=80" alt="Profile" class="w-full h-full object-cover">
+            <button id="profile-trigger-btn" class="group flex items-center justify-center bg-darkCard/60 p-1.5 rounded-xl transition duration-200 focus:outline-none" title="Open Character Sheet">
+                <div class="w-8 h-8 rounded-lg overflow-hidden shadow-sm relative">
+                    <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
                     <!-- Little Google status indicator -->
                     <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-darkCard rounded-full"></span>
                 </div>
@@ -143,11 +142,7 @@
     <!-- Side-Drawer Character Sheet -->
     <div id="character-drawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-darkCard/95 border-l border-darkBorder backdrop-blur-lg shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <!-- Drawer Header -->
-        <div class="p-6 border-b border-darkBorder flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <span class="text-xs px-2 py-1 bg-tarkoogleBlue/10 text-tarkoogleBlue border border-tarkoogleBlue/20 rounded font-mono">D&D Core V1</span>
-                <h2 class="text-lg font-bold tracking-tight text-zinc-100">Hero Profile</h2>
-            </div>
+        <div class="p-6 border-b border-darkBorder flex items-center justify-end">
             <button id="close-drawer-btn" class="p-2 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -162,8 +157,8 @@
                 <!-- Decorative absolute grid lines -->
                 <div class="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none"></div>
                 <div class="flex items-center space-x-4 relative z-10">
-                    <div class="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-tarkoogleBlue">
-                        <img id="char-avatar" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80" alt="Character Avatar" class="w-full h-full object-cover">
+                    <div class="relative w-16 h-16 rounded-xl overflow-hidden">
+                        <img id="char-avatar" src="https://thispersondoesnotexist.com" alt="Character Avatar" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'">
                     </div>
                     <div>
                         <h3 id="char-name" class="text-xl font-bold text-zinc-100 tracking-tight">Loading...</h3>
@@ -193,14 +188,6 @@
                 <div class="grid grid-cols-2 gap-3" id="attributes-grid">
                     <!-- Loaded dynamically -->
                 </div>
-            </div>
-
-            <!-- Bio Description Card -->
-            <div class="bg-zinc-900/30 border border-darkBorder rounded-xl p-4 text-xs space-y-2">
-                <span class="font-mono text-[10px] text-zinc-500 uppercase tracking-wider block">Generated Narrative Bio</span>
-                <p id="char-bio" class="text-zinc-400 leading-relaxed italic">
-                    Calculating narrative parameters...
-                </p>
             </div>
         </div>
 
@@ -280,19 +267,12 @@
         let currentVersion = "v0.1 (alpha)";
         let currentTitle = "Tarkoogle";
 
-        // Fallbacks for D&D Module JSON targets
-        let dndNames = ["Kaelen Hearthfield", "Jaxson Vane", "Theron Ironfist", "Lyra Whispersmith", "Brogden Stonefury", "Zariel Stormweaver", "Fiona Oakheart", "Nikos Shadowmend"];
-        let dndProfessions = ["Net-Weaver", "Cyber-Mage", "Relic-Hunter", "Grid-Stalker", "Spell-Compiler", "Shadow-Broker", "Chrono-Architect", "Bio-Engineer"];
-        let dndRaces = ["Deep Gnome", "Elf-Cyborg", "Holographic Construct", "Silicon Dwarf", "Neon Half-Orc", "Hyper-Tiefling", "Synth-Human"];
-        let dndPlaces = ["Menzoberranzan Neon Grid", "The Zenith Spire", "Sector 7 Storage Vaults", "Aether Nexus Terminal", "Cyber-Dungeon 404", "Quantum Basin Base Camp"];
-        let dndAttributes = [
-            { name: "Strength", code: "STR", color: "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5" },
-            { name: "Dexterity", code: "DEX", color: "border-tarkoogleGreen/50 hover:bg-tarkoogleGreen/5" },
-            { name: "Constitution", code: "CON", color: "border-tarkoogleYellow/50 hover:bg-tarkoogleYellow/5" },
-            { name: "Intelligence", code: "INT", color: "border-tarkoogleBlue/50 hover:bg-tarkoogleBlue/5" },
-            { name: "Wisdom", code: "WIS", color: "border-zinc-500/50 hover:bg-zinc-500/5" },
-            { name: "Charisma", code: "CHA", color: "border-purple-500/50 hover:bg-purple-500/5" }
-        ];
+        // Dynamic targets - initialized empty, populated purely by dynamic fetches
+        let dndNames = [];
+        let dndProfessions = [];
+        let dndRaces = [];
+        let dndPlaces = [];
+        let dndAttributes = [];
 
         async function loadResourceData() {
             // Fetch titles JSON
@@ -320,22 +300,14 @@
                 }
             }
 
-            // --- FETCH D&D DATASETS WITH ROBUST PATH RESOLUTION ---
-            const dndNamesData = await fetchFileJSON('resources/dnd/listNames.json') || await fetchFileJSON('dnd/listNames.json') || await fetchFileJSON('/resources/dnd/listNames.json');
-            if (dndNamesData && Array.isArray(dndNamesData)) dndNames = dndNamesData;
+            // --- D&D MODULE DYNAMIC DATASETS RESOLUTION ---
+            dndNames = await fetchFileJSON('resources/dnd/listNames.json') || await fetchFileJSON('dnd/listNames.json') || await fetchFileJSON('/resources/dnd/listNames.json') || [];
+            dndProfessions = await fetchFileJSON('resources/dnd/listProfession.json') || await fetchFileJSON('dnd/listProfession.json') || await fetchFileJSON('/resources/dnd/listProfession.json') || [];
+            dndRaces = await fetchFileJSON('resources/dnd/listRace.json') || await fetchFileJSON('dnd/listRace.json') || await fetchFileJSON('/resources/dnd/listRace.json') || [];
+            dndPlaces = await fetchFileJSON('resources/dnd/listPlace.json') || await fetchFileJSON('dnd/listPlace.json') || await fetchFileJSON('/resources/dnd/listPlace.json') || [];
 
-            const dndProfessionsData = await fetchFileJSON('resources/dnd/listProfession.json') || await fetchFileJSON('dnd/listProfession.json') || await fetchFileJSON('/resources/dnd/listProfession.json');
-            if (dndProfessionsData && Array.isArray(dndProfessionsData)) dndProfessions = dndProfessionsData;
-
-            const dndRacesData = await fetchFileJSON('resources/dnd/listRace.json') || await fetchFileJSON('dnd/listRace.json') || await fetchFileJSON('/resources/dnd/listRace.json');
-            if (dndRacesData && Array.isArray(dndRacesData)) dndRaces = dndRacesData;
-
-            const dndPlacesData = await fetchFileJSON('resources/dnd/listPlace.json') || await fetchFileJSON('dnd/listPlace.json') || await fetchFileJSON('/resources/dnd/listPlace.json');
-            if (dndPlacesData && Array.isArray(dndPlacesData)) dndPlaces = dndPlacesData;
-
-            const dndAttributesData = await fetchFileJSON('resources/dnd/listAttributes.json') || await fetchFileJSON('dnd/listAttributes.json') || await fetchFileJSON('/resources/dnd/listAttributes.json');
+            const dndAttributesData = await fetchFileJSON('resources/dnd/listAttributes.json') || await fetchFileJSON('dnd/listAttributes.json') || await fetchFileJSON('/resources/dnd/listAttributes.json') || [];
             if (dndAttributesData && Array.isArray(dndAttributesData)) {
-                // Keep the structural schema safe, map simple strings to structural configuration if needed
                 dndAttributes = dndAttributesData.map((attr, index) => {
                     const presetColors = [
                         "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5",
@@ -392,19 +364,6 @@
                 document.head.appendChild(link);
             }
             link.href = `data:image/svg+xml,${svg.trim()}`;
-        }
-
-        function loadDynamicTitleAndSubtitle() {
-            const logoSubtitle = document.getElementById('logo-subtitle');
-            currentTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)] || "Tarkoogle";
-            
-            document.title = currentTitle + " Hub";
-            if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
-            
-            setRandomFavicon(currentTitle);
-
-            // Trigger the title's unique decrypt animation
-            triggerTitleDecrypt(currentTitle);
         }
 
         // --- 3.5 TACTICAL HUD DECRYPT ANIMATION ENGINE ---
@@ -686,6 +645,15 @@
 
         // --- D&D HERO SYSTEM LOGIC ---
         function generateHeroIdentity() {
+            // Guard clause if data hasn't arrived/resolved from the JSON streams
+            if (!dndNames.length || !dndProfessions.length || !dndRaces.length || !dndPlaces.length) {
+                document.getElementById('char-name').textContent = "Unknown Identity";
+                document.getElementById('char-race').textContent = "Pending Fetch";
+                document.getElementById('char-profession').textContent = "Pending Fetch";
+                document.getElementById('char-location').textContent = "System Offline";
+                return;
+            }
+
             const randomName = dndNames[Math.floor(Math.random() * dndNames.length)];
             const randomProfession = dndProfessions[Math.floor(Math.random() * dndProfessions.length)];
             const randomRace = dndRaces[Math.floor(Math.random() * dndRaces.length)];
@@ -698,7 +666,7 @@
 
             // Generate customized stats
             const attributesGrid = document.getElementById('attributes-grid');
-            if (attributesGrid) {
+            if (attributesGrid && dndAttributes.length > 0) {
                 attributesGrid.innerHTML = '';
                 dndAttributes.forEach(attr => {
                     // Standard d&d stats generator (3d6 plus class adjustments)
@@ -722,13 +690,24 @@
                 });
             }
 
-            // Create contextual Bio narrative based on generated criteria
-            const bios = [
-                `A seasoned ${randomRace} operating as a clandestine ${randomProfession} under the neon-lit canopy of ${randomPlace}. System records indicate high-risk tracking protocols.`,
-                `Originating from ${randomPlace}, this ${randomRace} ${randomProfession} utilizes highly-threaded security bypasses to harvest intelligence caches.`,
-                `This elusive ${randomRace} has achieved legendary status in ${randomPlace} as a rogue ${randomProfession}, running on localized overdrive kernels.`
-            ];
-            document.getElementById('char-bio').textContent = bios[Math.floor(Math.random() * bios.length)];
+            // Retain This Person Does Not Exist dynamic query parameter key so the image shifts on reroll!
+            const avatarImg = document.getElementById('char-avatar');
+            if (avatarImg) {
+                avatarImg.src = `https://thispersondoesnotexist.com?nocache=${Date.now()}`;
+            }
+        }
+
+        function loadDynamicTitleAndSubtitle() {
+            const logoSubtitle = document.getElementById('logo-subtitle');
+            currentTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)] || "Tarkoogle";
+            
+            document.title = currentTitle + " Hub";
+            if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
+            
+            setRandomFavicon(currentTitle);
+
+            // Trigger the title's unique decrypt animation
+            triggerTitleDecrypt(currentTitle);
         }
 
         // --- BOOTSTRAP INITIALIZATION ---

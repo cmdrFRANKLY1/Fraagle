@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prapor Quest Flowchart - Escape from Tarkov</title>
+    <style>
+        /* ===== minimal layout – same style as the converter ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            padding: 1rem;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-weight: 400;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .options-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 0.4rem;
+        }
+        .btn {
+            border: 1px solid #ccc;
+            padding: 0.1rem 0.8rem;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .btn:hover {
+            background: #eee;
+        }
+        .btn:active {
+            background: #ddd;
+        }
+        .stats {
+            font-size: 0.8rem;
+            margin-left: auto;
+            opacity: 0.7;
+        }
+
+        .main-content {
+            display: flex;
+            height: 600px;
+            min-height: 300px;
+            max-height: 900px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+
+        /* ===== panels ===== */
+        .panel {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 100px;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            background: #f8f8f8;
+        }
+        .badge {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            font-weight: 300;
+        }
+        .panel-body {
+            padding: 0.5rem;
+            flex: 1;
+            overflow: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        /* ===== splitter ===== */
+        .splitter-h {
+            flex: 0 0 1px;
+            cursor: ew-resize;
+            position: relative;
+            z-index: 2;
+            background: #ccc;
+        }
+        .splitter-h:hover {
+            background: #999;
+        }
+        .splitter-h.active {
+            background: #666;
+        }
+
+        /* ===== tree styles ===== */
+        .tree-root {
+            padding: 0.5rem 0;
+        }
+        .tree-root ul {
+            padding-left: 1.8rem;
+            list-style: none;
+            position: relative;
+            margin: 0;
+        }
+        .tree-root ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0.5rem;
+            width: 1px;
+            height: 100%;
+            background: #ccc;
+        }
+        .tree-root li {
+            position: relative;
+            padding: 0.3rem 0 0.3rem 1.2rem;
+            margin: 0;
+        }
+        /* vertical line connecting to parent */
+        .tree-root li::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1.2rem;
+            height: 100%;
+            border-left: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            border-radius: 0 0 0 4px;
+        }
+        /* horizontal line for last child */
+        .tree-root li:last-child::before {
+            border-bottom: 1px solid #ccc;
+            height: 1.2rem;
+            top: 0;
+        }
+        .tree-root li:only-child::before {
+            border-bottom: 1px solid #ccc;
+            height: 1.2rem;
+            top: 0;
+        }
+        /* remove vertical line for root-level li */
+        .tree-root > ul > li::before {
+            border-left: none;
+            border-bottom: none;
+        }
+        .tree-root > ul > li::after {
+            display: none;
+        }
+        .tree-root > ul::before {
+            display: none;
+        }
+
+        /* node card */
+        .quest-node {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.1s, border-color 0.1s, box-shadow 0.1s;
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            white-space: nowrap;
+        }
+        .quest-node:hover {
+            background: #f0f4ff;
+            border-color: #8899bb;
+        }
+        .quest-node.active {
+            background: #e0e8f5;
+            border-color: #4466aa;
+            box-shadow: 0 0 0 2px rgba(68, 102, 170, 0.2);
+        }
+        .quest-node .node-name {
+            font-weight: 500;
+        }
+        .quest-node .node-badge {
+            font-size: 0.65rem;
+            opacity: 0.6;
+            margin-left: 0.4rem;
+            font-weight: 300;
+        }
+
+        /* ===== detail panel ===== */
+        #detailPanel .panel-body {
+            padding: 1rem;
+        }
+        .detail-empty {
+            color: #999;
+            font-style: italic;
+        }
+        .detail-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.25rem;
+        }
+        .detail-section {
+            margin-top: 1rem;
+        }
+        .detail-section h4 {
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+            margin-bottom: 0.2rem;
+        }
+        .detail-section p {
+            font-size: 0.9rem;
+            padding-left: 0.5rem;
+            border-left: 2px solid #ddd;
+            padding-left: 0.75rem;
+        }
+        .detail-rewards ul {
+            list-style: none;
+            padding-left: 0.75rem;
+            border-left: 2px solid #ddd;
+        }
+        .detail-rewards ul li {
+            font-size: 0.9rem;
+            padding: 0.1rem 0;
+        }
+        .detail-rewards ul li::before {
+            content: '• ';
+            opacity: 0.6;
+        }
+
+        /* ===== responsive ===== */
+        @media (max-width: 800px) {
+            .main-content {
+                flex-wrap: wrap;
+                height: auto;
+                min-height: auto;
+                max-height: none;
+            }
+            .splitter-h {
+                display: none;
+            }
+            .panel {
+                min-height: 250px;
+                border-bottom: 1px solid #eee;
+            }
+            .panel:last-child {
+                border-bottom: none;
+            }
+        }
+
+        /* scrollbar styling (minimal) */
+        .panel-body::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .panel-body::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        .panel-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header><h1>📍 Prapor – Quest Flowchart (Escape from Tarkov)</h1></header>
+
+    <div class="options-bar">
+        <div class="btn-group">
+            <button class="btn" id="expandAllBtn">[ expand all ]</button>
+            <button class="btn" id="collapseAllBtn">[ collapse all ]</button>
+            <button class="btn" id="resetViewBtn">[ reset view ]</button>
+        </div>
+        <span class="stats" id="stats">0 nodes</span>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <!-- left panel: flowchart -->
+        <div class="panel" id="flowchartPanel">
+            <div class="panel-header">
+                <span>quest tree</span>
+                <span class="badge" id="nodeCount">0</span>
+            </div>
+            <div class="panel-body" id="treeContainer">
+                <!-- tree will be rendered here -->
+            </div>
+        </div>
+
+        <!-- splitter -->
+        <div class="splitter-h" id="splitter"></div>
+
+        <!-- right panel: details -->
+        <div class="panel" id="detailPanel">
+            <div class="panel-header">
+                <span>quest details</span>
+                <span class="badge">info</span>
+            </div>
+            <div class="panel-body" id="detailBody">
+                <div class="detail-empty">← click a quest node</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ================================================================
+        //  DATA – Prapor quest tree (official EFT wiki)
+        // ================================================================
+        const questData = {
+            name: "Debut",
+            requirements: "Reach level 2 • Hand over 2 MP-133 shotguns • Kill 5 Scavs on Customs",
+            rewards: ["+2,000 EXP", "9,000 Roubles", "2× RGD-5 grenade", "Unlocks: Bad Rep Evidence, Checking"],
+            children: [{
+                name: "Bad Rep Evidence",
+                requirements: "Find the container of alcohol in Dorms (Customs) • Hand it over",
+                rewards: ["+3,000 EXP", "10,000 Roubles", "1× PACA armor", "Unlocks: Ice Cream Cones"],
+                children: [{
+                    name: "Ice Cream Cones",
+                    requirements: "Find 4 60-round 6L31 magazines for AK • Hand them over",
+                    rewards: ["+4,000 EXP", "12,000 Roubles", "1× AK-74N", "Unlocks: The Punisher - Part 1"],
+                    children: [{
+                        name: "The Punisher - Part 1",
+                        requirements: "Kill 15 Scavs on Shoreline while using an AKM series weapon",
+                        rewards: ["+5,000 EXP", "15,000 Roubles", "1× Vepr AKM", "Unlocks: Punisher - Part 2"],
+                        children: [{
+                            name: "The Punisher - Part 2",
+                            requirements: "Kill 25 Scavs on Customs while using an AKS-74U",
+                            rewards: ["+6,000 EXP", "18,000 Roubles", "1× AKS-74UB", "Unlocks: Punisher - Part 3"],
+                            children: [{
+                                name: "The Punisher - Part 3",
+                                requirements: "Kill 25 Scavs on Woods while wearing a Balaclava and Scav Vest",
+                                rewards: ["+7,000 EXP", "20,000 Roubles", "1× SV-98", "Unlocks: Punisher - Part 4"],
+                                children: [{
+                                    name: "The Punisher - Part 4",
+                                    requirements: "Kill 10 PMCs on Shoreline using a suppressed sniper rifle",
+                                    rewards: ["+8,000 EXP", "25,000 Roubles", "1× M1A", "Unlocks: Punisher - Part 5"],
+                                    children: [{
+                                        name: "The Punisher - Part 5",
+                                        requirements: "Kill 20 PMCs on any map using an AK series weapon",
+                                        rewards: ["+9,000 EXP", "30,000 Roubles", "1× AK-104", "Unlocks: Punisher - Part 6"],
+                                        children: [{
+                                            name: "The Punisher - Part 6",
+                                            requirements: "Kill 12 PMCs on Factory with a specific loadout (Paca, 6B47, PP-19-01)",
+                                            rewards: ["+15,000 EXP", "50,000 Roubles", "Epsilon container (2x4)", "Unlocks: Test Drive - Part 1"],
+                                            children: [{
+                                                name: "Test Drive - Part 1",
+                                                requirements: "Level 35 • Kill 50 PMCs using a thermal G28 • Requires 'The Huntsman Path - Eraser' (Jaeger)",
+                                                rewards: ["+20,000 EXP", "75,000 Roubles", "1× G28", "Tactical thermal scope"],
+                                                children: []
+                                            }]
+                                        }]
+                                    }]
+                                }]
+                            }]
+                        }]
+                    }]
+                }]
+            }, {
+                name: "Checking",
+                requirements: "Find the bronze pocket watch in the tank near the dorms (Customs)",
+                rewards: ["+3,000 EXP", "8,000 Roubles", "1× Makarov PM", "Unlocks: Delivery from the Past"],
+                children: [{
+                    name: "Delivery from the Past",
+                    requirements: "Retrieve the secure case from the train car on Customs • Deliver it to Factory (survive)",
+                    rewards: ["+4,500 EXP", "12,000 Roubles", "1× AKS-74U", "Unlocks: (Skier quests)"],
+                    children: []
+                }]
+            }]
+        };
+
+        // ================================================================
+        //  STATE
+        // ================================================================
+        let selectedNode = null; // stores the node data object
+        const treeContainer = document.getElementById('treeContainer');
+        const detailBody = document.getElementById('detailBody');
+        const nodeCountSpan = document.getElementById('nodeCount');
+        const statsSpan = document.getElementById('stats');
+
+        // ================================================================
+        //  RENDER TREE
+        // ================================================================
+        function renderTree(node, isRoot = true) {
+            const ul = document.createElement('ul');
+
+            // if root, we just render children directly without an extra <li> wrapper for the root itself
+            if (isRoot) {
+                if (node.children) {
+                    for (const child of node.children) {
+                        ul.appendChild(createListItem(child));
+                    }
+                }
+                return ul;
+            }
+
+            // for non-root, we wrap in <li>
+            const li = createListItem(node);
+            return li;
+        }
+
+        function createListItem(node) {
+            const li = document.createElement('li');
+
+            // --- node button ---
+            const btn = document.createElement('span');
+            btn.className = 'quest-node';
+            btn.dataset.quest = node.name;
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'node-name';
+            nameSpan.textContent = node.name;
+            btn.appendChild(nameSpan);
+
+            // count children badge
+            if (node.children && node.children.length > 0) {
+                const badge = document.createElement('span');
+                badge.className = 'node-badge';
+                badge.textContent = `(${node.children.length})`;
+                btn.appendChild(badge);
+            }
+
+            // click to select
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectNode(node);
+                // update active class
+                document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+            });
+
+            li.appendChild(btn);
+
+            // --- children ---
+            if (node.children && node.children.length > 0) {
+                const childUl = document.createElement('ul');
+                // by default collapsed? We'll make it expanded for clarity, but add toggle?
+                // let's make it expanded by default, and the "expand/collapse all" buttons will handle toggling.
+                // we need to store reference for collapse/expand.
+                childUl.className = 'child-list';
+                childUl.style.display = 'block';
+                for (const child of node.children) {
+                    const childLi = createListItem(child);
+                    childUl.appendChild(childLi);
+                }
+                li.appendChild(childUl);
+
+                // double-click on node to toggle children
+                btn.addEventListener('dblclick', function(e) {
+                    e.stopPropagation();
+                    const ul = this.parentElement.querySelector('ul.child-list');
+                    if (ul) {
+                        ul.style.display = (ul.style.display === 'none') ? 'block' : 'none';
+                    }
+                });
+            }
+
+            return li;
+        }
+
+        function buildTree(data) {
+            const container = document.createElement('div');
+            container.className = 'tree-root';
+            const rootUl = renderTree(data, true);
+            container.appendChild(rootUl);
+
+            // count total nodes (including root and all children)
+            let count = 0;
+            function countNodes(node) {
+                count++;
+                if (node.children) {
+                    for (const child of node.children) {
+                        countNodes(child);
+                    }
+                }
+            }
+            countNodes(data);
+            nodeCountSpan.textContent = count;
+            statsSpan.textContent = `${count} quests`;
+
+            return container;
+        }
+
+        // ================================================================
+        //  SELECT / DETAILS
+        // ================================================================
+        function selectNode(node) {
+            selectedNode = node;
+            renderDetails(node);
+        }
+
+        function renderDetails(node) {
+            if (!node) {
+                detailBody.innerHTML = `<div class="detail-empty">← click a quest node</div>`;
+                return;
+            }
+
+            let html = '';
+            html += `<div class="detail-title">${node.name}</div>`;
+
+            html += `<div class="detail-section"><h4>requirements</h4><p>${node.requirements || 'none'}</p></div>`;
+
+            if (node.rewards && node.rewards.length > 0) {
+                html += `<div class="detail-section detail-rewards"><h4>rewards</h4><ul>`;
+                for (const reward of node.rewards) {
+                    html += `<li>${reward}</li>`;
+                }
+                html += `</ul></div>`;
+            }
+
+            // show children count
+            const childCount = (node.children && node.children.length) || 0;
+            html += `<div class="detail-section" style="margin-top:1rem;opacity:0.6;font-size:0.8rem;">`;
+            html += `unlocks ${childCount} quest${childCount !== 1 ? 's' : ''}`;
+            if (childCount > 0) {
+                html += `: ${node.children.map(c => c.name).join(', ')}`;
+            }
+            html += `</div>`;
+
+            detailBody.innerHTML = html;
+        }
+
+        // ================================================================
+        //  EXPAND / COLLAPSE ALL
+        // ================================================================
+        function expandAll() {
+            document.querySelectorAll('.child-list').forEach(ul => ul.style.display = 'block');
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('.child-list').forEach(ul => ul.style.display = 'none');
+        }
+
+        function resetView() {
+            expandAll();
+            // deselect
+            document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
+            selectedNode = null;
+            renderDetails(null);
+            // scroll to top
+            treeContainer.scrollTop = 0;
+        }
+
+        // ================================================================
+        //  SPLITTER (same as converter)
+        // ================================================================
+        function initSplitter() {
+            const splitter = document.getElementById('splitter');
+            const leftPanel = document.getElementById('flowchartPanel');
+            const rightPanel = document.getElementById('detailPanel');
+            let dragging = false,
+                startX, startLeftWidth, startRightWidth;
+
+            splitter.addEventListener('mousedown', function(e) {
+                dragging = true;
+                splitter.classList.add('active');
+                startX = e.clientX;
+                startLeftWidth = leftPanel.offsetWidth;
+                startRightWidth = rightPanel.offsetWidth;
+                document.body.style.cursor = 'ew-resize';
+                document.body.style.userSelect = 'none';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!dragging) return;
+                const delta = e.clientX - startX;
+                let newLeft = startLeftWidth + delta;
+                let newRight = startRightWidth - delta;
+                const minW = 120;
+                if (newLeft < minW) { newLeft = minW;
+                    newRight = startLeftWidth + startRightWidth - newLeft; }
+                if (newRight < minW) { newRight = minW;
+                    newLeft = startLeftWidth + startRightWidth - newRight; }
+                leftPanel.style.flex = `0 0 ${newLeft}px`;
+                rightPanel.style.flex = `0 0 ${newRight}px`;
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (dragging) {
+                    dragging = false;
+                    splitter.classList.remove('active');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+
+            // double-click reset
+            splitter.addEventListener('dblclick', function() {
+                leftPanel.style.flex = '';
+                rightPanel.style.flex = '';
+            });
+        }
+
+        // ================================================================
+        //  INIT
+        // ================================================================
+        function init() {
+            // render tree
+            const treeEl = buildTree(questData);
+            treeContainer.appendChild(treeEl);
+
+            // auto-select root? No, let user click.
+            // select first node? Better not, show empty details.
+
+            // set up buttons
+            document.getElementById('expandAllBtn').addEventListener('click', expandAll);
+            document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+            document.getElementById('resetViewBtn').addEventListener('click', resetView);
+
+            // splitter
+            initSplitter();
+
+            // select root by default? Let's select root to show something.
+            // Actually, let's select the first node (Debut) so the user sees details right away.
+            const rootNode = questData;
+            // We need to highlight the root node. Since root is not rendered as a clickable node, we skip.
+            // We'll just show details for the root.
+            selectNode(rootNode);
+            // Highlight the first child (Bad Rep Evidence) or just show root details without highlight.
+            // Let's highlight the root visually? Not rendered. So we'll just show details.
+            // To make it intuitive, we'll auto-select the first child? No, let's just show root details.
+            renderDetails(rootNode);
+        }
+
+        // wait for DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+</script>
+</body>
+</html>
