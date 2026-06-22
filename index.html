@@ -1,69 +1,616 @@
-import fs from 'fs';
-import path from 'path';
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarkoogle Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Force dark mode context always
+        document.documentElement.classList.add('dark');
 
-export default async function handler(req, res) {
-    if (req.method !== 'POST') {
-        res.setHeader('Allow', ['POST']);
-        return res.status(405).json({ success: false, error: `Method ${req.method} Not Allowed` });
-    }
-
-    try {
-        const { timeMs, version, title } = req.body;
-
-        if (typeof timeMs !== 'number') {
-            return res.status(400).json({ success: false, error: 'Invalid load time data type.' });
-        }
-
-        // Define a clean structured entry
-        const logEntry = {
-            timestamp: new Date().toISOString(),
-            timeMs,
-            version,
-            title
-        };
-
-        // Standard Vercel Serverless deployments operate on read-only environments.
-        // Therefore, writing directly to the source folder inside Vercel lambdas is blocked.
-        // During local development (vercel dev), we can write directly to local JSON files.
-        const isLocalDev = process.env.VERCEL_ENV === undefined || process.env.NODE_ENV === 'development';
-        
-        let localWritePath = '';
-        if (isLocalDev) {
-            // Write directly to your local file system during vercel dev runtimes
-            localWritePath = path.join(process.cwd(), 'loading-times-log.json');
-            
-            let currentLogs = [];
-            try {
-                if (fs.existsSync(localWritePath)) {
-                    const existingData = fs.readFileSync(localWritePath, 'utf-8');
-                    currentLogs = JSON.parse(existingData);
+        // Tailwind configuration for premium stealth dark mode with colorful brand accents on the logo
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#09090b', // Deep zinc dark background
+                        darkCard: '#18181b', // Dark card
+                        darkBorder: '#27272a', // Subtle dark borders
+                        tarkoogleBlue: '#3b82f6', // Google Blue
+                        tarkoogleRed: '#ef4444', // Google Red
+                        tarkoogleYellow: '#f59e0b', // Google Yellow
+                        tarkoogleGreen: '#10b981' // Google Green
+                    }
                 }
-            } catch (readErr) {
-                console.warn('Error reading log file, initializing empty array.', readErr);
             }
-
-            currentLogs.push(logEntry);
-            
-            try {
-                fs.writeFileSync(localWritePath, JSON.stringify(currentLogs, null, 2), 'utf-8');
-                console.log(`[Metric Logged Locally] Written to: ${localWritePath}`);
-            } catch (writeErr) {
-                console.error('Failed to write JSON locally:', writeErr);
-            }
-        } else {
-            // In Production, Vercel captures all console.log output.
-            // These entries are safely logged under your Vercel Dashboard logs.
-            console.log(JSON.stringify({ event: 'performance_log', data: logEntry }));
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&family=Space+Grotesk:wght=500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #09090b;
+            color: #f4f4f5;
+        }
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
         }
 
-        return res.status(200).json({ 
-            success: true, 
-            message: 'Performance metric saved successfully.',
-            destination: isLocalDev ? 'Local filesystem JSON' : 'Vercel Console Logs'
-        });
+        /* Unified Transition Setup for premium tactical elements with white shadows */
+        #search-box-inner {
+            transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.08);
+            background-color: #18181b;
+        }
+    </style>
+</head>
+<body class="bg-darkBg text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
 
-    } catch (error) {
-        console.error('Error logging performance metric:', error);
-        return res.status(500).json({ success: false, error: 'Internal Server Error' });
-    }
-}
+    <!-- Top Navigation Bar -->
+    <header class="flex items-center justify-between p-5 relative z-10 w-full select-none">
+        <!-- Left Side: Mini Brand Indicator -->
+        <div class="flex items-center space-x-2">
+            <span class="text-lg font-bold tracking-tight bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">T.</span>
+        </div>
+
+        <!-- Center: Modern Live Clock & Date (Now with optimized visual scale hierarchy) -->
+        <div id="header-clock" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center">
+            <span id="clock-time" class="text-base sm:text-lg font-extrabold tracking-wider text-zinc-100">00:00:00</span>
+            <span id="clock-date" class="text-[8px] sm:text-[9px] font-semibold uppercase tracking-widest text-zinc-500 mt-0.5 whitespace-nowrap">Loading Date...</span>
+        </div>
+
+        <!-- Right Side: Profile Indicator -->
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl overflow-hidden border border-darkBorder shadow-sm hover:border-zinc-500/30 transition-all duration-200 cursor-pointer">
+                <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main id="main-container" class="flex-grow flex flex-col items-center justify-center px-4 w-full max-w-3xl mx-auto z-10">
+        
+        <!-- Logo Header -->
+        <div class="mb-8 select-none text-center flex flex-col items-center justify-center w-full relative">
+            <div class="relative inline-flex items-center justify-center">
+                <!-- Title is strictly centered by wrapper. Min-height prevents layout shift while waiting for load -->
+                <h1 id="logo-title" class="text-5xl sm:text-7xl font-bold tracking-tight inline-flex justify-center items-center drop-shadow-sm z-10 min-h-[48px] sm:min-h-[72px]">
+                    <!-- Text dynamically decrypted into this container -->
+                </h1>
+                
+                <!-- Tactical HUD Sidebar containing Version, absolutely positioned to prevent shifting -->
+                <div class="absolute left-full ml-3 flex flex-col items-start justify-center text-left whitespace-nowrap top-1/2 -translate-y-1/2 select-none">
+                    <!-- Version tag -->
+                    <span id="version-tag" class="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
+                </div>
+            </div>
+            
+            <!-- Dynamic Permutated Subtitle: Enforced strictly to one line with truncation -->
+            <p id="logo-subtitle" class="text-xs sm:text-sm font-medium tracking-wider text-zinc-500 mt-3 min-h-[1.25rem] text-center max-w-full px-4 whitespace-nowrap overflow-hidden text-ellipsis"></p>
+        </div>
+
+        <!-- Sleek Search Box Wrapper -->
+        <div class="w-full max-w-[584px] relative group z-30" id="search-container">
+            <div id="search-box-inner" class="flex items-center w-full h-[52px] px-5 rounded-2xl border border-darkBorder bg-darkCard/75 backdrop-blur-md focus-within:bg-darkCard shadow-sm hover:shadow-lg focus-within:shadow-lg focus-within:border-zinc-500/50 transition-all duration-300">
+                <svg class="w-5 h-5 text-zinc-400 mr-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input 
+                    type="text" 
+                    id="search-input"
+                    placeholder="Search the web..." 
+                    class="w-full bg-transparent border-none outline-none text-[16px] text-zinc-100 placeholder-zinc-500"
+                    autocomplete="off"
+                    autofocus
+                >
+                <button id="clear-search" class="hidden p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 focus:outline-none mr-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Left HUD Performance Metric Overlay (Fixed height container prevents layout-shifting) -->
+    <div class="fixed bottom-6 left-6 flex flex-col items-start justify-start select-none z-20 h-12 w-[320px] sm:w-[400px]">
+        <!-- Load time tag -->
+        <span id="load-time-tag" class="text-[9px] sm:text-xs font-mono font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_3px_rgba(255,255,255,0.1)] h-5 inline-block"></span>
+        <!-- Stats tag (LOW/AVG/HIGH performance telemetry log) -->
+        <span id="stats-tag" class="text-[8px] sm:text-[10px] font-mono font-bold tracking-widest text-zinc-600 opacity-0 drop-shadow-[0_0_2px_rgba(255,255,255,0.05)] h-5 mt-1 inline-block"></span>
+    </div>
+
+    <!-- Unified Impressum & Credits Footer -->
+    <footer class="w-full text-center py-6 text-xs text-zinc-500 relative z-10 select-none">
+        <button id="impressum-btn" class="hover:text-zinc-300 transition-colors font-medium cursor-pointer focus:outline-none">
+            Impressum / Credits
+        </button>
+    </footer>
+
+    <!-- Impressum Popup Modal Overlay -->
+    <div id="impressum-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-darkCard border border-darkBorder rounded-2xl max-w-md w-full shadow-2xl backdrop-blur-xl p-6 relative transform transition-all scale-100 max-h-[90vh] overflow-y-auto">
+            <button id="close-impressum-btn" class="absolute top-4 right-4 p-1.5 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition focus:outline-none cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <div class="mb-5 select-none">
+                <h2 class="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">ℹ️ Impressum & Credits</h2>
+                <p class="text-xs text-zinc-500 mt-1">Project reference data and technical attributes.</p>
+            </div>
+            <div class="space-y-4 text-sm text-zinc-300">
+                <div class="p-3 rounded-xl border border-darkBorder bg-darkBg/30 flex items-start gap-3">
+                    <span class="text-lg mt-0.5 select-none">🌐</span>
+                    <div>
+                        <h3 class="font-semibold text-zinc-200">Credits</h3>
+                        <p class="text-xs text-zinc-500 mt-0.5">High-performance lightweight single-session search hub layout.</p>
+                        <p class="text-xs text-zinc-400 hover:underline font-medium inline-block mt-1">Tarkoogle Hub Portal</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-t-zinc-200 dark:border-t-zinc-800 flex justify-end">
+                <button id="close-impressum-ok-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition focus:outline-none cursor-pointer">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Start measuring load metrics immediately on script initialization
+        const loadStartTimestamp = performance.now();
+
+        // --- 2. LIVE CLOCK & DATE ENGINE ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            document.getElementById('clock-date').textContent = now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Fallbacks that are overwritten if custom JSON files are loaded
+        let generalSearchTitles = ["Tarkoogle", "Seeker", "Nexus", "Portal", "Horizon", "Discover", "Sleek", "Explore", "Infinity", "Orbit", "Unified", "Clarity", "Apex", "Vortex", "Stellar", "Cosmos", "Zenith", "Aether", "Pulse", "Catalyst", "Nova", "Beacon", "Chronos", "Elysium", "Solace", "Summit", "Enigma", "Quantum", "Prism", "Echo", "Mirage", "Aura"];
+        let subtitleIntros = ["Your friendly guide to", "Instantly teleporting through", "A whimsical window into", "An optimized catalyst for", "The premier launchpad for", "Gently navigating the", "A hyper-dimensional key to", "Your daily dose of", "A customized springboard toward", "A cozy digital hammock for", "A futuristic portal serving", "The most reliable source for", "A secret garden full of", "The ultimate playground of", "An astronomical orbit around", "Crafting high-quality queries for", "The legendary archives of", "Delving fearlessly into", "Sailing the cybernetic seas of", "Unlocking the mysteries of", "A sanctuary dedicated to", "The definitive roadmap for", "Orbiting the dynamic realms of", "An elegant gateway into", "Sifting through the cosmic dust of", "Unraveling the deep syntax of", "Peering through the multi-threaded looking glass of"];
+        let subtitleAdjectives = ["wobbly", "bubbly", "quantum-entangled", "neomorphic", "retro-futuristic", "gravity-defying", "fluffy", "hyper-threaded", "pixel-perfect", "sub-atomic", "cyber-organic", "laser-focused", "stellar", "glowing", "cloud-native", "whimsical", "magnetic", "kaleidoscopic", "polychromatic", "giggle-powered", "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful", "gravitationally-skewed", "helium-filled", "neon-bathed", "spark-emitting", "polymorphic", "exquisite"];
+        let subtitleSubjects = ["bubble-tea recipes", "robotic penguin blueprints", "neomorphic button shadows", "clandestine cookie jars", "cosmic potato logic", "gravity-free space socks", "digital dandelion dreams", "underwater firefly networks", "secret hamster space programs", "virtual origami instructions", "sentient marshmallow algorithms", "quantum pancake configurations", "acoustic pizza vibrations", "sub-aquatic bicycle repair guides", "hovercraft cat grooming manuals", "invisible ink ingredient lists", "philosophical donut holes", "nebulous cloud formations", "digital jellyfish orchestras", "interdimensional coffee brewing", "time-traveling toasters", "tactical rubber ducks", "cybernetic cheese wheels", "sub-atomic particle salads", "galactic map coordinates", "advanced bubblewrap physics", "glowing microchip ecosystems", "neon-tinted matrix indexes"];
+        let subtitleEndings = ["using pure imagination.", "while drinking warm cocoa.", "powered by friendly space sloths.", "at the speed of a startled twilight turtle.", "inside a comfortable pocket dimension.", "approved by intergalactic wizards.", "optimized for maximum coziness.", "with a gentle sprinkle of stardust.", "without breaking the space-time continuum.", "just for the joy of discovery.", "conceived by well-meaning calculators.", "under the soft glow of friendly neon signs.", "strictly for entertainment purposes.", "because why not?", "in a strangely soothing manner.", "with absolutely no instruction manual.", "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon.", "to satisfy your curiosity parameters.", "while standing on one foot.", "guaranteed to spark joy.", "under the supervision of cybernetic kittens."];
+        let currentVersion = "v0.1 (alpha)";
+        let currentTitle = "Tarkoogle";
+
+        async function loadResourceData() {
+            // Fetch titles JSON
+            const titlesData = await fetchFileJSON('resources/rndTitles.json') || await fetchFileJSON('rndTitles.json') || await fetchFileJSON('/resources/rndTitles.json');
+            if (titlesData && Array.isArray(titlesData)) {
+                generalSearchTitles = titlesData;
+            }
+
+            // Fetch subtitles JSON
+            const subsData = await fetchFileJSON('resources/rndSubtitles.json') || await fetchFileJSON('rndSubtitles.json') || await fetchFileJSON('/resources/rndSubtitles.json');
+            if (subsData && typeof subsData === 'object') {
+                if (subsData.intros) subtitleIntros = subsData.intros;
+                if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
+                if (subsData.subjects) subtitleSubjects = subsData.subjects;
+                if (subsData.endings) subtitleEndings = subsData.endings;
+            }
+
+            // Fetch version number JSON
+            const versionData = await fetchFileJSON('currentVersionNr.json') || await fetchFileJSON('/currentVersionNr.json') || await fetchFileJSON('resources/currentVersionNr.json');
+            if (versionData) {
+                if (typeof versionData === 'object' && versionData.version) {
+                    currentVersion = versionData.version;
+                } else if (typeof versionData === 'string') {
+                    currentVersion = versionData;
+                }
+            }
+        }
+
+        async function fetchFileJSON(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function generatePermutatedSubtitle() {
+            const intro = subtitleIntros[Math.floor(Math.random() * subtitleIntros.length)];
+            const adj = subtitleAdjectives[Math.floor(Math.random() * subtitleAdjectives.length)];
+            const subject = subtitleSubjects[Math.floor(Math.random() * subtitleSubjects.length)];
+            const ending = subtitleEndings[Math.floor(Math.random() * subtitleEndings.length)];
+            return `${intro} ${adj} ${subject} ${ending}`;
+        }
+
+        function setRandomFavicon(title) {
+            const letter = title ? title.charAt(0) : 'F';
+            const colors = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect width="100" height="100" rx="26" fill="%2318181b"/>
+                    <text x="50" y="55" font-family="'Space Grotesk', sans-serif" font-weight="bold" font-size="65" fill="${encodeURIComponent(randomColor)}" text-anchor="middle" dominant-baseline="middle">${letter}</text>
+                </svg>
+            `;
+            let link = document.querySelector("link[rel*='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.type = 'image/svg+xml';
+                link.rel = 'icon';
+                document.head.appendChild(link);
+            }
+            link.href = `data:image/svg+xml,${svg.trim()}`;
+        }
+
+        function loadDynamicTitleAndSubtitle() {
+            const logoSubtitle = document.getElementById('logo-subtitle');
+            currentTitle = generalSearchTitles[Math.floor(Math.random() * generalSearchTitles.length)] || "Tarkoogle";
+            
+            document.title = currentTitle + " Hub";
+            if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
+            
+            setRandomFavicon(currentTitle);
+
+            // Trigger the title's unique decrypt animation
+            triggerTitleDecrypt(currentTitle);
+        }
+
+        // --- 3.5 TACTICAL HUD DECRYPT ANIMATION ENGINE ---
+
+        // Decrypt Title with colorful brand accents (Google palette, no consecutive same colors)
+        function triggerTitleDecrypt(targetText) {
+            const titleTag = document.getElementById('logo-title');
+            if (!titleTag) return;
+            
+            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
+            const colorPool = ['text-tarkoogleBlue', 'text-tarkoogleRed', 'text-tarkoogleYellow', 'text-tarkoogleGreen'];
+            
+            const titleColors = [];
+            for (let i = 0; i < targetText.length; i++) {
+                const prevColor = i > 0 ? titleColors[i - 1] : null;
+                const filteredPool = colorPool.filter(c => c !== prevColor);
+                titleColors.push(filteredPool[Math.floor(Math.random() * filteredPool.length)]);
+            }
+            
+            let iterations = 0;
+            clearInterval(titleTag.decryptInterval);
+            
+            titleTag.decryptInterval = setInterval(() => {
+                let displayText = targetText.split("").map((char, index) => {
+                    if (char === " ") return "&nbsp;";
+                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                    const colorClass = titleColors[index];
+                    return `<span class="${colorClass}">${displayChar}</span>`;
+                }).join("");
+                
+                titleTag.innerHTML = displayText;
+                
+                if (iterations >= targetText.length) {
+                    clearInterval(titleTag.decryptInterval);
+                    triggerVersionDecrypt();
+                }
+                iterations += 1 / 3;
+            }, 25);
+        }
+
+        // Decrypt Version Number tag
+        function triggerVersionDecrypt() {
+            const versionTag = document.getElementById('version-tag');
+            if (!versionTag) return;
+            
+            versionTag.classList.remove('opacity-0');
+            versionTag.classList.add('opacity-100');
+            
+            const targetText = currentVersion;
+            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
+            let iterations = 0;
+            
+            clearInterval(versionTag.decryptInterval);
+            
+            versionTag.decryptInterval = setInterval(() => {
+                let displayText = targetText.split("").map((char, index) => {
+                    if (char === " ") return " ";
+                    if (index < iterations) return targetText[index];
+                    return possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                }).join("");
+                
+                versionTag.textContent = displayText;
+                
+                if (iterations >= targetText.length) {
+                    clearInterval(versionTag.decryptInterval);
+                    
+                    // Trigger the Load Time Decryption ONLY after version completes
+                    const finalLoadTime = Math.round(performance.now() - loadStartTimestamp);
+                    triggerLoadTimeDecrypt(`LOADED IN: ${finalLoadTime}ms`, finalLoadTime);
+                }
+                iterations += 1 / 3;
+            }, 25);
+        }
+
+        // Decrypt Load Time tag (starts with standard stealth zinc)
+        function triggerLoadTimeDecrypt(targetText, rawMs) {
+            const loadTimeTag = document.getElementById('load-time-tag');
+            if (!loadTimeTag) return;
+            
+            loadTimeTag.classList.remove('opacity-0');
+            loadTimeTag.classList.add('opacity-100');
+            
+            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
+            let iterations = 0;
+            
+            clearInterval(loadTimeTag.decryptInterval);
+            
+            loadTimeTag.decryptInterval = setInterval(async () => {
+                let displayText = targetText.split("").map((char, index) => {
+                    if (char === " ") return "&nbsp;";
+                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                    let wrapColor = (index < 9) ? 'text-zinc-400 font-semibold' : 'text-zinc-500';
+                    return `<span class="${wrapColor}">${displayChar}</span>`;
+                }).join("");
+                
+                loadTimeTag.innerHTML = displayText;
+                
+                if (iterations >= targetText.length) {
+                    clearInterval(loadTimeTag.decryptInterval);
+                    // Send performance metric payload to Vercel Serverless API
+                    await saveLoadTimeToServer(rawMs);
+                    // Compute metric statistics and trigger decryption reveal
+                    await calculateAndDecryptStats(rawMs);
+                }
+                iterations += 1 / 2;
+            }, 20);
+        }
+
+        // Decrypt Load Time tag into its performance-coded color (Label only)
+        function triggerLoadTimeColorDecrypt(tagElement, targetText, colorClass) {
+            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
+            let iterations = 0;
+
+            clearInterval(tagElement.decryptInterval);
+
+            tagElement.decryptInterval = setInterval(() => {
+                let displayText = targetText.split("").map((char, index) => {
+                    if (char === " ") return "&nbsp;";
+                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                    
+                    let wrapColor = 'text-zinc-500';
+                    // Index ranges: 
+                    // 0 to 8 is "LOADED IN" -> Colorized
+                    if (index < 9) {
+                        wrapColor = `${colorClass} font-semibold`;
+                    }
+                    
+                    return `<span class="${wrapColor}">${displayChar}</span>`;
+                }).join("");
+
+                tagElement.innerHTML = displayText;
+
+                if (iterations >= targetText.length) {
+                    clearInterval(tagElement.decryptInterval);
+                }
+                iterations += 1 / 2;
+            }, 20);
+        }
+
+        // Compute performance stats (LOW, AVG, HIGH) from server data + client localStorage backup
+        async function calculateAndDecryptStats(currentMs) {
+            let times = [];
+
+            // 1. Try pulling log registry arrays from Serverless Endpoint (GET or file fetch)
+            try {
+                const response = await fetch('/api/loadingTimesLogging');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        times = data.map(item => item.timeMs);
+                    } else if (data.success && Array.isArray(data.logs)) {
+                        times = data.logs.map(item => item.timeMs);
+                    }
+                }
+            } catch (err) {
+                console.warn('Could not pull stats from Vercel API, applying localized fallback calculations.');
+            }
+
+            // 2. Load LocalStorage client logs registry backup to guarantee calculations
+            try {
+                let localLogs = [];
+                const saved = localStorage.getItem('tarkoogle_load_times');
+                if (saved) {
+                    localLogs = JSON.parse(saved);
+                }
+                localLogs.push(currentMs);
+                localStorage.setItem('tarkoogle_load_times', JSON.stringify(localLogs));
+
+                // If Serverless metrics are empty or unreachable, fall back to localStorage pool
+                if (times.length === 0) {
+                    times = localLogs;
+                }
+            } catch (e) {
+                if (times.length === 0) {
+                    times = [currentMs];
+                }
+            }
+
+            // 3. Compute metric boundaries
+            const low = Math.min(...times);
+            const high = Math.max(...times);
+            const sum = times.reduce((a, b) => a + b, 0);
+            const avg = Math.round(sum / times.length);
+
+            const statsText = `LOW: ${low}ms AVG: ${avg}ms HIGH: ${high}ms`;
+            
+            // Determine load speed status
+            let colorClass = 'text-amber-400'; // Mid / Average fallback
+            if (currentMs <= avg * 0.95) {
+                colorClass = 'text-emerald-400'; // Low / Fast
+            } else if (currentMs >= avg * 1.15) {
+                colorClass = 'text-rose-400'; // High / Slow
+            }
+
+            // Trigger decrypt for stats, passing colorClass and currentMs so we trigger loaded-in color changes AFTER stats decrypt completes.
+            const part1 = `LOW: ${low}ms`;
+            const part2 = `AVG: ${avg}ms`;
+            triggerStatsDecrypt(statsText, part1.length, part2.length, colorClass, currentMs);
+        }
+
+        // Decrypt stats tag with matching tactical typewriter HUD decryption speed and custom segment coloring
+        function triggerStatsDecrypt(targetText, lowLen, avgLen, finalColorClass, currentMs) {
+            const statsTag = document.getElementById('stats-tag');
+            if (!statsTag) return;
+
+            statsTag.classList.remove('opacity-0');
+            statsTag.classList.add('opacity-100');
+
+            const possibleChars = "0123456789_#@*&%$?![]=+/\\";
+            const idxLow = targetText.indexOf("LOW:");
+            const idxAvg = targetText.indexOf("AVG:");
+            const idxHigh = targetText.indexOf("HIGH:");
+
+            let iterations = 0;
+
+            clearInterval(statsTag.decryptInterval);
+
+            statsTag.decryptInterval = setInterval(() => {
+                let displayText = targetText.split("").map((char, index) => {
+                    if (char === " ") return "&nbsp;";
+                    let displayChar = (index < iterations) ? char : possibleChars[Math.floor(Math.random() * possibleChars.length)];
+                    
+                    // Style sections individually (only labels LOW:, AVG:, HIGH: colored, numbers and units uncolored)
+                    let colorClass = 'text-zinc-500';
+                    if (index >= idxLow && index < idxLow + 3) {
+                        colorClass = 'text-emerald-500 dark:text-emerald-400 font-semibold'; // LOW label only
+                    } else if (index >= idxAvg && index < idxAvg + 3) {
+                        colorClass = 'text-amber-500 dark:text-amber-400 font-semibold'; // AVG label only
+                    } else if (index >= idxHigh && index < idxHigh + 4) {
+                        colorClass = 'text-rose-500 dark:text-rose-400 font-semibold'; // HIGH label only
+                    }
+
+                    return `<span class="${colorClass}">${displayChar}</span>`;
+                }).join("");
+
+                statsTag.innerHTML = displayText;
+
+                if (iterations >= targetText.length) {
+                    clearInterval(statsTag.decryptInterval);
+                    
+                    // Trigger the Load Time color change decrypt ONLY after stats are completely done decrypting
+                    const loadTimeTag = document.getElementById('load-time-tag');
+                    if (loadTimeTag) {
+                        triggerLoadTimeColorDecrypt(loadTimeTag, `LOADED IN: ${currentMs}ms`, finalColorClass);
+                    }
+                }
+                iterations += 1 / 2; // Decrypts fast
+            }, 20);
+        }
+
+        // Send calculated boot load speed cleanly to the serverless function
+        async function saveLoadTimeToServer(timeMs) {
+            try {
+                await fetch('/api/loadingTimesLogging', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        timeMs: timeMs,
+                        version: currentVersion,
+                        title: currentTitle
+                    })
+                });
+            } catch (err) {
+                console.warn('Unable to log metric to Vercel Serverless Function.', err);
+            }
+        }
+
+        // --- BOOTSTRAP INITIALIZATION ---
+        async function initializeHubData() {
+            await loadResourceData();
+            loadDynamicTitleAndSubtitle();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeHubData);
+
+        // --- SEARCH INPUT & GOOGLE REDIRECT ENGINE ---
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('clear-search');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                if (e.target.value.trim().length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim();
+                    if (query.length > 0) {
+                        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                    }
+                }
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearBtn.classList.add('hidden');
+                searchInput.focus();
+            });
+        }
+
+        // --- 5. IMPRESSUM POPUP MODAL ENGINE ---
+        const impressumBtn = document.getElementById('impressum-btn');
+        const impressumModal = document.getElementById('impressum-modal');
+        const closeImpressumBtn = document.getElementById('close-impressum-btn');
+        const closeImpressumOkBtn = document.getElementById('close-impressum-ok-btn');
+
+        function openImpressum() {
+            if (impressumModal) impressumModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeImpressum() {
+            if (impressumModal) impressumModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        if (impressumBtn) {
+            impressumBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openImpressum();
+            });
+        }
+        if (closeImpressumBtn) closeImpressumBtn.addEventListener('click', closeImpressum);
+        if (closeImpressumOkBtn) closeImpressumOkBtn.addEventListener('click', closeImpressum);
+
+        if (impressumModal) {
+            impressumModal.addEventListener('click', (e) => {
+                if (e.target === impressumModal) closeImpressum();
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchInput && searchInput) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+            if (e.key === 'Escape') {
+                if (searchInput && document.activeElement === searchInput) {
+                    searchInput.blur();
+                }
+                closeImpressum();
+            }
+        });
+    </script>
+</body>
+</html>
