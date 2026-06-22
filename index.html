@@ -417,11 +417,18 @@
         let bioMotivations = ["now driven solely by a quest to defeat the shadow cultists.", "quietly planning a journey towards the outer mystical runic border.", "collecting ancient crystal shards to rebuild the shattered Starstone.", "saving enough gold to purchase a passage permit into the Elven realms."];
         let bioSecrets = ["They are rumored to hide a glowing rune stone behind a false plate in their gauntlets.", "They never sleep without a spellbound obsidian dagger tucked under their pillow.", "Some say they can predict magical anomalies by checking the behavior of local crows.", "They carry an old map of an undiscovered floating island in the sky."];
 
-        // Fetcher Utility with safe handling
+        // Fetcher Utility with safe handling - Upgraded to handle raw text list formats cleanly
         async function fetchFileJSON(url) {
             try {
                 const response = await fetch(url);
-                if (response.ok) return await response.json();
+                if (response.ok) {
+                    const text = await response.text();
+                    try {
+                        return JSON.parse(text);
+                    } catch (jsonErr) {
+                        return text; // Return raw text if not valid JSON (e.g. newline lists from HTML)
+                    }
+                }
             } catch (e) {}
             return null;
         }
@@ -435,6 +442,10 @@
                         for (let key in data) {
                             if (Array.isArray(data[key])) return data[key];
                         }
+                    }
+                    if (typeof data === 'string') {
+                        const lines = data.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                        if (lines.length > 0) return lines;
                     }
                 }
             }
@@ -1123,7 +1134,10 @@
                     currentVersion = versionData.version;
                 } else if (typeof versionData === 'string') {
                     // Extract version line directly from HTML list/text format if retrieved raw
-                    currentVersion = versionData.trim().split('\n')[0];
+                    const lines = versionData.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                    if (lines.length > 0) {
+                        currentVersion = lines[Math.floor(Math.random() * lines.length)];
+                    }
                 } else if (typeof versionData === 'object') {
                     for (let key in versionData) {
                         if (typeof versionData[key] === 'string') {
