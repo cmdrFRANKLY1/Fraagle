@@ -152,6 +152,13 @@
 
         <!-- Drawer Content -->
         <div class="flex-grow overflow-y-auto p-6 space-y-6">
+            <!-- CORS Notice Help Panel -->
+            <div id="cors-notice" class="hidden p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-200 space-y-1.5">
+                <span class="font-bold font-mono block text-amber-400">⚠️ CORS/LOCAL SECURITY BLOCK</span>
+                <p class="leading-relaxed">Browsers automatically block reading local JSON files directly via the <code class="bg-black/30 px-1 rounded font-mono">file://</code> protocol.</p>
+                <p class="font-semibold text-amber-300">To fix this: Run a simple local web server in your project folder (e.g., Live Server in VS Code, or run <code class="bg-black/30 px-1 rounded font-mono">python -m http.server</code> in this directory).</p>
+            </div>
+
             <!-- Hero Card Header -->
             <div class="relative bg-zinc-900/50 rounded-2xl p-5 border border-darkBorder overflow-hidden group">
                 <!-- Decorative absolute grid lines -->
@@ -267,14 +274,14 @@
         let currentVersion = "v0.1 (alpha)";
         let currentTitle = "Tarkoogle";
 
-        // Dynamic targets - initialized empty, populated purely by dynamic fetches
+        // Dynamic target variables - Populated natively by folder fetch
         let dndNames = [];
         let dndProfessions = [];
         let dndRaces = [];
         let dndPlaces = [];
-        let dndAttributes = [];
+        let dndAttributes = null; // Stored as Key-Value descriptor object
 
-        // Universal File Fetcher with helpful CORS logging
+        // Universal File Fetcher with helpful console reporting
         async function fetchFileJSON(url) {
             try {
                 const response = await fetch(url);
@@ -282,22 +289,21 @@
                     return await response.json();
                 }
             } catch (e) {
-                // Ignore the logging of normal fallback checks failing, but we log the attempt for debugging
+                // Fetch attempts reported silently
             }
             return null;
         }
 
-        // Smart Array Extractor: Checks multiple paths & extracts arrays if wrapped inside a JSON object
+        // Smart Array Extractor: Checks variations of file paths, and digs through wrapper structures
         async function loadResourceArray(paths) {
             for (let path of paths) {
                 const data = await fetchFileJSON(path);
                 if (data) {
-                    // Scenario A: It's a standard Array JSON -> [ "Warrior", "Mage" ]
+                    // Scenario A: Standard array e.g., ["Item 1", "Item 2"]
                     if (Array.isArray(data)) {
                         return data;
                     }
-                    
-                    // Scenario B: It's wrapped in an object -> { "classes": ["Warrior", "Mage"] }
+                    // Scenario B: Array is stored inside an object wrapper e.g., { "list": ["Item 1"] }
                     if (typeof data === 'object') {
                         for (let key in data) {
                             if (Array.isArray(data[key])) {
@@ -307,8 +313,24 @@
                     }
                 }
             }
-            console.warn(`Could not load array from paths starting with: ${paths[0]}. Are you using a local web server (http://localhost) or opening file:/// directly? Browser CORS blocks file:/// fetches.`);
-            return []; // Fail gracefully
+            return [];
+        }
+
+        // Object Parser: Grabs the Key-Value schema from listAttributes.json
+        async function loadAttributesData() {
+            const paths = [
+                './resources/dnd/listAttributes.json',
+                'resources/dnd/listAttributes.json',
+                '/resources/dnd/listAttributes.json',
+                'listAttributes.json'
+            ];
+            for (let path of paths) {
+                const data = await fetchFileJSON(path);
+                if (data && typeof data === 'object' && !Array.isArray(data)) {
+                    return data;
+                }
+            }
+            return null;
         }
 
         async function loadResourceData() {
@@ -337,33 +359,46 @@
                 }
             }
 
-            // --- D&D MODULE DYNAMIC DATASETS RESOLUTION ---
-            // Utilizing loadResourceArray to automatically handle relative paths and nested object arrays
-            dndNames = await loadResourceArray(['./resources/dnd/listNames.json', 'resources/dnd/listNames.json', '/resources/dnd/listNames.json', 'dnd/listNames.json']);
-            dndProfessions = await loadResourceArray(['./resources/dnd/listProfession.json', 'resources/dnd/listProfession.json', '/resources/dnd/listProfession.json', 'dnd/listProfession.json']);
-            dndRaces = await loadResourceArray(['./resources/dnd/listRace.json', 'resources/dnd/listRace.json', '/resources/dnd/listRace.json', 'dnd/listRace.json']);
-            dndPlaces = await loadResourceArray(['./resources/dnd/listPlace.json', 'resources/dnd/listPlace.json', '/resources/dnd/listPlace.json', 'dnd/listPlace.json']);
+            // --- D&D MODULE DYNAMIC DATASETS RESOLUTION (Plural-first filenames check) ---
+            dndNames = await loadResourceArray([
+                './resources/dnd/listNames.json', 
+                'resources/dnd/listNames.json', 
+                '/resources/dnd/listNames.json', 
+                'listNames.json'
+            ]);
+            dndProfessions = await loadResourceArray([
+                './resources/dnd/listProfessions.json', 
+                'resources/dnd/listProfessions.json', 
+                '/resources/dnd/listProfessions.json', 
+                'listProfessions.json',
+                './resources/dnd/listProfession.json', 
+                'resources/dnd/listProfession.json', 
+                '/resources/dnd/listProfession.json', 
+                'listProfession.json'
+            ]);
+            dndRaces = await loadResourceArray([
+                './resources/dnd/listRaces.json', 
+                'resources/dnd/listRaces.json', 
+                '/resources/dnd/listRaces.json', 
+                'listRaces.json',
+                './resources/dnd/listRace.json', 
+                'resources/dnd/listRace.json', 
+                '/resources/dnd/listRace.json', 
+                'listRace.json'
+            ]);
+            dndPlaces = await loadResourceArray([
+                './resources/dnd/listPlaces.json', 
+                'resources/dnd/listPlaces.json', 
+                '/resources/dnd/listPlaces.json', 
+                'listPlaces.json',
+                './resources/dnd/listPlace.json', 
+                'resources/dnd/listPlace.json', 
+                '/resources/dnd/listPlace.json', 
+                'listPlace.json'
+            ]);
 
-            const dndAttributesData = await loadResourceArray(['./resources/dnd/listAttributes.json', 'resources/dnd/listAttributes.json', '/resources/dnd/listAttributes.json', 'dnd/listAttributes.json']);
-            if (dndAttributesData && dndAttributesData.length > 0) {
-                dndAttributes = dndAttributesData.map((attr, index) => {
-                    const presetColors = [
-                        "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5",
-                        "border-tarkoogleGreen/50 hover:bg-tarkoogleGreen/5",
-                        "border-tarkoogleYellow/50 hover:bg-tarkoogleYellow/5",
-                        "border-tarkoogleBlue/50 hover:bg-tarkoogleBlue/5",
-                        "border-zinc-500/50 hover:bg-zinc-500/5",
-                        "border-purple-500/50 hover:bg-purple-500/5"
-                    ];
-                    const name = typeof attr === 'string' ? attr : (attr.name || "Attribute");
-                    const code = typeof attr === 'string' ? attr.substring(0, 3).toUpperCase() : (attr.code || "ATT");
-                    return {
-                        name: name,
-                        code: code,
-                        color: presetColors[index % presetColors.length]
-                    };
-                });
-            }
+            // Load Attribute descriptor mapping
+            dndAttributes = await loadAttributesData();
         }
 
         function generatePermutatedSubtitle() {
@@ -673,13 +708,25 @@
 
         // --- D&D HERO SYSTEM LOGIC ---
         function generateHeroIdentity() {
+            const corsNotice = document.getElementById('cors-notice');
+
             // Guard clause with UI feedback if data hasn't arrived/resolved from the JSON streams
             if (!dndNames.length || !dndProfessions.length || !dndRaces.length || !dndPlaces.length) {
-                document.getElementById('char-name').textContent = "Data Not Found";
-                document.getElementById('char-race').textContent = "Server Needed";
-                document.getElementById('char-profession').textContent = "CORS Blocked?";
-                document.getElementById('char-location').textContent = "Please serve via HTTP to read JSONs";
+                document.getElementById('char-name').textContent = "Database Offline";
+                document.getElementById('char-race').textContent = "Check URL";
+                document.getElementById('char-profession').textContent = "Fetch Failed";
+                document.getElementById('char-location').textContent = "CORS Blocked (Local File Protocol)";
+                
+                // Show the helpful custom CORS guide if we are currently loading locally
+                if (corsNotice) {
+                    corsNotice.classList.remove('hidden');
+                }
                 return;
+            }
+
+            // Hide warning if resources were loaded successfully
+            if (corsNotice) {
+                corsNotice.classList.add('hidden');
             }
 
             const randomName = dndNames[Math.floor(Math.random() * dndNames.length)];
@@ -694,20 +741,47 @@
 
             // Generate customized stats
             const attributesGrid = document.getElementById('attributes-grid');
-            if (attributesGrid && dndAttributes.length > 0) {
+            if (attributesGrid) {
                 attributesGrid.innerHTML = '';
-                dndAttributes.forEach(attr => {
-                    // Standard d&d stats generator (3d6 plus class adjustments)
+                
+                // Pre-configured style colors mapping for standard attributes
+                const styleColors = {
+                    "Strength": "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5 text-tarkoogleRed",
+                    "Dexterity": "border-tarkoogleGreen/50 hover:bg-tarkoogleGreen/5 text-tarkoogleGreen",
+                    "Constitution": "border-tarkoogleYellow/50 hover:bg-tarkoogleYellow/5 text-tarkoogleYellow",
+                    "Intelligence": "border-tarkoogleBlue/50 hover:bg-tarkoogleBlue/5 text-tarkoogleBlue",
+                    "Wisdom": "border-zinc-500/50 hover:bg-zinc-500/5 text-zinc-400",
+                    "Charisma": "border-purple-500/50 hover:bg-purple-500/5 text-purple-400"
+                };
+
+                // Determine schema: Parse loaded object or generate defaults if attributes file is blocked
+                const attributesObj = dndAttributes || {
+                    "Strength": ["Power", "Force"],
+                    "Dexterity": ["Agility", "Reflexes"],
+                    "Constitution": ["Stamina", "Endurance"],
+                    "Intelligence": ["Logic", "Knowledge"],
+                    "Wisdom": ["Perception", "Insight"],
+                    "Charisma": ["Presence", "Charm"]
+                };
+
+                for (let attrName in attributesObj) {
+                    const descriptors = attributesObj[attrName];
+                    const randomDescriptor = Array.isArray(descriptors) ? descriptors[Math.floor(Math.random() * descriptors.length)] : "";
+                    
+                    // Standard D&D stats generator (3d6 roll)
                     const baseScore = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 3;
                     const modifier = Math.floor((baseScore - 10) / 2);
                     const formattedModifier = modifier >= 0 ? `+${modifier}` : modifier;
 
+                    const colorClasses = styleColors[attrName] || "border-zinc-500/50 hover:bg-zinc-500/5 text-zinc-400";
+                    const code = attrName.substring(0, 3).toUpperCase();
+
                     const attrBlock = document.createElement('div');
-                    attrBlock.className = `p-3 bg-zinc-900/60 rounded-xl border border-darkBorder ${attr.color} transition-all duration-300 flex items-center justify-between select-none`;
+                    attrBlock.className = `p-3 bg-zinc-900/60 rounded-xl border ${colorClasses.split(' ')[0]} ${colorClasses.split(' ')[1]} transition-all duration-300 flex items-center justify-between select-none`;
                     attrBlock.innerHTML = `
                         <div class="flex flex-col">
-                            <span class="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">${attr.name}</span>
-                            <span class="text-sm font-bold text-zinc-200 mt-0.5">${attr.code}</span>
+                            <span class="text-[10px] font-mono font-bold text-zinc-500 uppercase tracking-wider">${attrName}</span>
+                            <span class="text-[10px] font-semibold text-zinc-400 font-mono italic">${randomDescriptor}</span>
                         </div>
                         <div class="text-right">
                             <span class="text-lg font-extrabold font-mono text-zinc-100">${baseScore}</span>
@@ -715,7 +789,7 @@
                         </div>
                     `;
                     attributesGrid.appendChild(attrBlock);
-                });
+                }
             }
 
             // Retain This Person Does Not Exist dynamic query parameter key so the image shifts on reroll!

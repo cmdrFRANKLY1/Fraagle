@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prapor Quest Flowchart – Multi‑View</title>
+    <title>Prapor Quest Flowchart – Live from tarkov.dev</title>
     <style>
         /* ===== minimal layout – same style ===== */
         * {
@@ -25,6 +25,12 @@
             font-weight: 400;
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
+        }
+        header .source {
+            font-size: 0.75rem;
+            font-weight: 300;
+            opacity: 0.6;
+            margin-left: 0.5rem;
         }
 
         .options-bar {
@@ -66,6 +72,27 @@
             padding: 0.1rem 0.4rem;
             font-family: inherit;
             font-size: 0.85rem;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.1rem 0.6rem;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            background: #f0f0f0;
+        }
+        .status-badge.loading {
+            background: #e8f0fe;
+            border-color: #8ab4f8;
+        }
+        .status-badge.error {
+            background: #fce8e8;
+            border-color: #f5a0a0;
+            color: #b00;
+        }
+        .status-badge.success {
+            background: #e6f4ea;
+            border-color: #81c995;
+            color: #1e7e34;
         }
 
         .main-content {
@@ -323,6 +350,7 @@
             font-size: 0.9rem;
             padding-left: 0.75rem;
             border-left: 2px solid #ddd;
+            white-space: pre-wrap;
         }
         .detail-rewards ul {
             list-style: none;
@@ -368,11 +396,24 @@
         .panel-body::-webkit-scrollbar-track {
             background: transparent;
         }
+        .loading-placeholder {
+            padding: 1rem;
+            opacity: 0.6;
+            font-style: italic;
+        }
+        .error-placeholder {
+            padding: 1rem;
+            color: #c00;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <header><h1>📍 Prapor – Quest Flowchart (Escape from Tarkov)</h1></header>
+    <header>
+        <h1>📍 Prapor – Quest Flowchart
+            <span class="source">(live data from tarkov.dev)</span>
+        </h1>
+    </header>
 
     <div class="options-bar">
         <div class="btn-group">
@@ -386,17 +427,18 @@
             <option value="flat">Flat List</option>
             <option value="chain">Chain (selected)</option>
         </select>
-        <span class="stats" id="stats">0 nodes</span>
+        <span class="stats" id="stats">⏳ loading…</span>
+        <span class="status-badge loading" id="statusBadge">connecting…</span>
     </div>
 
     <div class="main-content" id="mainContent">
         <div class="panel" id="flowchartPanel">
             <div class="panel-header">
                 <span>quest tree</span>
-                <span class="badge" id="nodeCount">0</span>
+                <span class="badge" id="nodeCount">—</span>
             </div>
             <div class="panel-body" id="treeContainer">
-                <!-- rendered by JS -->
+                <div class="loading-placeholder">⏳ Fetching quest data from tarkov.dev API…</div>
             </div>
         </div>
 
@@ -417,86 +459,195 @@
 <script>
     (function() {
         // ================================================================
-        //  DATA – Prapor quest tree
+        //  CONFIG – only hardcoded value: API endpoint & trader filter
         // ================================================================
-        const questData = {
-            name: "Debut",
-            requirements: "Reach level 2 • Hand over 2 MP-133 shotguns • Kill 5 Scavs on Customs",
-            rewards: ["+2,000 EXP", "9,000 Roubles", "2× RGD-5 grenade", "Unlocks: Bad Rep Evidence, Checking"],
-            children: [{
-                name: "Bad Rep Evidence",
-                requirements: "Find the container of alcohol in Dorms (Customs) • Hand it over",
-                rewards: ["+3,000 EXP", "10,000 Roubles", "1× PACA armor", "Unlocks: Ice Cream Cones"],
-                children: [{
-                    name: "Ice Cream Cones",
-                    requirements: "Find 4 60-round 6L31 magazines for AK • Hand them over",
-                    rewards: ["+4,000 EXP", "12,000 Roubles", "1× AK-74N", "Unlocks: The Punisher - Part 1"],
-                    children: [{
-                        name: "The Punisher - Part 1",
-                        requirements: "Kill 15 Scavs on Shoreline while using an AKM series weapon",
-                        rewards: ["+5,000 EXP", "15,000 Roubles", "1× Vepr AKM", "Unlocks: Punisher - Part 2"],
-                        children: [{
-                            name: "The Punisher - Part 2",
-                            requirements: "Kill 25 Scavs on Customs while using an AKS-74U",
-                            rewards: ["+6,000 EXP", "18,000 Roubles", "1× AKS-74UB", "Unlocks: Punisher - Part 3"],
-                            children: [{
-                                name: "The Punisher - Part 3",
-                                requirements: "Kill 25 Scavs on Woods while wearing a Balaclava and Scav Vest",
-                                rewards: ["+7,000 EXP", "20,000 Roubles", "1× SV-98", "Unlocks: Punisher - Part 4"],
-                                children: [{
-                                    name: "The Punisher - Part 4",
-                                    requirements: "Kill 10 PMCs on Shoreline using a suppressed sniper rifle",
-                                    rewards: ["+8,000 EXP", "25,000 Roubles", "1× M1A", "Unlocks: Punisher - Part 5"],
-                                    children: [{
-                                        name: "The Punisher - Part 5",
-                                        requirements: "Kill 20 PMCs on any map using an AK series weapon",
-                                        rewards: ["+9,000 EXP", "30,000 Roubles", "1× AK-104", "Unlocks: Punisher - Part 6"],
-                                        children: [{
-                                            name: "The Punisher - Part 6",
-                                            requirements: "Kill 12 PMCs on Factory with a specific loadout (Paca, 6B47, PP-19-01)",
-                                            rewards: ["+15,000 EXP", "50,000 Roubles", "Epsilon container (2x4)", "Unlocks: Test Drive - Part 1"],
-                                            children: [{
-                                                name: "Test Drive - Part 1",
-                                                requirements: "Level 35 • Kill 50 PMCs using a thermal G28 • Requires 'The Huntsman Path - Eraser' (Jaeger)",
-                                                rewards: ["+20,000 EXP", "75,000 Roubles", "1× G28", "Tactical thermal scope"],
-                                                children: []
-                                            }]
-                                        }]
-                                    }]
-                                }]
-                            }]
-                        }]
-                    }]
-                }]
-            }, {
-                name: "Checking",
-                requirements: "Find the bronze pocket watch in the tank near the dorms (Customs)",
-                rewards: ["+3,000 EXP", "8,000 Roubles", "1× Makarov PM", "Unlocks: Delivery from the Past"],
-                children: [{
-                    name: "Delivery from the Past",
-                    requirements: "Retrieve the secure case from the train car on Customs • Deliver it to Factory (survive)",
-                    rewards: ["+4,500 EXP", "12,000 Roubles", "1× AKS-74U", "Unlocks: (Skier quests)"],
-                    children: []
-                }]
-            }]
-        };
+        const API_URL = 'https://api.tarkov.dev/graphql';
+        const TRADER_NAME = 'Prapor';
 
         // ================================================================
         //  STATE
         // ================================================================
-        let selectedNode = null;       // reference to node object
-        let selectedNodeName = null;   // for highlighting
+        let questData = null;          // virtual root node: { name, children, requirements, rewards }
+        let selectedNode = null;       // reference to a node in the tree
+        let selectedNodeName = null;
         let currentView = 'tree';
+        let isLoading = true;
+
+        // ================================================================
+        //  DOM REFS
+        // ================================================================
         const treeContainer = document.getElementById('treeContainer');
         const detailBody = document.getElementById('detailBody');
         const nodeCountSpan = document.getElementById('nodeCount');
         const statsSpan = document.getElementById('stats');
         const viewSelect = document.getElementById('viewType');
+        const statusBadge = document.getElementById('statusBadge');
 
         // ================================================================
-        //  HELPERS
+        //  API FETCH & TREE BUILD
         // ================================================================
+        async function fetchAndBuildTree() {
+            const query = `
+            query {
+              quests {
+                id
+                name
+                description
+                objectives {
+                  id
+                  type
+                  description
+                }
+                rewards {
+                  experience
+                  roubles
+                  items {
+                    item {
+                      name
+                      shortName
+                    }
+                    quantity
+                  }
+                  traderStanding {
+                    trader {
+                      name
+                    }
+                    standing
+                  }
+                }
+                trader {
+                  name
+                }
+                predecessorQuests {
+                  id
+                  name
+                }
+                successors {
+                  id
+                  name
+                }
+              }
+            }
+          `;
+
+            try {
+                statusBadge.textContent = 'fetching…';
+                statusBadge.className = 'status-badge loading';
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+                const json = await response.json();
+                if (json.errors) throw new Error(json.errors[0].message);
+
+                const rawQuests = json.data.quests;
+                if (!rawQuests || rawQuests.length === 0) throw new Error('No quests returned from API.');
+
+                // --- filter for Prapor quests ---
+                const praporQuests = rawQuests.filter(q => q.trader && q.trader.name === TRADER_NAME);
+                if (praporQuests.length === 0) throw new Error(`No quests found for trader: ${TRADER_NAME}`);
+
+                // --- build map by id ---
+                const map = {};
+                for (const q of praporQuests) {
+                    map[q.id] = q;
+                }
+
+                // --- helper: map API quest to internal node format ---
+                function mapQuest(apiQuest) {
+                    const reqParts = [];
+                    if (apiQuest.description) reqParts.push(apiQuest.description);
+                    if (apiQuest.objectives && apiQuest.objectives.length > 0) {
+                        for (const obj of apiQuest.objectives) {
+                            if (obj.description) reqParts.push(`- ${obj.description}`);
+                        }
+                    }
+                    const rewardList = [];
+                    if (apiQuest.rewards) {
+                        if (apiQuest.rewards.experience) rewardList.push(`+${apiQuest.rewards.experience} EXP`);
+                        if (apiQuest.rewards.roubles) rewardList.push(`${apiQuest.rewards.roubles} Roubles`);
+                        if (apiQuest.rewards.items) {
+                            for (const ir of apiQuest.rewards.items) {
+                                const name = ir.item.name || ir.item.shortName || 'Unknown Item';
+                                rewardList.push(`${ir.quantity}× ${name}`);
+                            }
+                        }
+                        if (apiQuest.rewards.traderStanding) {
+                            for (const ts of apiQuest.rewards.traderStanding) {
+                                rewardList.push(`+${ts.standing} standing with ${ts.trader.name}`);
+                            }
+                        }
+                    }
+                    return {
+                        name: apiQuest.name,
+                        requirements: reqParts.join(' • ') || 'none',
+                        rewards: rewardList.length > 0 ? rewardList : ['none'],
+                        children: [],
+                        _apiRef: apiQuest // keep for reference
+                    };
+                }
+
+                // --- recursive build ---
+                function buildTree(apiQuest) {
+                    const node = mapQuest(apiQuest);
+                    if (apiQuest.successors) {
+                        for (const succ of apiQuest.successors) {
+                            // only include if the successor is also a Prapor quest (exists in our map)
+                            if (map[succ.id]) {
+                                node.children.push(buildTree(map[succ.id]));
+                            }
+                        }
+                    }
+                    return node;
+                }
+
+                // --- find roots (quests with no predecessors among Prapor quests) ---
+                const rootIds = new Set();
+                for (const q of praporQuests) {
+                    let hasPredecessor = false;
+                    if (q.predecessorQuests) {
+                        for (const pred of q.predecessorQuests) {
+                            if (map[pred.id]) {
+                                hasPredecessor = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasPredecessor) rootIds.add(q.id);
+                }
+
+                const rootNodes = [];
+                for (const id of rootIds) {
+                    rootNodes.push(buildTree(map[id]));
+                }
+
+                // --- create virtual root ---
+                const virtualRoot = {
+                    name: `🪖 ${TRADER_NAME} (All Quests)`,
+                    requirements: `Quest tree for ${TRADER_NAME} – data fetched live from tarkov.dev`,
+                    rewards: [`${praporQuests.length} total quests`],
+                    children: rootNodes
+                };
+
+                return virtualRoot;
+
+            } catch (err) {
+                statusBadge.textContent = 'error';
+                statusBadge.className = 'status-badge error';
+                throw err;
+            }
+        }
+
+        // ================================================================
+        //  RENDER FUNCTIONS (unchanged logic, uses questData)
+        // ================================================================
+
         function countAllNodes(node) {
+            if (!node) return 0;
             let count = 1;
             if (node.children) {
                 for (const child of node.children) {
@@ -506,7 +657,6 @@
             return count;
         }
 
-        // collect all nodes with parent references (for flat list)
         function collectNodesWithParent(node, parent = null) {
             const list = [];
             list.push({ node, parent });
@@ -518,7 +668,6 @@
             return list;
         }
 
-        // find node by name (deep search)
         function findNodeByName(root, name) {
             if (root.name === name) return root;
             if (root.children) {
@@ -530,7 +679,6 @@
             return null;
         }
 
-        // get path from root to node
         function getPath(root, target) {
             function search(node, path) {
                 path.push(node);
@@ -546,11 +694,7 @@
             return search(root, []);
         }
 
-        // ================================================================
-        //  RENDER FUNCTIONS (each returns DOM element)
-        // ================================================================
-
-        // --- shared: create a clickable quest node ---
+        // --- shared: create node element ---
         function createNodeElement(node, highlight = false) {
             const span = document.createElement('span');
             span.className = 'quest-node' + (highlight ? ' active' : '');
@@ -568,8 +712,6 @@
             span.addEventListener('click', function(e) {
                 e.stopPropagation();
                 selectNode(node);
-                // highlight in current view (will re-render on selection)
-                // We'll re-render the whole view on select to update highlights.
                 renderView(currentView);
             });
             return span;
@@ -587,7 +729,6 @@
                         const li = document.createElement('li');
                         const el = createNodeElement(child, child.name === selectedName);
                         li.appendChild(el);
-                        // children
                         if (child.children && child.children.length > 0) {
                             const childUl = buildTree(child);
                             childUl.className = 'child-list';
@@ -600,8 +741,6 @@
                 return ul;
             }
 
-            // root itself is not shown as a node, but we can show it? We'll show the root as a special heading.
-            // Actually we'll display the root as a node at the top? Better to show it as a header.
             const rootHeader = document.createElement('div');
             rootHeader.style.padding = '0.2rem 0.5rem';
             rootHeader.style.fontWeight = '500';
@@ -623,7 +762,7 @@
 
             function buildAccordion(node, depth = 0) {
                 const details = document.createElement('details');
-                if (depth === 0) details.open = true; // root expanded
+                if (depth === 0) details.open = true;
                 const summary = document.createElement('summary');
                 const el = createNodeElement(node, node.name === selectedName);
                 summary.appendChild(el);
@@ -640,13 +779,12 @@
                 return details;
             }
 
-            // We'll show root as accordion
             const rootAcc = buildAccordion(root, 0);
             container.appendChild(rootAcc);
             return container;
         }
 
-        // --- Flat List view ---
+        // --- Flat view ---
         function renderFlatView(root, selectedName) {
             const container = document.createElement('div');
             container.className = 'flat-root';
@@ -668,7 +806,7 @@
             return container;
         }
 
-        // --- Chain view (selected node path + children) ---
+        // --- Chain view ---
         function renderChainView(root, selectedNodeObj) {
             const container = document.createElement('div');
             container.className = 'chain-root';
@@ -678,7 +816,6 @@
                 return container;
             }
 
-            // Path
             const path = getPath(root, selectedNodeObj);
             if (path) {
                 const pathDiv = document.createElement('div');
@@ -697,7 +834,6 @@
                 container.appendChild(pathDiv);
             }
 
-            // Children of selected
             const childrenSection = document.createElement('div');
             childrenSection.className = 'children-section';
             const header = document.createElement('h4');
@@ -726,6 +862,11 @@
         //  RENDER DISPATCHER
         // ================================================================
         function renderView(viewType) {
+            if (!questData) {
+                treeContainer.innerHTML = '<div class="loading-placeholder">⏳ Loading quest data…</div>';
+                return;
+            }
+
             const root = questData;
             const selectedName = selectedNode ? selectedNode.name : null;
 
@@ -747,14 +888,14 @@
                     viewElement = renderTreeView(root, selectedName);
             }
 
-            // Clear and append
             treeContainer.innerHTML = '';
             treeContainer.appendChild(viewElement);
 
-            // Update node count
             const total = countAllNodes(root);
             nodeCountSpan.textContent = total;
             statsSpan.textContent = `${total} quests · ${viewType} view`;
+            statusBadge.textContent = 'ready';
+            statusBadge.className = 'status-badge success';
         }
 
         // ================================================================
@@ -764,8 +905,6 @@
             selectedNode = node;
             selectedNodeName = node.name;
             renderDetails(node);
-            // Re-render view to update highlights
-            renderView(currentView);
         }
 
         function renderDetails(node) {
@@ -794,56 +933,46 @@
         }
 
         // ================================================================
-        //  VIEW SWITCHING
+        //  VIEW CONTROL
         // ================================================================
         function setView(view) {
             currentView = view;
             renderView(view);
-            // Adjust expand/collapse behaviour for the view
-            // For tree/accordion we can support expand/collapse
         }
 
-        // ================================================================
-        //  EXPAND / COLLAPSE (works for tree and accordion)
-        // ================================================================
         function expandAll() {
+            if (!questData) return;
             if (currentView === 'tree') {
                 document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'block');
             } else if (currentView === 'accordion') {
                 document.querySelectorAll('.accordion-root details').forEach(d => d.open = true);
             }
-            // For flat and chain, no expand/collapse needed.
         }
 
         function collapseAll() {
+            if (!questData) return;
             if (currentView === 'tree') {
                 document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'none');
             } else if (currentView === 'accordion') {
-                // collapse all except root? we can collapse all details.
                 document.querySelectorAll('.accordion-root details').forEach(d => d.open = false);
-                // open root
                 const rootDetails = document.querySelector('.accordion-root details');
                 if (rootDetails) rootDetails.open = true;
             }
         }
 
         function resetView() {
-            // reset selection
             selectedNode = null;
             selectedNodeName = null;
             renderDetails(null);
-            // expand all (or default state)
             if (currentView === 'tree' || currentView === 'accordion') {
                 expandAll();
             }
-            // For chain, we need to show the default empty state
             renderView(currentView);
-            // clear active highlights
             document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
         }
 
         // ================================================================
-        //  SPLITTER (same)
+        //  SPLITTER
         // ================================================================
         function initSplitter() {
             const splitter = document.getElementById('splitter');
@@ -895,29 +1024,35 @@
         // ================================================================
         //  INIT
         // ================================================================
-        function init() {
-            // set up view selector
+        async function init() {
+            // Set up event listeners
             viewSelect.addEventListener('change', function() {
                 setView(this.value);
             });
 
-            // buttons
             document.getElementById('expandAllBtn').addEventListener('click', expandAll);
             document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
             document.getElementById('resetViewBtn').addEventListener('click', resetView);
 
-            // splitter
             initSplitter();
 
-            // initial view: tree
-            currentView = 'tree';
-            viewSelect.value = 'tree';
-            // select root? We'll show root details, but not highlight (root not clickable as node)
-            // We'll select the root as a default selection so details show.
-            selectedNode = questData;
-            selectedNodeName = questData.name;
-            renderDetails(questData);
-            renderView('tree');
+            // Load data from API
+            try {
+                questData = await fetchAndBuildTree();
+                // Select the virtual root by default so details show something
+                selectedNode = questData;
+                selectedNodeName = questData.name;
+                renderDetails(questData);
+                currentView = 'tree';
+                viewSelect.value = 'tree';
+                renderView('tree');
+            } catch (err) {
+                console.error(err);
+                treeContainer.innerHTML = `<div class="error-placeholder">❌ Failed to load data: ${err.message}</div>`;
+                statusBadge.textContent = 'error';
+                statusBadge.className = 'status-badge error';
+                statsSpan.textContent = 'error';
+            }
         }
 
         if (document.readyState === 'loading') {
