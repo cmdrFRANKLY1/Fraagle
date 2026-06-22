@@ -1047,7 +1047,8 @@
                 }
 
                 const resultBlock = document.createElement('div');
-                resultBlock.className = "text-left w-full py-2 group";
+                // Give search result card an invisible default border and standard cursor-pointer to signal clickability
+                resultBlock.className = "text-left w-full p-4 border border-transparent rounded-2xl hover:bg-zinc-100/40 dark:hover:bg-zinc-800/20 hover:border-lightBorder dark:hover:border-darkBorder transition-all duration-200 cursor-pointer group";
 
                 let breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${(item.shortName && item.shortName !== item.title) ? item.shortName : 'Item'}`;
 
@@ -1078,11 +1079,11 @@
                     }
 
                     if (item.armorClass) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">Armor Class: ${item.armorClass}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20">Armor Class: ${item.armorClass}</span>`);
                     }
 
                     if (item.damage) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">Damage: ${item.damage}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20">Damage: ${item.damage}</span>`);
                     }
 
                     tagsHtml = `
@@ -1119,12 +1120,24 @@
                     `}
                 `;
 
+                // Set up mouse events for pre-viewing
                 if (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest') {
                     const hoverTarget = resultBlock.querySelector('.search-result-item-link');
                     hoverTarget.addEventListener('mouseenter', (e) => startHoverPreview(e, item));
                     hoverTarget.addEventListener('mousemove', (e) => positionPreviewCard(e));
                     hoverTarget.addEventListener('mouseleave', cancelHoverPreview);
                 }
+
+                // Click event listener: Clicking the card refreshes details pane; clicking name hyperlink continues to fandom wiki
+                resultBlock.addEventListener('click', (e) => {
+                    const clickedLink = e.target.closest('.search-result-item-link');
+                    if (clickedLink) {
+                        // Let browser open the wiki page in a new window/tab as defined in the anchor properties
+                        return;
+                    }
+                    // Otherwise, refresh the knowledge details panel on the right with the clicked item
+                    renderKnowledgePanel(item);
+                });
 
                 googleResultsContainer.appendChild(resultBlock);
             });
