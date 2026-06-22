@@ -891,6 +891,7 @@
             }, 3000);
         }
 
+        // Hide hover tooltip
         function cancelHoverPreview() {
             clearTimeout(hoverTimer);
             if (previewCard) previewCard.classList.add('hidden');
@@ -1106,33 +1107,6 @@
                 matches.unshift(forcedExactItem);
             }
 
-            // Fallback Search Logic: If there is no adjacent match (or only the single exact match), fall back N-1 words
-            const hasNoAdjacentMatches = matches.length === 0 || (forcedExactItem && matches.length === 1);
-            if (hasNoAdjacentMatches) {
-                const words = normalizedQuery.split(/\s+/).filter(Boolean);
-                if (words.length > 1) {
-                    const fallbackQuery = words.slice(0, -1).join(' ');
-                    const fallbackMatches = searchIndex.filter(item => {
-                        const title = (item?.title || '').toLowerCase();
-                        const category = (item?.category || '').toLowerCase();
-                        return title.includes(fallbackQuery) || category.includes(fallbackQuery);
-                    });
-                    
-                    // Append fallback matches, avoiding duplicates
-                    fallbackMatches.forEach(item => {
-                        if (!matches.some(m => m.id === item.id)) {
-                            matches.push(item);
-                        }
-                    });
-                }
-            }
-
-            const endTime = performance.now();
-            const processTime = ((endTime - startTime) / 1000).toFixed(3);
-            if (resultsMetaText) resultsMetaText.textContent = `About ${matches.length} results (${processTime} seconds)`;
-
-            if (googleResultsView) googleResultsView.classList.remove('hidden');
-
             // Find best match for Knowledge Panel
             let knowledgePanelItem = forcedExactItem;
             if (!knowledgePanelItem && matches.length > 0) {
@@ -1143,7 +1117,72 @@
                     knowledgePanelItem = matches[0];
                 }
             }
-            renderKnowledgePanel(knowledgePanelItem);
+
+            // GUARANTEE ADJACENT RECOMMENDATIONS IS ALWAYS ROBUST (Fallback Strategies)
+            let adjacentMatches = [];
+
+            // Strategy 1: Shared Word Matching (Extract keywords longer than 2 characters)
+            const words = normalizedQuery.split(/\s+/).filter(w => w.length > 2);
+            if (words.length > 0) {
+                searchIndex.forEach(item => {
+                    // Prevent recommending the primary item
+                    if (knowledgePanelItem && item.id === knowledgePanelItem.id) return;
+                    
+                    const title = (item?.title || '').toLowerCase();
+                    const matchesWord = words.some(word => title.includes(word));
+                    
+                    if (matchesWord && !matches.some(m => m.id === item.id)) {
+                        adjacentMatches.push(item);
+                    }
+                });
+            }
+
+            // Strategy 2: Category Matching (Grab items from the same category to fill adjacent recommendation list)
+            let categorySource = knowledgePanelItem || (matches.length > 0 ? matches[0] : null);
+            if (categorySource && categorySource.category) {
+                const targetCategory = categorySource.category.toLowerCase();
+                searchIndex.forEach(item => {
+                    if (categorySource && item.id === categorySource.id) return;
+                    
+                    const itemCategory = (item.category || '').toLowerCase();
+                    if (itemCategory === targetCategory) {
+                        if (!matches.some(m => m.id === item.id) && !adjacentMatches.some(m => m.id === item.id)) {
+                            adjacentMatches.push(item);
+                        }
+                    }
+                });
+            }
+
+            // Strategy 3: N-1 Word Fallback (If still empty or tiny list, perform search on previous word block)
+            if (adjacentMatches.length < 5 && words.length > 1) {
+                const fallbackQuery = words.slice(0, -1).join(' ');
+                const fallbackMatches = searchIndex.filter(item => {
+                    const title = (item?.title || '').toLowerCase();
+                    const category = (item?.category || '').toLowerCase();
+                    return title.includes(fallbackQuery) || category.includes(fallbackQuery);
+                });
+                
+                fallbackMatches.forEach(item => {
+                    if (categorySource && item.id === categorySource.id) return;
+                    if (!matches.some(m => m.id === item.id) && !adjacentMatches.some(m => m.id === item.id)) {
+                        adjacentMatches.push(item);
+                    }
+                });
+            }
+
+            // Combine base query matches and dynamically filtered adjacent recommendation lists
+            adjacentMatches.forEach(item => {
+                if (!matches.some(m => m.id === item.id)) {
+                    matches.push(item);
+                }
+            });
+
+            const endTime = performance.now();
+            const processTime = ((endTime - startTime) / 1000).toFixed(3);
+            if (resultsMetaText) resultsMetaText.textContent = `About ${matches.length} results (${processTime} seconds)`;
+
+            if (googleResultsView) googleResultsView.classList.remove('hidden');
+            renderKnowledgePanel(knowledgePanelItem || matches[0]);
 
             const hasTarkovResults = matches.some(item => 
                 item && (item.type === 'tarkov' || item.type === 'trader' || item.type === 'quest')
@@ -1171,7 +1210,7 @@
                 if (!item) return;
 
                 // Add section divider before listing adjacent suggestions
-                if (forcedExactItem && index === 1) {
+                if ((forcedExactItem || categorySource) && index === 1) {
                     const adjacentSection = document.createElement('div');
                     adjacentSection.className = "pt-2 pb-1 border-b border-lightBorder dark:border-darkBorder/20 mb-2";
                     adjacentSection.innerHTML = `
@@ -1230,7 +1269,7 @@
                 }
 
                 // If this is the active primary selection item, give it a prominent tag
-                const primaryTagHtml = (forcedExactItem && index === 0) 
+                const primaryTagHtml = ((forcedExactItem || categorySource) && index === 0) 
                     ? `<span class="inline-flex items-center mb-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-500 text-white tracking-widest uppercase shadow-sm select-none">Primary Match</span>`
                     : '';
 
