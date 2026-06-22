@@ -121,6 +121,12 @@
     <!-- Main Content Container -->
     <main id="main-container" class="flex-grow flex flex-col items-center justify-center px-4 w-full max-w-4xl mx-auto z-10 py-8">
 
+        <!-- CORS Notice Help Panel (Relocated globally to the top of the main container, clean from RPG sheet) -->
+        <div id="cors-notice" class="hidden w-full max-w-[640px] mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-200 space-y-1.5 select-none animate-pulse">
+            <span class="font-bold font-mono block text-amber-400">⚠️ DATA ENGINE DEGRADATION</span>
+            <p class="leading-relaxed">Direct proxy calls failed. Running with native client-side fallback system architecture.</p>
+        </div>
+
         <!-- Logo Header -->
         <div class="mb-6 select-none text-center flex flex-col items-center justify-center w-full relative">
             <div class="relative inline-flex items-center justify-center">
@@ -257,12 +263,6 @@
 
         <!-- Drawer Content -->
         <div class="flex-grow overflow-y-auto p-4 space-y-4">
-            <!-- CORS Notice Help Panel -->
-            <div id="cors-notice" class="hidden p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-200 space-y-1.5">
-                <span class="font-bold font-mono block text-amber-400">⚠️ DATA ENGINE DEGRADATION</span>
-                <p class="leading-relaxed">Direct proxy calls failed. Running with native client-side fallback system architecture.</p>
-            </div>
-
             <!-- Compact Hero Card Header -->
             <div class="relative bg-darkCard border border-darkBorder rounded-2xl p-4 overflow-hidden group">
                 <div class="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none"></div>
@@ -304,7 +304,7 @@
             <div class="bg-darkCard border border-darkBorder rounded-xl p-3.5 text-xs space-y-1.5">
                 <span class="font-mono text-[10px] text-zinc-500 uppercase tracking-wider block">Bio</span>
                 <p id="char-bio" class="text-zinc-400 leading-relaxed italic">
-                    Initializing tactical biography matrix...
+                    Initializing biography matrix...
                 </p>
             </div>
         </div>
@@ -327,7 +327,7 @@
             </button>
             <div class="mb-4 select-none">
                 <h2 class="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">ℹ️ Impressum & Credits</h2>
-                <p class="text-xs text-zinc-500 mt-1">Project reference data, databases, and official community directories.</p>
+                <p class="text-xs text-zinc-500 mt-1">Project reference data, databases, and official directories.</p>
             </div>
 
             <div class="space-y-4 text-xs text-zinc-300">
@@ -425,6 +425,9 @@
 
         // --- EXTREMELY RESILIENT TARKOV DATA STREAM ENGINE ---
         async function gatherTarkovData() {
+            const statusLabel = document.getElementById('loading-status');
+            if (statusLabel) statusLabel.textContent = "Connecting to Tarkov Grid...";
+
             let queryResult = null;
 
             try {
@@ -545,6 +548,7 @@
             link.href = `data:image/svg+xml,${svg.trim()}`;
         }
 
+        // Helper: Generates a permutated subtitle
         function generatePermutatedSubtitle() {
             const intro = subtitleIntros[Math.floor(Math.random() * subtitleIntros.length)];
             const adj = subtitleAdjectives[Math.floor(Math.random() * subtitleAdjectives.length)];
@@ -911,6 +915,18 @@
             dock.innerHTML = '';
             modalGrid.innerHTML = '';
 
+            const parentHeading = modalGrid.previousElementSibling; // h4 element in impressum directory
+
+            // If there's nothing to show, show nothing
+            if (!officialLinks || officialLinks.length === 0) {
+                if (parentHeading) parentHeading.classList.add('hidden');
+                dock.classList.add('hidden');
+                return;
+            } else {
+                if (parentHeading) parentHeading.classList.remove('hidden');
+                dock.classList.remove('hidden');
+            }
+
             // Render home dock shortcuts (select the first 6 crucial links to retain clean visual ratios)
             const dockShortcuts = officialLinks.slice(0, 6);
             const dockFragment = document.createDocumentFragment();
@@ -954,7 +970,7 @@
             });
             dock.appendChild(dockFragment);
 
-            // Render complete list of 17 items inside Impressum modal grid (static load)
+            // Render complete list of items inside Impressum modal grid (static load)
             const modalFragment = document.createDocumentFragment();
             officialLinks.forEach(link => {
                 let hostname = "escapefromtarkov.com";
@@ -1089,19 +1105,11 @@
                     gatherTarkovData()
                 ]);
 
-                // Store or fallback
+                // Store or fallback - Completely removed the hardcoded fallback values as requested
                 if (linksPayload && linksPayload.length > 0) {
                     officialLinks = linksPayload;
                 } else {
-                    // Fail-safe static subset fallback
-                    officialLinks = [
-                        { "name": "Official Website", "url": "https://www.escapefromtarkov.com" },
-                        { "name": "Official Forum", "url": "https://forum.escapefromtarkov.com" },
-                        { "name": "Official Support", "url": "https://www.escapefromtarkov.com/support" },
-                        { "name": "Arena Website", "url": "https://arena.tarkov.com" },
-                        { "name": "Profile", "url": "https://profile.tarkov.com" },
-                        { "name": "Official Wiki", "url": "https://escapefromtarkov.fandom.com" }
-                    ];
+                    officialLinks = [];
                 }
 
                 loadDynamicTitleAndSubtitle();
