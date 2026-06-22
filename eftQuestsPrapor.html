@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prapor Quest Flowchart – Powered by tarkov.dev</title>
+    <style>
+        /* ===== minimal layout – same style, no bloat ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            padding: 1rem;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-weight: 400;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        header .source {
+            font-size: 0.75rem;
+            font-weight: 300;
+            opacity: 0.6;
+            margin-left: 0.5rem;
+        }
+
+        .options-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            border: 1px solid #ccc;
+            padding: 0.1rem 0.8rem;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .btn:hover {
+            background: #eee;
+        }
+        .btn:active {
+            background: #ddd;
+        }
+        .stats {
+            font-size: 0.8rem;
+            margin-left: auto;
+            opacity: 0.7;
+            white-space: nowrap;
+        }
+        .view-select {
+            border: 1px solid #ccc;
+            background: transparent;
+            padding: 0.1rem 0.4rem;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.1rem 0.6rem;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            background: #f0f0f0;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .status-badge.loading {
+            background: #e8f0fe;
+            border-color: #8ab4f8;
+        }
+        .status-badge.error {
+            background: #fce8e8;
+            border-color: #f5a0a0;
+            color: #b00;
+        }
+        .status-badge.success {
+            background: #e6f4ea;
+            border-color: #81c995;
+            color: #1e7e34;
+        }
+        .status-badge.cached {
+            background: #fef9e7;
+            border-color: #f1c40f;
+            color: #7d6608;
+        }
+
+        .main-content {
+            display: flex;
+            height: 600px;
+            min-height: 300px;
+            max-height: 900px;
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 100px;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            background: #f8f8f8;
+        }
+        .badge {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            font-weight: 300;
+        }
+        .panel-body {
+            padding: 0.5rem;
+            flex: 1;
+            overflow: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .splitter-h {
+            flex: 0 0 1px;
+            cursor: ew-resize;
+            position: relative;
+            z-index: 2;
+            background: #ccc;
+        }
+        .splitter-h:hover {
+            background: #999;
+        }
+        .splitter-h.active {
+            background: #666;
+        }
+
+        /* ===== shared node styles ===== */
+        .quest-node {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.1s, border-color 0.1s, box-shadow 0.1s;
+            position: relative;
+            z-index: 1;
+            max-width: 100%;
+            white-space: nowrap;
+            user-select: none;
+        }
+        .quest-node:hover {
+            background: #f0f4ff;
+            border-color: #8899bb;
+        }
+        .quest-node.active {
+            background: #e0e8f5;
+            border-color: #4466aa;
+            box-shadow: 0 0 0 2px rgba(68, 102, 170, 0.2);
+        }
+        .quest-node .node-name {
+            font-weight: 500;
+        }
+        .quest-node .node-badge {
+            font-size: 0.65rem;
+            opacity: 0.6;
+            margin-left: 0.4rem;
+            font-weight: 300;
+        }
+
+        /* ===== tree view ===== */
+        .tree-root {
+            padding: 0.5rem 0;
+        }
+        .tree-root ul {
+            padding-left: 1.8rem;
+            list-style: none;
+            position: relative;
+            margin: 0;
+        }
+        .tree-root ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0.5rem;
+            width: 1px;
+            height: 100%;
+            background: #ccc;
+        }
+        .tree-root li {
+            position: relative;
+            padding: 0.3rem 0 0.3rem 1.2rem;
+            margin: 0;
+        }
+        .tree-root li::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1.2rem;
+            height: 100%;
+            border-left: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            border-radius: 0 0 0 4px;
+        }
+        .tree-root li:last-child::before {
+            border-bottom: 1px solid #ccc;
+            height: 1.2rem;
+            top: 0;
+        }
+        .tree-root li:only-child::before {
+            border-bottom: 1px solid #ccc;
+            height: 1.2rem;
+            top: 0;
+        }
+        .tree-root>ul>li::before {
+            border-left: none;
+            border-bottom: none;
+        }
+        .tree-root>ul::before {
+            display: none;
+        }
+
+        /* ===== accordion view ===== */
+        .accordion-root {
+            padding: 0.2rem 0;
+        }
+        .accordion-root details {
+            margin: 0.2rem 0;
+            padding-left: 0.5rem;
+            border-left: 2px solid #eee;
+        }
+        .accordion-root details summary {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.1rem 0;
+            outline: none;
+        }
+        .accordion-root details summary::-webkit-details-marker {
+            color: #888;
+        }
+        .accordion-root details summary .quest-node {
+            white-space: normal;
+        }
+        .accordion-root details[open] {
+            border-left-color: #aaa;
+        }
+        .accordion-root details .child-container {
+            padding-left: 1.2rem;
+        }
+
+        /* ===== flat view ===== */
+        .flat-root {
+            padding: 0.2rem 0;
+        }
+        .flat-root ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .flat-root li {
+            padding: 0.15rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .flat-root li .meta {
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        /* ===== chain view ===== */
+        .chain-root {
+            padding: 0.5rem 0;
+        }
+        .chain-root .path {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.2rem 0.4rem;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 0.5rem;
+        }
+        .chain-root .path .arrow {
+            opacity: 0.4;
+        }
+        .chain-root .path .quest-node {
+            font-size: 0.8rem;
+            padding: 0.1rem 0.5rem;
+        }
+        .chain-root .children-section {
+            margin-top: 0.5rem;
+        }
+        .chain-root .children-section h4 {
+            font-weight: 400;
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-bottom: 0.2rem;
+        }
+        .chain-root .children-section .child-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        /* ===== detail panel ===== */
+        .detail-empty {
+            color: #999;
+            font-style: italic;
+        }
+        .detail-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.25rem;
+        }
+        .detail-section {
+            margin-top: 1rem;
+        }
+        .detail-section h4 {
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+            margin-bottom: 0.2rem;
+        }
+        .detail-section p {
+            font-size: 0.9rem;
+            padding-left: 0.75rem;
+            border-left: 2px solid #ddd;
+            white-space: pre-wrap;
+        }
+        .detail-rewards ul {
+            list-style: none;
+            padding-left: 0.75rem;
+            border-left: 2px solid #ddd;
+        }
+        .detail-rewards ul li {
+            font-size: 0.9rem;
+            padding: 0.1rem 0;
+        }
+        .detail-rewards ul li::before {
+            content: '• ';
+            opacity: 0.6;
+        }
+
+        @media (max-width: 800px) {
+            .main-content {
+                flex-wrap: wrap;
+                height: auto;
+                min-height: auto;
+                max-height: none;
+            }
+            .splitter-h {
+                display: none;
+            }
+            .panel {
+                min-height: 250px;
+                border-bottom: 1px solid #eee;
+            }
+            .panel:last-child {
+                border-bottom: none;
+            }
+        }
+
+        .panel-body::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .panel-body::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        .panel-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .loading-placeholder {
+            padding: 1rem;
+            opacity: 0.6;
+            font-style: italic;
+        }
+        .error-placeholder {
+            padding: 1rem;
+            color: #c00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📍 Prapor – Quest Flowchart
+                <span class="source">(live data from tarkov.dev)</span>
+            </h1>
+        </header>
+
+        <div class="options-bar">
+            <div class="btn-group">
+                <button class="btn" id="expandAllBtn">[ expand all ]</button>
+                <button class="btn" id="collapseAllBtn">[ collapse all ]</button>
+                <button class="btn" id="resetViewBtn">[ reset view ]</button>
+                <button class="btn" id="clearCacheBtn">[ clear cache ]</button>
+            </div>
+            <select class="view-select" id="viewType">
+                <option value="tree">Tree</option>
+                <option value="accordion">Accordion</option>
+                <option value="flat">Flat List</option>
+                <option value="chain">Chain (selected)</option>
+            </select>
+            <span class="stats" id="stats">⏳ loading…</span>
+            <span class="status-badge loading" id="statusBadge">connecting…</span>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="panel" id="flowchartPanel">
+                <div class="panel-header">
+                    <span>quest tree</span>
+                    <span class="badge" id="nodeCount">—</span>
+                </div>
+                <div class="panel-body" id="treeContainer">
+                    <div class="loading-placeholder">⏳ Fetching quest data from tarkov.dev API…</div>
+                </div>
+            </div>
+
+            <div class="splitter-h" id="splitter"></div>
+
+            <div class="panel" id="detailPanel">
+                <div class="panel-header">
+                    <span>quest details</span>
+                    <span class="badge">info</span>
+                </div>
+                <div class="panel-body" id="detailBody">
+                    <div class="detail-empty">← click a quest node</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  MODULE IMPORT – uses your optimized API from ~/api/          -->
+    <!-- ============================================================ -->
+    <script type="module">
+        // Import the ultra‑optimized API module
+        import { fetchQuestTree, clearCache } from './api/tarkovDevApi_A01.js';
+
+        // ================================================================
+        //  DOM REFS
+        // ================================================================
+        const treeContainer = document.getElementById('treeContainer');
+        const detailBody = document.getElementById('detailBody');
+        const nodeCountSpan = document.getElementById('nodeCount');
+        const statsSpan = document.getElementById('stats');
+        const viewSelect = document.getElementById('viewType');
+        const statusBadge = document.getElementById('statusBadge');
+
+        // ================================================================
+        //  STATE
+        // ================================================================
+        let questData = null;        // virtual root node
+        let selectedNode = null;
+        let selectedNodeName = null;
+        let currentView = 'tree';
+
+        // ================================================================
+        //  RENDER FUNCTIONS – same as before, using questData
+        // ================================================================
+
+        function countAllNodes(node) {
+            if (!node) return 0;
+            let count = 1;
+            if (node.children) {
+                for (const child of node.children) {
+                    count += countAllNodes(child);
+                }
+            }
+            return count;
+        }
+
+        function collectNodesWithParent(node, parent = null) {
+            const list = [];
+            list.push({ node, parent });
+            if (node.children) {
+                for (const child of node.children) {
+                    list.push(...collectNodesWithParent(child, node));
+                }
+            }
+            return list;
+        }
+
+        function getPath(root, target) {
+            function search(node, path) {
+                path.push(node);
+                if (node === target) return path;
+                if (node.children) {
+                    for (const child of node.children) {
+                        const result = search(child, path.slice());
+                        if (result) return result;
+                    }
+                }
+                return null;
+            }
+            return search(root, []);
+        }
+
+        function createNodeElement(node, highlight) {
+            const span = document.createElement('span');
+            span.className = 'quest-node' + (highlight ? ' active' : '');
+            span.dataset.quest = node.name;
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'node-name';
+            nameSpan.textContent = node.name;
+            span.appendChild(nameSpan);
+
+            if (node.children && node.children.length > 0) {
+                const badge = document.createElement('span');
+                badge.className = 'node-badge';
+                badge.textContent = `(${node.children.length})`;
+                span.appendChild(badge);
+            }
+
+            span.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectNode(node);
+                renderView(currentView);
+            });
+
+            return span;
+        }
+
+        function renderTreeView(root, selectedName) {
+            const container = document.createElement('div');
+            container.className = 'tree-root';
+            const frag = document.createDocumentFragment();
+
+            // Root header
+            const header = document.createElement('div');
+            header.style.padding = '0.2rem 0.5rem';
+            header.style.fontWeight = '500';
+            header.style.borderBottom = '1px solid #ddd';
+            header.style.marginBottom = '0.5rem';
+            header.appendChild(createNodeElement(root, root.name === selectedName));
+            frag.appendChild(header);
+
+            function buildTree(node) {
+                const ul = document.createElement('ul');
+                if (node.children) {
+                    for (const child of node.children) {
+                        const li = document.createElement('li');
+                        li.appendChild(createNodeElement(child, child.name === selectedName));
+                        if (child.children && child.children.length > 0) {
+                            const childUl = buildTree(child);
+                            childUl.className = 'child-list';
+                            childUl.style.display = 'block';
+                            li.appendChild(childUl);
+                        }
+                        ul.appendChild(li);
+                    }
+                }
+                return ul;
+            }
+
+            frag.appendChild(buildTree(root));
+            container.appendChild(frag);
+            return container;
+        }
+
+        function renderAccordionView(root, selectedName) {
+            const container = document.createElement('div');
+            container.className = 'accordion-root';
+            const frag = document.createDocumentFragment();
+
+            function buildAccordion(node, depth) {
+                const details = document.createElement('details');
+                if (depth === 0) details.open = true;
+                const summary = document.createElement('summary');
+                summary.appendChild(createNodeElement(node, node.name === selectedName));
+                details.appendChild(summary);
+
+                if (node.children && node.children.length > 0) {
+                    const childContainer = document.createElement('div');
+                    childContainer.className = 'child-container';
+                    for (const child of node.children) {
+                        childContainer.appendChild(buildAccordion(child, depth + 1));
+                    }
+                    details.appendChild(childContainer);
+                }
+                return details;
+            }
+
+            frag.appendChild(buildAccordion(root, 0));
+            container.appendChild(frag);
+            return container;
+        }
+
+        function renderFlatView(root, selectedName) {
+            const container = document.createElement('div');
+            container.className = 'flat-root';
+            const frag = document.createDocumentFragment();
+            const all = collectNodesWithParent(root);
+            const ul = document.createElement('ul');
+            for (const { node, parent } of all) {
+                const li = document.createElement('li');
+                li.appendChild(createNodeElement(node, node.name === selectedName));
+                const meta = document.createElement('span');
+                meta.className = 'meta';
+                const parentName = parent ? parent.name : '(root)';
+                const childCount = (node.children && node.children.length) || 0;
+                meta.textContent = `← ${parentName} · ${childCount} unlocks`;
+                li.appendChild(meta);
+                ul.appendChild(li);
+            }
+            frag.appendChild(ul);
+            container.appendChild(frag);
+            return container;
+        }
+
+        function renderChainView(root, selectedNodeObj) {
+            const container = document.createElement('div');
+            container.className = 'chain-root';
+            const frag = document.createDocumentFragment();
+
+            if (!selectedNodeObj) {
+                const msg = document.createElement('div');
+                msg.style.opacity = '0.6';
+                msg.style.fontStyle = 'italic';
+                msg.textContent = 'select a quest to see its chain';
+                frag.appendChild(msg);
+                container.appendChild(frag);
+                return container;
+            }
+
+            const path = getPath(root, selectedNodeObj);
+            if (path) {
+                const pathDiv = document.createElement('div');
+                pathDiv.className = 'path';
+                for (let i = 0; i < path.length; i++) {
+                    const node = path[i];
+                    pathDiv.appendChild(createNodeElement(node, node.name === selectedNodeObj.name));
+                    if (i < path.length - 1) {
+                        const arrow = document.createElement('span');
+                        arrow.className = 'arrow';
+                        arrow.textContent = '→';
+                        pathDiv.appendChild(arrow);
+                    }
+                }
+                frag.appendChild(pathDiv);
+            }
+
+            const childrenSection = document.createElement('div');
+            childrenSection.className = 'children-section';
+            const header = document.createElement('h4');
+            header.textContent = 'Unlocked quests:';
+            childrenSection.appendChild(header);
+            const childList = document.createElement('div');
+            childList.className = 'child-list';
+            if (selectedNodeObj.children && selectedNodeObj.children.length > 0) {
+                for (const child of selectedNodeObj.children) {
+                    childList.appendChild(createNodeElement(child, false));
+                }
+            } else {
+                const none = document.createElement('span');
+                none.style.opacity = '0.5';
+                none.textContent = 'none';
+                childList.appendChild(none);
+            }
+            childrenSection.appendChild(childList);
+            frag.appendChild(childrenSection);
+
+            container.appendChild(frag);
+            return container;
+        }
+
+        // ================================================================
+        //  RENDER DISPATCHER
+        // ================================================================
+        function renderView(viewType) {
+            if (!questData) {
+                treeContainer.replaceChildren();
+                const placeholder = document.createElement('div');
+                placeholder.className = 'loading-placeholder';
+                placeholder.textContent = '⏳ Loading quest data…';
+                treeContainer.appendChild(placeholder);
+                return;
+            }
+
+            const root = questData;
+            const selectedName = selectedNode ? selectedNode.name : null;
+
+            let viewElement;
+            switch (viewType) {
+                case 'tree':
+                    viewElement = renderTreeView(root, selectedName);
+                    break;
+                case 'accordion':
+                    viewElement = renderAccordionView(root, selectedName);
+                    break;
+                case 'flat':
+                    viewElement = renderFlatView(root, selectedName);
+                    break;
+                case 'chain':
+                    viewElement = renderChainView(root, selectedNode);
+                    break;
+                default:
+                    viewElement = renderTreeView(root, selectedName);
+            }
+
+            treeContainer.replaceChildren(viewElement);
+
+            const total = countAllNodes(root);
+            nodeCountSpan.textContent = total;
+            statsSpan.textContent = `${total} quests · ${viewType} view`;
+            statusBadge.textContent = 'ready';
+            statusBadge.className = 'status-badge success';
+        }
+
+        // ================================================================
+        //  SELECTION & DETAILS
+        // ================================================================
+        function selectNode(node) {
+            selectedNode = node;
+            selectedNodeName = node.name;
+            renderDetails(node);
+        }
+
+        function renderDetails(node) {
+            if (!node) {
+                detailBody.replaceChildren();
+                const empty = document.createElement('div');
+                empty.className = 'detail-empty';
+                empty.textContent = '← click a quest node';
+                detailBody.appendChild(empty);
+                return;
+            }
+
+            const frag = document.createDocumentFragment();
+
+            const title = document.createElement('div');
+            title.className = 'detail-title';
+            title.textContent = node.name;
+            frag.appendChild(title);
+
+            const reqSection = document.createElement('div');
+            reqSection.className = 'detail-section';
+            const reqH = document.createElement('h4');
+            reqH.textContent = 'requirements';
+            reqSection.appendChild(reqH);
+            const reqP = document.createElement('p');
+            reqP.textContent = node.requirements || 'none';
+            reqSection.appendChild(reqP);
+            frag.appendChild(reqSection);
+
+            if (node.rewards && node.rewards.length > 0) {
+                const rewSection = document.createElement('div');
+                rewSection.className = 'detail-section detail-rewards';
+                const rewH = document.createElement('h4');
+                rewH.textContent = 'rewards';
+                rewSection.appendChild(rewH);
+                const ul = document.createElement('ul');
+                for (const reward of node.rewards) {
+                    const li = document.createElement('li');
+                    li.textContent = reward;
+                    ul.appendChild(li);
+                }
+                rewSection.appendChild(ul);
+                frag.appendChild(rewSection);
+            }
+
+            const childCount = (node.children && node.children.length) || 0;
+            const info = document.createElement('div');
+            info.className = 'detail-section';
+            info.style.marginTop = '1rem';
+            info.style.opacity = '0.6';
+            info.style.fontSize = '0.8rem';
+            info.textContent = `unlocks ${childCount} quest${childCount !== 1 ? 's' : ''}`;
+            if (childCount > 0) {
+                info.textContent += `: ${node.children.map(c => c.name).join(', ')}`;
+            }
+            frag.appendChild(info);
+
+            detailBody.replaceChildren(frag);
+        }
+
+        // ================================================================
+        //  VIEW CONTROLS
+        // ================================================================
+        function setView(view) {
+            currentView = view;
+            renderView(view);
+        }
+
+        function expandAll() {
+            if (!questData) return;
+            if (currentView === 'tree') {
+                document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'block');
+            } else if (currentView === 'accordion') {
+                document.querySelectorAll('.accordion-root details').forEach(d => d.open = true);
+            }
+        }
+
+        function collapseAll() {
+            if (!questData) return;
+            if (currentView === 'tree') {
+                document.querySelectorAll('.tree-root .child-list').forEach(ul => ul.style.display = 'none');
+            } else if (currentView === 'accordion') {
+                document.querySelectorAll('.accordion-root details').forEach(d => d.open = false);
+                const rootDetails = document.querySelector('.accordion-root details');
+                if (rootDetails) rootDetails.open = true;
+            }
+        }
+
+        function resetView() {
+            selectedNode = null;
+            selectedNodeName = null;
+            renderDetails(null);
+            if (currentView === 'tree' || currentView === 'accordion') {
+                expandAll();
+            }
+            renderView(currentView);
+            document.querySelectorAll('.quest-node').forEach(el => el.classList.remove('active'));
+        }
+
+        // ================================================================
+        //  SPLITTER (lightweight)
+        // ================================================================
+        function initSplitter() {
+            const splitter = document.getElementById('splitter');
+            const leftPanel = document.getElementById('flowchartPanel');
+            const rightPanel = document.getElementById('detailPanel');
+            let dragging = false,
+                startX, startLeftWidth, startRightWidth;
+
+            splitter.addEventListener('mousedown', function(e) {
+                dragging = true;
+                splitter.classList.add('active');
+                startX = e.clientX;
+                startLeftWidth = leftPanel.offsetWidth;
+                startRightWidth = rightPanel.offsetWidth;
+                document.body.style.cursor = 'ew-resize';
+                document.body.style.userSelect = 'none';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!dragging) return;
+                const delta = e.clientX - startX;
+                let newLeft = startLeftWidth + delta;
+                let newRight = startRightWidth - delta;
+                const minW = 120;
+                if (newLeft < minW) { newLeft = minW;
+                    newRight = startLeftWidth + startRightWidth - newLeft; }
+                if (newRight < minW) { newRight = minW;
+                    newLeft = startLeftWidth + startRightWidth - newRight; }
+                leftPanel.style.flex = `0 0 ${newLeft}px`;
+                rightPanel.style.flex = `0 0 ${newRight}px`;
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (dragging) {
+                    dragging = false;
+                    splitter.classList.remove('active');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+
+            splitter.addEventListener('dblclick', function() {
+                leftPanel.style.flex = '';
+                rightPanel.style.flex = '';
+            });
+        }
+
+        // ================================================================
+        //  LOAD DATA FROM MODULE
+        // ================================================================
+        async function loadData() {
+            try {
+                statusBadge.textContent = 'fetching…';
+                statusBadge.className = 'status-badge loading';
+
+                // Use the optimized module – this handles caching internally
+                questData = await fetchQuestTree('Prapor');
+
+                // Select virtual root by default
+                selectedNode = questData;
+                selectedNodeName = questData.name;
+                renderDetails(questData);
+
+                currentView = 'tree';
+                viewSelect.value = 'tree';
+                renderView('tree');
+
+            } catch (err) {
+                console.error(err);
+                treeContainer.replaceChildren();
+                const errDiv = document.createElement('div');
+                errDiv.className = 'error-placeholder';
+                errDiv.textContent = `❌ Failed to load data: ${err.message}`;
+                treeContainer.appendChild(errDiv);
+                statusBadge.textContent = 'error';
+                statusBadge.className = 'status-badge error';
+                statsSpan.textContent = 'error';
+            }
+        }
+
+        // ================================================================
+        //  INIT
+        // ================================================================
+        function init() {
+            viewSelect.addEventListener('change', function() {
+                setView(this.value);
+            });
+            document.getElementById('expandAllBtn').addEventListener('click', expandAll);
+            document.getElementById('collapseAllBtn').addEventListener('click', collapseAll);
+            document.getElementById('resetViewBtn').addEventListener('click', resetView);
+            document.getElementById('clearCacheBtn').addEventListener('click', function() {
+                clearCache('Prapor');
+                // Reload to fetch fresh
+                loadData();
+            });
+            initSplitter();
+            loadData();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

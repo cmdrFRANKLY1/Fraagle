@@ -165,7 +165,7 @@
                 <div class="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none"></div>
                 <div class="flex items-center space-x-4 relative z-10">
                     <div class="relative w-16 h-16 rounded-xl overflow-hidden">
-                        <img id="char-avatar" src="https://thispersondoesnotexist.com" alt="Character Avatar" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
+                        <img id="char-avatar" src="https://thispersondoesnotexist.com" alt="Character Avatar" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'">
                     </div>
                     <div>
                         <h3 id="char-name" class="text-xl font-bold text-zinc-100 tracking-tight">Loading...</h3>
@@ -195,6 +195,14 @@
                 <div class="grid grid-cols-2 gap-3" id="attributes-grid">
                     <!-- Loaded dynamically -->
                 </div>
+            </div>
+
+            <!-- Interactive Character Bio Panel -->
+            <div class="bg-zinc-900/30 border border-darkBorder rounded-xl p-4 text-xs space-y-2">
+                <span class="font-mono text-[10px] text-zinc-500 uppercase tracking-wider block">Procedural Identity Bio</span>
+                <p id="char-bio" class="text-zinc-400 leading-relaxed italic">
+                    Initializing tactical biography matrix...
+                </p>
             </div>
         </div>
     </div>
@@ -263,6 +271,12 @@
         let subtitleEndings = ["using pure imagination.", "while drinking warm cocoa.", "powered by friendly space sloths.", "at the speed of a startled twilight turtle.", "inside a comfortable pocket dimension.", "approved by intergalactic wizards.", "optimized for maximum coziness.", "with a gentle sprinkle of stardust.", "without breaking the space-time continuum.", "just for the joy of discovery.", "conceived by well-meaning calculators.", "under the soft glow of friendly neon signs.", "strictly for entertainment purposes.", "because why not?", "in a strangely soothing manner.", "with absolutely no instruction manual.", "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon.", "to satisfy your curiosity parameters.", "while standing on one foot.", "guaranteed to spark joy.", "under the supervision of cybernetic kittens."];
         let currentVersion = "v0.1 (alpha)";
         let currentTitle = "Tarkoogle";
+
+        // Fallbacks for procedural biography parser
+        let bioIntros = ["Known across the realm as a formidable presence,", "Whispered about in hushed tones around tavern hearths,", "A mysterious figure with a highly classified file,", "Records indicate this individual is a wild card,", "Regarded by peers as a brilliant but unpredictable soul,"];
+        let bioBackgrounds = ["they spent their formative years decoding ancient cyphers in hidden archives,", "they once guarded the outer boundary of a forgotten sky-citadel,", "they survived by outwitting rival guilds in the deepest subterranean alleys,", "they dedicated half a lifetime to charting wild, unmappable magical anomalies,"];
+        let bioMotivations = ["driven by a relentless quest to find a legendary lost chronometer.", "constantly searching for the missing piece of a shattered family heirloom.", "seeking to restore balance to the chaotic magic flowing through the local ley lines.", "quietly working to pay off an old debt to a mysterious guild patron."];
+        let bioSecrets = ["They are rumored to carry a compass that points only to what they fear most.", "They secretly keep a mechanical pocket watch that ticks backwards.", "Some say their shadow occasionally moves half a second slower than they do.", "They carry a sealed letter that they have sworn never to open."];
 
         // Dynamic target variables - Populated natively by folder fetch
         let dndNames = [];
@@ -337,6 +351,19 @@
                 if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
                 if (subsData.subjects) subtitleSubjects = subsData.subjects;
                 if (subsData.endings) subtitleEndings = subsData.endings;
+            }
+
+            // Fetch procedural bio categories JSON cleanly from multiple local path candidates
+            const bioData = await fetchFileJSON('./resources/dnd/rndCharacterBio.json') || 
+                            await fetchFileJSON('resources/dnd/rndCharacterBio.json') || 
+                            await fetchFileJSON('rndCharacterBio.json') || 
+                            await fetchFileJSON('/resources/dnd/rndCharacterBio.json') ||
+                            await fetchFileJSON('resources/dnd/listCharacterBio.json');
+            if (bioData && typeof bioData === 'object') {
+                if (bioData.intros) bioIntros = bioData.intros;
+                if (bioData.backgrounds) bioBackgrounds = bioData.backgrounds;
+                if (bioData.motivations) bioMotivations = bioData.motivations;
+                if (bioData.secrets) bioSecrets = bioData.secrets;
             }
 
             // Fetch version number JSON
@@ -737,6 +764,14 @@
             document.getElementById('char-profession').textContent = randomProfession;
             document.getElementById('char-location').textContent = randomPlace;
 
+            // Generate procedural tactical bio sentence
+            const intro = bioIntros[Math.floor(Math.random() * bioIntros.length)];
+            const bg = bioBackgrounds[Math.floor(Math.random() * bioBackgrounds.length)];
+            const motivation = bioMotivations[Math.floor(Math.random() * bioMotivations.length)];
+            const secret = bioSecrets[Math.floor(Math.random() * bioSecrets.length)];
+            
+            document.getElementById('char-bio').textContent = `${intro} ${bg} ${motivation} ${secret}`;
+
             // Generate customized stats
             const attributesGrid = document.getElementById('attributes-grid');
             if (attributesGrid) {
@@ -892,6 +927,8 @@
                 if (isOpen) {
                     charDrawer.classList.add('translate-x-full');
                 } else {
+                    // Re-roll dynamically whenever the drawer is toggled open
+                    generateHeroIdentity();
                     charDrawer.classList.remove('translate-x-full');
                 }
             }
