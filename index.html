@@ -143,6 +143,13 @@
                             <!-- Populated dynamically with EFT apps -->
                         </div>
                     </div>
+                    <!-- VoiceAttack Apps Section -->
+                    <div id="dropdown-voiceattack-section" class="hidden border-t border-lightBorder dark:border-darkBorder pt-3">
+                        <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">VoiceAttack</div>
+                        <div id="dropdown-voiceattack-apps-grid" class="grid grid-cols-3 gap-2">
+                            <!-- Populated dynamically with VA apps -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -223,7 +230,7 @@
                 <!-- YouTube -->
                 <a href="https://www.youtube.com/battlestategames" target="_blank" title="BSG YouTube" class="hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5 12 3.5 12 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5 12 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                     </svg>
                 </a>
                 <!-- Twitter / X -->
@@ -489,7 +496,7 @@
 
         function getAppTitle(fileName) {
             let name = fileName.replace(/\.html$/i, '');
-            const prefixes = ['eft', 'twitch', 'youtube'];
+            const prefixes = ['eft', 'twitch', 'youtube', 'va'];
             for (const pref of prefixes) {
                 if (name.toLowerCase().startsWith(pref)) {
                     let rest = name.slice(pref.length);
@@ -500,6 +507,9 @@
             }
             if (name.toLowerCase().startsWith('eft')) {
                 name = name.slice(3);
+            }
+            if (name.toLowerCase().startsWith('va')) {
+                name = name.slice(2);
             }
             let spaced = name
                 .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -700,18 +710,22 @@
             const dropdownGrid = document.getElementById('dropdown-apps-grid');
             const dropdownGeneralToolsGrid = document.getElementById('dropdown-general-tools-grid');
             const dropdownTarkovGrid = document.getElementById('dropdown-tarkov-apps-grid');
+            const dropdownVoiceAttackGrid = document.getElementById('dropdown-voiceattack-apps-grid');
             
             const dropdownTarkovSection = document.getElementById('dropdown-tarkov-section');
             const dropdownGeneralToolsSection = document.getElementById('dropdown-general-tools-section');
             const dropdownGeneralSection = document.getElementById('dropdown-general-section');
+            const dropdownVoiceAttackSection = document.getElementById('dropdown-voiceattack-section');
 
             dropdownGrid.innerHTML = '';
             dropdownGeneralToolsGrid.innerHTML = '';
             dropdownTarkovGrid.innerHTML = '';
+            dropdownVoiceAttackGrid.innerHTML = '';
 
             let hasTarkov = false;
             let hasGeneralTools = false;
             let hasGeneral = false;
+            let hasVoiceAttack = false;
 
             appsToRender.forEach((app, index) => {
                 const title = getAppTitle(app);
@@ -730,7 +744,10 @@
                     </span>
                 `;
 
-                if (app.toLowerCase().startsWith('eft')) {
+                if (app.toLowerCase().startsWith('va')) {
+                    dropdownVoiceAttackGrid.appendChild(link);
+                    hasVoiceAttack = true;
+                } else if (app.toLowerCase().startsWith('eft')) {
                     dropdownTarkovGrid.appendChild(link);
                     hasTarkov = true;
                 } else if (app.startsWith('twitch') || app.startsWith('youtube')) {
@@ -741,6 +758,12 @@
                     hasGeneral = true;
                 }
             });
+
+            if (hasVoiceAttack) {
+                dropdownVoiceAttackSection.classList.remove('hidden');
+            } else {
+                dropdownVoiceAttackSection.classList.add('hidden');
+            }
 
             if (hasTarkov) {
                 dropdownTarkovSection.classList.remove('hidden');
