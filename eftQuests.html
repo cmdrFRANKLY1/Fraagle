@@ -473,12 +473,12 @@
         </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!--  IMPORT YOUR CACHE API MODULE from ~/api/tarkov_cache_api.js  -->
+    <!-- ============================================================ -->
     <script type="module">
-        // ================================================================
-        //  IMPORT YOUR OPTIMIZED API MODULE
-        //  Path: ./api/tarkovDevApi_A01.js
-        // ================================================================
-        import { fetchQuestTree, clearCache } from './api/tarkovDevApi_A01.js';
+        // ─── Use your optimized caching API module ───
+        import { fetchQuestTree, clearCache } from './api/tarkov_cache_api.js';
 
         // ================================================================
         //  DOM REFS
@@ -500,7 +500,7 @@
         let currentView = 'tree';
         let currentTrader = 'Prapor';
         let isLoading = false;
-        let loadCount = 0; // debug counter
+        let loadCount = 0;
 
         // ================================================================
         //  RENDER FUNCTIONS
@@ -977,18 +977,14 @@
             const trader = traderSelect.value;
             console.log(`🔄 [onTraderChange] Switched to: ${trader} (current: ${currentTrader}, hasData: ${!!questData})`);
 
-            // If same trader and we already have data, just re-render
             if (trader === currentTrader && questData) {
                 renderView(currentView);
                 return;
             }
 
-            // Clear selection
             selectedNode = null;
             selectedNodeName = null;
             renderDetails(null);
-
-            // Load new trader
             loadData(trader);
         }
 
