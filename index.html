@@ -73,9 +73,9 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- Decorative Ambient Soft Glow Gradients (Colors and coordinates dynamically randomized via JS) -->
-    <div id="ambient-glow-1" class="absolute rounded-full blur-[120px] pointer-events-none transition-all duration-700"></div>
-    <div id="ambient-glow-2" class="absolute rounded-full blur-[120px] pointer-events-none transition-all duration-700"></div>
+    <!-- Decorative Ambient Soft Glow Gradients (Colors, shapes, and coordinates dynamically randomized via JS) -->
+    <div id="ambient-glow-1" class="absolute pointer-events-none transition-all duration-1000"></div>
+    <div id="ambient-glow-2" class="absolute pointer-events-none transition-all duration-1000"></div>
 
     <!-- Top Navigation Bar -->
     <header class="flex items-center justify-between p-5 relative z-10 w-full">
@@ -401,16 +401,24 @@
             ambientGlow1.classList.add(pair[0]);
             ambientGlow2.classList.add(pair[1]);
 
-            // Randomize position coordinate parameters, border-radius/shapes and scale
-            const shapeVariations = ['rounded-full', 'rounded-[40%_60%_70%_30%_/_40%_50%_60%_50%]', 'rounded-[60%_40%_30%_70%_/_50%_60%_50%_40%]', 'rounded-[50%_50%_30%_70%_/_50%_60%_40%_60%]'];
-            const shape1 = shapeVariations[Math.floor(Math.random() * shapeVariations.length)];
-            const shape2 = shapeVariations[Math.floor(Math.random() * shapeVariations.length)];
+            // Randomize position coordinate parameters, scale, rotation and non-uniform morphing liquid shapes
+            const randomPercent = () => Math.floor(Math.random() * 50) + 25; // 25% to 75%
+            const randBlobShape = () => {
+                return `${randomPercent()}% ${100 - randomPercent()}% ${randomPercent()}% ${100 - randomPercent()}% / ${randomPercent()}% ${randomPercent()}% ${100 - randomPercent()}% ${100 - randomPercent()}%`;
+            };
 
-            ambientGlow1.className = ambientGlow1.className.replace(/rounded-\S+/g, '');
-            ambientGlow2.className = ambientGlow2.className.replace(/rounded-\S+/g, '');
+            // Infinite randomized shape border-radius values
+            ambientGlow1.style.borderRadius = randBlobShape();
+            ambientGlow2.style.borderRadius = randBlobShape();
 
-            ambientGlow1.classList.add(shape1);
-            ambientGlow2.classList.add(shape2);
+            // Randomize spatial transformations (Rotation, scale factor variations, and micro-skewing)
+            const randRotation = Math.floor(Math.random() * 360);
+            const randScaleX = (Math.random() * 0.4 + 0.8).toFixed(2); // Scale boundaries: 0.8 to 1.2
+            const randScaleY = (Math.random() * 0.4 + 0.8).toFixed(2);
+            const randSkew = Math.floor(Math.random() * 20) - 10; // -10deg to 10deg
+
+            ambientGlow1.style.transform = `rotate(${randRotation}deg) scale(${randScaleX}, ${randScaleY}) skew(${randSkew}deg)`;
+            ambientGlow2.style.transform = `rotate(${360 - randRotation}deg) scale(${randScaleY}, ${randScaleX}) skew(${-randSkew}deg)`;
 
             // Randomize dimension boundaries
             const sizeValue1 = Math.floor(Math.random() * 20) + 40; // 40vw to 60vw
@@ -912,25 +920,25 @@
                     }
                     
                     if (item.penetrationPower !== null && item.penetrationPower !== undefined) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">Penetration: ${item.penetrationPower}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20">Penetration: ${item.penetrationPower}</span>`);
                     }
                     
                     if (item.avgPrice) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">PVP: ${item.avgPrice.toLocaleString()} ₽</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">PVP: ${item.avgPrice.toLocaleString()} ₽</span>`);
                     } else if (item.basePrice) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">PVP (Base): ${item.basePrice.toLocaleString()} ₽</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">PVP (Base): ${item.basePrice.toLocaleString()} ₽</span>`);
                     }
                     
                     if (item.pvePrice) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
                     }
 
                     if (item.armorClass) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">Armor Class: ${item.armorClass}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20">Armor Class: ${item.armorClass}</span>`);
                     }
 
                     if (item.damage) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">Damage: ${item.damage}</span>`);
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20">Damage: ${item.damage}</span>`);
                     }
 
                     tagsHtml = `
@@ -1018,7 +1026,12 @@
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    // Set search value and trigger a beautiful Google-style search result page
+                    // 1. Open corresponding wiki link in a new tab in the background
+                    if (item.url) {
+                        window.open(item.url, '_blank');
+                    }
+                    
+                    // 2. Set search value and trigger the search
                     searchInput.value = item.title || '';
                     if (clearBtn) clearBtn.classList.remove('hidden');
                     if (dropdownResults) dropdownResults.classList.add('hidden');
