@@ -1,0 +1,6 @@
+[
+  { "name": "text", "value": "resources, text, indexTitles" },
+  { "name": "font", "value": "Verdana" },
+  { "name": "fontsize", "value": "10" },
+  { "name": "color", "value": "resources, colors, palettes, google" }
+]

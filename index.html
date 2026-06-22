@@ -10,7 +10,7 @@
         // Force dark mode context always
         document.documentElement.classList.add('dark');
 
-        // Tailwind configuration for premium stealth dark mode with colorful brand accents
+        // Tailwind configuration for premium stealth dark mode with neutral grey layout styling
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -33,9 +33,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&family=Space+Grotesk:wght=500;700&display=swap" rel="stylesheet">
     <style>
-        /* Force Verdana Globally on Everything */
+        /* Force Verdana Globally on Everything while allowing inline style overrides */
         *, body, h1, h2, h3, h4, h5, h6, input, button, select, p, span, kbd, div {
-            font-family: Verdana, Geneva, sans-serif !important;
+            font-family: Verdana, Geneva, sans-serif;
         }
 
         body {
@@ -81,7 +81,7 @@
     <div id="loading-screen" class="fixed inset-0 z-[100] bg-darkBg flex flex-col items-center justify-center transition-opacity duration-500 select-none">
         <div class="relative flex items-center justify-center">
             <!-- Outer spinning rings -->
-            <div class="w-16 h-16 rounded-full border-4 border-zinc-800 border-t-tarkoogleBlue animate-spin"></div>
+            <div class="w-16 h-16 rounded-full border-4 border-zinc-800 border-t-zinc-600 animate-spin"></div>
             <!-- Inner branding label pulsing -->
             <div class="absolute text-sm font-bold tracking-tight text-zinc-400 animate-pulse">T.</div>
         </div>
@@ -92,7 +92,7 @@
     <header class="flex items-center justify-between p-5 relative z-10 w-full select-none">
         <!-- Left Side: Creator Credit -->
         <div class="flex items-center space-x-2">
-            <span class="text-xs text-zinc-500 font-medium">by <a href="https://steamcommunity.com/id/hellomynameisfrankly/" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-tarkoogleBlue transition-colors font-semibold">cmdrFRANKLY</a></span>
+            <span class="text-xs text-zinc-500 font-medium">by <a href="https://steamcommunity.com/id/hellomynameisfrankly/" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-500 transition-colors font-semibold">cmdrFRANKLY</a></span>
         </div>
 
         <!-- Center: Modern Live Clock & Date -->
@@ -199,7 +199,7 @@
                     <img id="modal-item-icon" src="" alt="" class="max-w-full max-h-full object-contain" onerror="this.src='https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?w=100&auto=format&fit=crop&q=80'">
                 </div>
                 <div class="min-w-0 flex-1">
-                    <span id="modal-item-category" class="text-[9px] tracking-widest font-bold uppercase text-tarkoogleBlue">Category</span>
+                    <span id="modal-item-category" class="text-[9px] tracking-widest font-bold uppercase text-zinc-500">Category</span>
                     <h2 id="modal-item-name" class="text-xl font-bold tracking-tight text-zinc-100 truncate">Item Name</h2>
                     <p id="modal-item-short" class="text-xs text-zinc-400 font-medium mt-0.5">Short Name</p>
                 </div>
@@ -208,12 +208,12 @@
             <!-- Price Analysis Cards -->
             <div class="grid grid-cols-2 gap-3 mb-5 select-none">
                 <div class="p-3.5 rounded-xl bg-darkBg border border-darkBorder">
-                    <span class="text-[10px] font-bold tracking-wider text-tarkoogleBlue uppercase">PvP Market Price</span>
+                    <span class="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">PvP Market Price</span>
                     <div class="text-lg font-extrabold text-zinc-100 mt-1" id="modal-item-pvp">₽0</div>
                     <span class="text-[9px] text-zinc-500 block">24h average market pricing</span>
                 </div>
                 <div class="p-3.5 rounded-xl bg-darkBg border border-darkBorder">
-                    <span class="text-[10px] font-bold tracking-wider text-tarkoogleGreen uppercase">PvE Market Price</span>
+                    <span class="text-[10px] font-bold tracking-wider text-zinc-400 uppercase">PvE Market Price</span>
                     <div class="text-lg font-extrabold text-zinc-100 mt-1" id="modal-item-pve">₽0</div>
                     <span class="text-[9px] text-zinc-500 block">24h average market pricing</span>
                 </div>
@@ -235,7 +235,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                     </svg>
                 </a>
-                <button id="close-modal-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-tarkoogleBlue hover:bg-blue-600 text-white transition focus:outline-none">Done</button>
+                <button id="close-modal-btn" class="px-4 py-2 text-xs font-semibold rounded-xl bg-zinc-850 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/50 transition focus:outline-none">Done</button>
             </div>
         </div>
     </div>
@@ -275,14 +275,14 @@
                             <!-- Increased ID font size by 2 (text-[10px] -> text-[12px]) -->
                             <span id="char-id" class="text-[12px] font-bold text-zinc-400 tracking-wider font-mono">Loading ID...</span>
                             <!-- Increased Playing Tag font size by 2 (text-[8px] -> text-[10px]) -->
-                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold truncate max-w-[150px] font-mono"></span>
+                            <span id="char-game-status" class="hidden text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700/50 text-zinc-300 font-semibold truncate max-w-[150px] font-mono animate-pulse"></span>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-1 mt-1.5">
-                            <!-- Font increased by 1 (text-[9px] -> text-[10px]) and default labels updated -->
-                            <span id="char-race" class="text-[10px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder whitespace-nowrap">Race: Loading...</span>
-                            <span id="char-profession" class="text-[10px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium truncate max-w-[150px]">Profession: Loading...</span>
-                            <span id="char-gender" class="text-[10px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium">Gender: Loading...</span>
+                            <!-- Font increased by 1 (text-[10px] -> text-[11px]) & whitespace-nowrap applied so no text is cut off -->
+                            <span id="char-race" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-400 rounded font-semibold border border-darkBorder whitespace-nowrap">Race: Loading...</span>
+                            <span id="char-profession" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-400 rounded font-semibold border border-darkBorder font-medium whitespace-nowrap">Profession: Loading...</span>
+                            <span id="char-gender" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-400 rounded font-semibold border border-darkBorder font-medium whitespace-nowrap">Gender: Loading...</span>
                         </div>
                     </div>
                 </div>
@@ -290,7 +290,7 @@
                 <!-- Location block -->
                 <div class="mt-3 pt-2.5 border-t border-darkBorder flex items-center text-xs text-zinc-400 relative z-10">
                     <!-- Clean performance: Removed animate-pulse (glowing) from the location icon -->
-                    <svg class="w-3.5 h-3.5 text-tarkoogleRed mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <svg class="w-3.5 h-3.5 text-zinc-500 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
@@ -427,7 +427,9 @@
         let dndPlaces = ["Eldoria Capital", "The Whispering Woods", "Stonehaven Mines", "The Obsidian Spire", "Sunken Crystal Caves", "Shadowfen Swamp", "Dragon's Teeth Peak", "Forgotten Citadel"];
         let dndAttributes = null;
         let dndGenders = ["Male", "Female", "Classified"];
-        let logoColorPalette = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+
+        // Fallback palette updated to pure, crisp white as requested
+        let logoColorPalette = ['#ffffff'];
 
         // Pure fantasy bios entirely clean of Tarkov terms
         let bioIntros = ["Once a highly decorated champion of the Royal Vanguard,", "Known across the taverns by a legendary guild moniker,", "A rogue adventurer who chose to explore when the old kingdoms fell,", "A specialized arcane supply courier working for the Grand Magus,"];
@@ -468,6 +470,13 @@
                 }
             }
             return [];
+        }
+
+        // Path resolver: Convert "resources, text, indexTitles" into "./resources/text/indexTitles.json"
+        function resolvePath(commaString) {
+            if (!commaString) return "";
+            const parts = commaString.split(',').map(s => s.trim());
+            return './' + parts.join('/') + '.json';
         }
 
         // --- EXTREMELY RESILIENT TARKOV DATA STREAM ENGINE ---
@@ -721,13 +730,15 @@
             const attributesGrid = document.getElementById('attributes-grid');
             if (attributesGrid) {
                 attributesGrid.innerHTML = '';
+
+                // Pure, high-performance clean white outline styles instead of colorful fallbacks
                 const styleColors = {
-                    "Strength": "border-tarkoogleRed/50 hover:bg-tarkoogleRed/5 text-tarkoogleRed",
-                    "Dexterity": "border-tarkoogleGreen/50 hover:bg-tarkoogleGreen/5 text-tarkoogleGreen",
-                    "Constitution": "border-tarkoogleYellow/50 hover:bg-tarkoogleYellow/5 text-tarkoogleYellow",
-                    "Intelligence": "border-tarkoogleBlue/50 hover:bg-tarkoogleBlue/5 text-tarkoogleBlue",
-                    "Wisdom": "border-zinc-500/50 hover:bg-zinc-500/5 text-zinc-400",
-                    "Charisma": "border-purple-500/50 hover:bg-purple-500/5 text-purple-400"
+                    "Strength": "border-zinc-700/50 hover:bg-zinc-800/10 text-white",
+                    "Dexterity": "border-zinc-700/50 hover:bg-zinc-800/10 text-white",
+                    "Constitution": "border-zinc-700/50 hover:bg-zinc-800/10 text-white",
+                    "Intelligence": "border-zinc-700/50 hover:bg-zinc-800/10 text-white",
+                    "Wisdom": "border-zinc-700/50 hover:bg-zinc-800/10 text-white",
+                    "Charisma": "border-zinc-700/50 hover:bg-zinc-800/10 text-white"
                 };
 
                 const attributesObj = dndAttributes || {
@@ -745,7 +756,7 @@
                     const baseScore = Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + Math.floor(Math.random() * 6) + 3;
                     const modifier = Math.floor((baseScore - 10) / 2);
                     const formattedModifier = modifier >= 0 ? `+${modifier}` : modifier;
-                    const colorClasses = styleColors[attrName] || "border-zinc-500/50 hover:bg-zinc-500/5 text-zinc-400";
+                    const colorClasses = styleColors[attrName] || "border-zinc-700/50 hover:bg-zinc-800/10 text-white";
 
                     const attrBlock = document.createElement('div');
                     attrBlock.className = `p-2 bg-darkBg/60 rounded-xl border ${colorClasses.split(' ')[0]} ${colorClasses.split(' ')[1]} transition-all duration-300 flex items-center justify-between select-none`;
@@ -755,7 +766,7 @@
                             <span class="text-[8px] font-semibold text-zinc-400 italic truncate max-w-[110px]" title="${chosenDesc}">${chosenDesc}</span>
                         </div>
                         <div class="text-right flex-shrink-0 pl-1">
-                            <span class="text-base font-extrabold text-zinc-100">${baseScore}</span>
+                            <span class="text-base font-extrabold text-white">${baseScore}</span>
                             <span class="text-[9px] block text-zinc-400 font-semibold leading-none">${formattedModifier}</span>
                         </div>
                     `;
@@ -782,9 +793,9 @@
             const gameStatusEl = document.getElementById('char-game-status');
 
             const statusConfigurations = [
-                { key: 'online', color: 'bg-tarkoogleGreen' },
-                { key: 'idle', color: 'bg-tarkoogleYellow' },
-                { key: 'dnd', color: 'bg-tarkoogleRed' }
+                { key: 'online', color: 'bg-emerald-500' },
+                { key: 'idle', color: 'bg-amber-500' },
+                { key: 'dnd', color: 'bg-rose-500' }
             ];
             const rolledStatus = statusConfigurations[Math.floor(Math.random() * statusConfigurations.length)];
 
@@ -853,8 +864,8 @@
                 const isSelected = activeCategoryFilter === cat;
                 pill.className = `px-3 py-1 rounded-full text-[10px] font-semibold transition ${
                     isSelected
-                        ? 'bg-tarkoogleBlue text-white border border-tarkoogleBlue'
-                        : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/50'
+                        ? 'bg-zinc-700 text-white border border-zinc-600'
+                        : 'bg-zinc-800 hover:bg-zinc-750 text-zinc-300 border border-zinc-700/50'
                 }`;
                 pill.textContent = cat;
                 pill.onclick = (e) => {
@@ -926,9 +937,9 @@
                     if (item.pvpPrice > 0 && item.pvePrice > 0) {
                         const diffPercent = Math.round(((item.pvePrice - item.pvpPrice) / item.pvpPrice) * 100);
                         if (diffPercent > 0) {
-                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-tarkoogleGreen">+${diffPercent}% PvE</span>`;
+                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-zinc-400">+${diffPercent}% PvE</span>`;
                         } else if (diffPercent < 0) {
-                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-tarkoogleRed">${diffPercent}% PvE</span>`;
+                            priceRatioIndicator = `<span class="text-[8px] font-semibold text-zinc-400">${diffPercent}% PvE</span>`;
                         }
                     }
 
@@ -940,7 +951,7 @@
                             <div class="min-w-0">
                                 <div class="text-xs font-bold text-zinc-100 truncate">${item.name}</div>
                                 <div class="flex items-center space-x-2 mt-0.5 text-[9px] text-zinc-500">
-                                    <span class="text-tarkoogleBlue font-semibold uppercase">${item.shortName}</span>
+                                    <span class="text-zinc-400 font-semibold uppercase">${item.shortName}</span>
                                     <span>•</span>
                                     <span>${item.category}</span>
                                     <span>•</span>
@@ -1079,21 +1090,10 @@
                 btn.rel = "noopener noreferrer";
                 btn.className = `group flex flex-col items-center justify-center text-center transition focus:outline-none w-14`;
 
-                // Distinct fallback text colors for standard styling
-                const textColors = [
-                    'text-tarkoogleBlue',
-                    'text-tarkoogleRed',
-                    'text-tarkoogleYellow',
-                    'text-tarkoogleGreen',
-                    'text-purple-500',
-                    'text-pink-500'
-                ];
-                const textClass = textColors[idx % textColors.length];
-
                 btn.innerHTML = `
-                    <div class="w-12 h-12 rounded-full border border-darkBorder bg-darkCard/60 hover:bg-darkCard hover:border-zinc-500 flex items-center justify-center p-2.5 transition-all duration-300 group-hover:scale-105 group-hover:bg-darkCard group-hover:shadow-[0_0_12px_rgba(255,255,255,0.03)] relative overflow-hidden">
+                    <div class="w-12 h-12 rounded-full border border-darkBorder bg-darkCard/60 hover:bg-darkCard hover:border-zinc-500 hover:text-white flex items-center justify-center p-2.5 transition-all duration-300 group-hover:scale-105 group-hover:bg-darkCard group-hover:shadow-[0_0_12px_rgba(255,255,255,0.03)] relative overflow-hidden text-white">
                         <img src="${faviconSrc}" alt="${link.name}" class="w-full h-full object-contain filter brightness-95 group-hover:brightness-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span class="hidden ${textClass} text-sm font-bold uppercase">${fallbackLetter}</span>
+                        <span class="hidden text-sm font-bold uppercase">${fallbackLetter}</span>
                     </div>
                     <span class="text-[9px] font-medium text-zinc-500 group-hover:text-zinc-300 mt-2 truncate w-full tracking-wider transition-colors">${link.name}</span>
                 `;
@@ -1114,7 +1114,7 @@
                 linkCard.href = link.url;
                 linkCard.target = "_blank";
                 linkCard.rel = "noopener noreferrer";
-                linkCard.className = "p-2 rounded-lg border border-darkBorder bg-darkBg/50 hover:bg-zinc-800/20 hover:border-zinc-700 text-zinc-300 hover:text-tarkoogleBlue transition text-[11px] font-medium flex items-center justify-between gap-2";
+                linkCard.className = "p-2 rounded-lg border border-darkBorder bg-darkBg/50 hover:bg-zinc-800/20 hover:border-zinc-700 text-zinc-300 hover:text-white transition text-[11px] font-medium flex items-center justify-between gap-2";
                 linkCard.innerHTML = `
                     <div class="flex items-center gap-2 min-w-0">
                         <img src="${faviconSrc}" class="w-4 h-4 object-contain flex-shrink-0" onerror="this.style.display='none';">
@@ -1145,18 +1145,33 @@
         }
 
         async function loadResourceData() {
-            // Simultaneously fetch config arrays
-            const colorsData = await loadResourceArray([
-                './resources/colors/indexColorPalette.json',
-                'resources/colors/indexColorPalette.json',
-                'indexColorPalette.json'
-            ]);
-            if (colorsData && colorsData.length > 0) logoColorPalette = colorsData;
+            // Load title settings first
+            const titleStylePayload = await fetchFileJSON('./settings/styleIndexTitles.json') ||
+                                      await fetchFileJSON('settings/styleIndexTitles.json') ||
+                                      await fetchFileJSON('/settings/styleIndexTitles.json');
 
-            const titlesData = await fetchFileJSON('./resources/text/indexTitles.json') || await fetchFileJSON('indexTitles.json');
+            // Load subtitle settings
+            const subtitleStylePayload = await fetchFileJSON('./settings/styleIndexSubtitles.json') ||
+                                         await fetchFileJSON('settings/styleIndexSubtitles.json') ||
+                                         await fetchFileJSON('/settings/styleIndexSubtitles.json');
+
+            // Map arrays to key-value objects
+            const titleSettings = {};
+            if (Array.isArray(titleStylePayload)) {
+                titleStylePayload.forEach(item => titleSettings[item.name] = item.value);
+            }
+            const subtitleSettings = {};
+            if (Array.isArray(subtitleStylePayload)) {
+                subtitleStylePayload.forEach(item => subtitleSettings[item.name] = item.value);
+            }
+
+            // Resolve dynamic text paths based on loaded settings
+            const titleTextPath = resolvePath(titleSettings.text) || './resources/text/indexTitles.json';
+            const titlesData = await fetchFileJSON(titleTextPath);
             if (titlesData && Array.isArray(titlesData)) generalSearchTitles = titlesData;
 
-            const subsData = await fetchFileJSON('./resources/text/listSubtitles.json') || await fetchFileJSON('listSubtitles.json');
+            const subtitleTextPath = resolvePath(subtitleSettings.text) || './resources/text/listSubtitles.json';
+            const subsData = await fetchFileJSON(subtitleTextPath);
             if (subsData && typeof subsData === 'object') {
                 if (subsData.intros) subtitleIntros = subsData.intros;
                 if (subsData.adjectives) subtitleAdjectives = subsData.adjectives;
@@ -1164,6 +1179,33 @@
                 if (subsData.endings) subtitleEndings = subsData.endings;
             }
 
+            // Resolve color palettes dynamically
+            const titleColorPath = resolvePath(titleSettings.color) || './resources/colors/indexColorPalette.json';
+            const colorsData = await fetchFileJSON(titleColorPath);
+            if (colorsData && Array.isArray(colorsData)) logoColorPalette = colorsData;
+
+            // Apply Fonts dynamically to Title & Subtitle from settings!
+            const titleTag = document.getElementById('logo-title');
+            const subtitleTag = document.getElementById('logo-subtitle');
+
+            if (titleTag && titleSettings.font) {
+                titleTag.style.fontFamily = `${titleSettings.font}, Verdana, Geneva, sans-serif`;
+            }
+            if (subtitleTag && subtitleSettings.font) {
+                subtitleTag.style.fontFamily = `${subtitleSettings.font}, Verdana, Geneva, sans-serif`;
+            }
+
+            // Apply Font Sizes dynamically from settings!
+            if (titleTag && titleSettings.fontsize) {
+                const sz = titleSettings.fontsize;
+                titleTag.style.fontSize = isNaN(sz) ? sz : (parseFloat(sz) < 15 ? `${sz}rem` : `${sz}px`);
+            }
+            if (subtitleTag && subtitleSettings.fontsize) {
+                const sz = subtitleSettings.fontsize;
+                subtitleTag.style.fontSize = isNaN(sz) ? sz : (parseFloat(sz) < 5 ? `${sz}rem` : `${sz}px`);
+            }
+
+            // Load general static config files as fallback options
             const bioData = await fetchFileJSON('./resources/dnd/listBiography.json') || await fetchFileJSON('listBiography.json');
             if (bioData && typeof bioData === 'object') {
                 if (bioData.intros) bioIntros = bioData.intros;
