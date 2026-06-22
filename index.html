@@ -73,9 +73,10 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- Decorative Ambient Soft Glow Gradients (Colors, shapes, and coordinates dynamically randomized via JS) -->
-    <div id="ambient-glow-1" class="absolute pointer-events-none transition-all duration-1000"></div>
-    <div id="ambient-glow-2" class="absolute pointer-events-none transition-all duration-1000"></div>
+    <!-- Decorative Ambient Soft Glow Gradients (Colors and coordinates dynamically randomized via JS) -->
+    <!-- s-l-o-w-e-r custom 15s transition applied inline -->
+    <div id="ambient-glow-1" class="absolute pointer-events-none" style="transition: all 15s ease-in-out;"></div>
+    <div id="ambient-glow-2" class="absolute pointer-events-none" style="transition: all 15s ease-in-out;"></div>
 
     <!-- Top Navigation Bar -->
     <header class="flex items-center justify-between p-5 relative z-10 w-full">
@@ -888,6 +889,12 @@
                 bsgChannelsBar.classList.add('hidden');
             }
 
+            // Collapse logo header on search result display so content is cleanly positioned at top
+            const logoHeader = document.getElementById('logo-title')?.parentElement;
+            if (logoHeader) {
+                logoHeader.classList.add('hidden');
+            }
+
             if (!googleResultsContainer) return;
             googleResultsContainer.innerHTML = '';
             
@@ -912,7 +919,7 @@
                     const tags = [];
                     
                     if (item.category) {
-                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20">Type: ${item.category}</span>`);
+                        tags.push(`<span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[11px] px-2 py-0.5 rounded-md mr-1.5 select-none">Type: ${item.category}</span>`);
                     }
                     
                     if (item.caliber) {
@@ -985,13 +992,39 @@
             if (googleResultsView) googleResultsView.classList.add('hidden');
             if (bsgChannelsBar) bsgChannelsBar.classList.add('hidden');
             cancelHoverPreview();
+            
+            // Re-reveal logo header on dismissal
+            const logoHeader = document.getElementById('logo-title')?.parentElement;
+            if (logoHeader) {
+                logoHeader.classList.remove('hidden');
+            }
         }
 
         if (resultsCloseBtn) resultsCloseBtn.addEventListener('click', dismissGoogleSearchResults);
 
+        // Global states to support arrow keys navigation
+        let activeSuggestionIndex = -1;
+        let suggestionElements = [];
+
+        function highlightSuggestion(index) {
+            suggestionElements.forEach((el, idx) => {
+                if (idx === index) {
+                    el.classList.add('bg-zinc-100/70', 'dark:bg-zinc-800/70', 'border-indigo-600', 'dark:border-indigo-400');
+                    el.classList.remove('border-transparent');
+                    el.scrollIntoView({ block: 'nearest' });
+                } else {
+                    el.classList.remove('bg-zinc-100/70', 'dark:bg-zinc-800/70', 'border-indigo-600', 'dark:border-indigo-400');
+                    el.classList.add('border-transparent');
+                }
+            });
+        }
+
         function renderAutocompleteDropdown(matches, isSearching = false) {
             if (!resultsContainer || !dropdownResults) return;
             resultsContainer.innerHTML = '';
+            activeSuggestionIndex = -1;
+            suggestionElements = [];
+
             if (matches.length === 0) {
                 dropdownResults.classList.add('hidden');
                 return;
@@ -1002,7 +1035,8 @@
             header.textContent = isSearching ? "Found Recommendations" : "Quick Suggestions";
             resultsContainer.appendChild(header);
 
-            matches.slice(0, 10).forEach((item) => {
+            const limitedMatches = matches.slice(0, 10);
+            limitedMatches.forEach((item) => {
                 if (!item) return;
                 const element = document.createElement('div');
                 element.className = "flex items-center justify-between px-4 py-3 hover:bg-zinc-100/70 dark:hover:bg-zinc-800/70 transition duration-150 cursor-pointer border-l-2 border-transparent hover:border-indigo-600 dark:hover:border-indigo-400";
@@ -1026,12 +1060,16 @@
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    // 1. Open corresponding wiki link in a new tab in the background
-                    if (item.url) {
-                        window.open(item.url, '_blank');
+                    // Safe sandboxed wrapper open wiki URL triggers
+                    try {
+                        if (item.url) {
+                            window.open(item.url, '_blank');
+                        }
+                    } catch (err) {
+                        console.warn('Popup blocked or sandboxed window navigation restricted.');
                     }
                     
-                    // 2. Set search value and trigger the search
+                    // Set search value and trigger the search view
                     searchInput.value = item.title || '';
                     if (clearBtn) clearBtn.classList.remove('hidden');
                     if (dropdownResults) dropdownResults.classList.add('hidden');
@@ -1045,6 +1083,7 @@
                 }
 
                 resultsContainer.appendChild(element);
+                suggestionElements.push(element);
             });
 
             dropdownResults.classList.remove('hidden');
@@ -1086,9 +1125,52 @@
                 renderAutocompleteDropdown(matchedResultsBuffer, true);
             });
 
+            // Intercept Arrow keys for high quality results keyboard navigation before Enter search
             searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    executeSearch(searchInput.value);
+                const isDropdownVisible = dropdownResults && !dropdownResults.classList.contains('hidden');
+                
+                if (isDropdownVisible && suggestionElements.length > 0) {
+                    const maxIdx = suggestionElements.length - 1;
+                    
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        activeSuggestionIndex++;
+                        if (activeSuggestionIndex > maxIdx) {
+                            activeSuggestionIndex = 0;
+                        }
+                        highlightSuggestion(activeSuggestionIndex);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        activeSuggestionIndex--;
+                        if (activeSuggestionIndex < 0) {
+                            activeSuggestionIndex = maxIdx;
+                        }
+                        highlightSuggestion(activeSuggestionIndex);
+                    } else if (e.key === 'Enter') {
+                        if (activeSuggestionIndex >= 0) {
+                            e.preventDefault();
+                            const selectedItem = matchedResultsBuffer.slice(0, 10)[activeSuggestionIndex];
+                            if (selectedItem) {
+                                try {
+                                    if (selectedItem.url) {
+                                        window.open(selectedItem.url, '_blank');
+                                    }
+                                } catch (err) {
+                                    console.warn('Window open restricted in sandbox context.');
+                                }
+                                searchInput.value = selectedItem.title || '';
+                                if (clearBtn) clearBtn.classList.remove('hidden');
+                                if (dropdownResults) dropdownResults.classList.add('hidden');
+                                executeSearch(selectedItem.title || '');
+                            }
+                        } else {
+                            executeSearch(searchInput.value);
+                        }
+                    }
+                } else {
+                    if (e.key === 'Enter') {
+                        executeSearch(searchInput.value);
+                    }
                 }
             });
         }
