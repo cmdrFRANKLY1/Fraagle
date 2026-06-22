@@ -735,6 +735,34 @@
             let tasks = [];
             let pveItems = [];
 
+            // 1. POPULATE TRADERS FALLBACK LIST (GUARDS FENCE & ALL TRADERS OF EFT)
+            const standardTraders = [
+                { id: "prapor", name: "Prapor", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Prapor", imageLink: "https://tarkov.dev/images/traders/prapor-portrait.png" },
+                { id: "therapist", name: "Therapist", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Therapist", imageLink: "https://tarkov.dev/images/traders/therapist-portrait.png" },
+                { id: "fence", name: "Fence", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Fence", imageLink: "https://tarkov.dev/images/traders/fence-portrait.png" },
+                { id: "skier", name: "Skier", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Skier", imageLink: "https://tarkov.dev/images/traders/skier-portrait.png" },
+                { id: "peacekeeper", name: "Peacekeeper", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Peacekeeper", imageLink: "https://tarkov.dev/images/traders/peacekeeper-portrait.png" },
+                { id: "mechanic", name: "Mechanic", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Mechanic", imageLink: "https://tarkov.dev/images/traders/mechanic-portrait.png" },
+                { id: "ragman", name: "Ragman", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Ragman", imageLink: "https://tarkov.dev/images/traders/ragman-portrait.png" },
+                { id: "jaeger", name: "Jaeger", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Jaeger", imageLink: "https://tarkov.dev/images/traders/jaeger-portrait.png" },
+                { id: "ref", name: "Ref", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Ref", imageLink: "https://tarkov.dev/images/traders/ref-portrait.png" },
+                { id: "lightkeeper", name: "Lightkeeper", wikiLink: "https://escapefromtarkov.fandom.com/wiki/Lightkeeper", imageLink: "https://tarkov.dev/images/traders/lightkeeper-portrait.png" }
+            ];
+
+            standardTraders.forEach(trader => {
+                searchIndex.push({
+                    id: `trader-${trader.id}`,
+                    title: trader.name,
+                    shortName: trader.name,
+                    type: 'trader',
+                    url: trader.wikiLink,
+                    description: `Official trade coordinator in Escape from Tarkov. Sells general goods, tactical items, and hosts special assignments.`,
+                    category: `Tarkov Trader`,
+                    iconLink: trader.imageLink,
+                    traderDesc: `Official trade coordinator in Escape from Tarkov. Sells general goods, tactical items, and hosts special assignments.`
+                });
+            });
+
             try {
                 const response = await fetch('/api/tarkov-data');
                 if (response.ok) {
@@ -745,7 +773,6 @@
                     throw new Error();
                 }
             } catch (e) {
-                // Corrected lang: e to lang: en (English) to fix failure to load data fallback
                 const fallbackItemsQuery = `query {
                     pvp: items(lang: en, gameMode: regular) {
                         id name shortName wikiLink iconLink basePrice weight avg24hPrice category { name }
@@ -772,16 +799,16 @@
             }
 
             try {
-                // Fixed Traders query: removed the non-existent field 'description' to prevent syntax failures
+                // Fixed Traders query: removed non-existent field 'imageLink' to guarantee API execution success
                 const fallbackTradersQuery = `query {
                     traders(lang: en) {
-                        id name imageLink wikiLink
+                        id name wikiLink
                     }
                 }`;
                 const data = await fetchTarkovGraphQL(fallbackTradersQuery);
                 traders = data?.traders || [];
             } catch (e) {
-                console.warn('Failed to load traders', e);
+                console.warn('Failed to load traders dynamically', e);
             }
 
             try {
@@ -823,20 +850,23 @@
                 });
             });
 
-            // Populate traders safely (description field resolved locally)
+            // Populate dynamic traders safely and avoid creating any duplicate entries
             traders.filter(Boolean).forEach(trader => {
                 const traderName = trader.name || 'Unknown Trader';
-                searchIndex.push({
-                    id: `trader-${trader.id}`,
-                    title: traderName,
-                    shortName: traderName,
-                    type: 'trader',
-                    url: trader.wikiLink || `https://escapefromtarkov.fandom.com/wiki/${encodeURIComponent(traderName)}`,
-                    description: `Official trade coordinator in Escape from Tarkov. Sells gear, weapons, ammunition and hosts specific quests.`,
-                    category: `Tarkov Trader`,
-                    iconLink: trader.imageLink,
-                    traderDesc: `Official trade coordinator in Escape from Tarkov. Sells gear, weapons, ammunition and hosts specific quests.`
-                });
+                const exists = searchIndex.some(t => t.id === `trader-${trader.id}`);
+                if (!exists) {
+                    searchIndex.push({
+                        id: `trader-${trader.id}`,
+                        title: traderName,
+                        shortName: traderName,
+                        type: 'trader',
+                        url: trader.wikiLink || `https://escapefromtarkov.fandom.com/wiki/${encodeURIComponent(traderName)}`,
+                        description: `Official trade coordinator in Escape from Tarkov. Sells general goods, tactical items, and hosts special assignments.`,
+                        category: `Tarkov Trader`,
+                        iconLink: `https://tarkov.dev/images/traders/${trader.id}-portrait.png`,
+                        traderDesc: `Official trade coordinator in Escape from Tarkov. Sells general goods, tactical items, and hosts special assignments.`
+                    });
+                }
             });
 
             // Populate tasks safely
@@ -1060,7 +1090,7 @@
                             <a href="${item.url}" target="_blank" title="Open wiki page" class="hover:underline inline-flex items-center gap-1.5">
                                 ${item.title}
                                 <svg class="w-3.5 h-3.5 flex-shrink-0 opacity-60 hover:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                 </svg>
                             </a>
                         </h2>
