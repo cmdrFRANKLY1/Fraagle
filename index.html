@@ -165,7 +165,7 @@
                 <div class="absolute inset-0 bg-grid opacity-[0.02] pointer-events-none"></div>
                 <div class="flex items-center space-x-4 relative z-10">
                     <div class="relative w-16 h-16 rounded-xl overflow-hidden">
-                        <img id="char-avatar" src="https://thispersondoesnotexist.com" alt="Character Avatar" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'">
+                        <img id="char-avatar" src="https://thispersondoesnotexist.com" alt="Character Avatar" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
                     </div>
                     <div>
                         <h3 id="char-name" class="text-xl font-bold text-zinc-100 tracking-tight">Loading...</h3>
@@ -196,16 +196,6 @@
                     <!-- Loaded dynamically -->
                 </div>
             </div>
-        </div>
-
-        <!-- Drawer Footer with Re-roll Button -->
-        <div class="p-6 border-t border-darkBorder bg-zinc-950/60 flex space-x-3">
-            <button id="reroll-btn" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-tarkoogleBlue to-tarkoogleGreen hover:opacity-95 text-zinc-900 font-bold text-xs tracking-wider uppercase transition focus:outline-none flex items-center justify-center space-x-2 shadow-lg shadow-tarkoogleBlue/10">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18"></path>
-                </svg>
-                <span>Re-Roll Identity</span>
-            </button>
         </div>
     </div>
 
@@ -782,7 +772,6 @@
                     const formattedModifier = modifier >= 0 ? `+${modifier}` : modifier;
 
                     const colorClasses = styleColors[attrName] || "border-zinc-500/50 hover:bg-zinc-500/5 text-zinc-400";
-                    const code = attrName.substring(0, 3).toUpperCase();
 
                     const attrBlock = document.createElement('div');
                     attrBlock.className = `p-3 bg-zinc-900/60 rounded-xl border ${colorClasses.split(' ')[0]} ${colorClasses.split(' ')[1]} transition-all duration-300 flex items-center justify-between select-none`;
@@ -896,7 +885,6 @@
         const profileTrigger = document.getElementById('profile-trigger-btn');
         const charDrawer = document.getElementById('character-drawer');
         const closeDrawerBtn = document.getElementById('close-drawer-btn');
-        const rerollBtn = document.getElementById('reroll-btn');
 
         function toggleCharacterDrawer() {
             if (charDrawer) {
@@ -912,21 +900,28 @@
         if (profileTrigger) {
             profileTrigger.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation(); // Avoid triggering document-level click outside handler
                 toggleCharacterDrawer();
             });
         }
 
         if (closeDrawerBtn) {
-            closeDrawerBtn.addEventListener('click', () => {
+            closeDrawerBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 if (charDrawer) charDrawer.classList.add('translate-x-full');
             });
         }
 
-        if (rerollBtn) {
-            rerollBtn.addEventListener('click', () => {
-                generateHeroIdentity();
-            });
-        }
+        // Close character panel drawer if clicked outside of it
+        document.addEventListener('click', (e) => {
+            if (charDrawer && !charDrawer.classList.contains('translate-x-full')) {
+                const isClickInsideDrawer = charDrawer.contains(e.target);
+                const isClickOnTrigger = profileTrigger && profileTrigger.contains(e.target);
+                if (!isClickInsideDrawer && !isClickOnTrigger) {
+                    charDrawer.classList.add('translate-x-full');
+                }
+            }
+        });
 
         window.addEventListener('keydown', (e) => {
             if (e.key === '/' && document.activeElement !== searchInput && searchInput) {
