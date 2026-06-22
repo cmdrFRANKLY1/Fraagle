@@ -378,7 +378,7 @@
                 <div class="p-3 rounded-xl border border-lightBorder dark:border-darkBorder bg-zinc-50 dark:bg-darkBg/30 flex items-start gap-3">
                     <span class="text-lg mt-0.5 select-none">👤</span>
                     <div>
-                        <h3 class="font-semibold text-zinc-900 dark:text-zinc-200">Profile Avatars</h3>
+                        <h3 class="font-semibold text-zinc-800 dark:text-zinc-200">Profile Avatars</h3>
                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Generative realism synthetic styling face vectors sourced via AI networks from:</p>
                         <a href="https://this-person-does-not-exist.com/en" target="_blank" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium inline-block mt-1">this-person-does-not-exist.com</a>
                     </div>
@@ -645,23 +645,34 @@
         
         let subtitleEndings = [
             "using pure imagination.", "while drinking warm cocoa.", "powered by friendly space sloths.",
-            "at the speed of a startled twilight turtle.", "inside a comfortable pocket dimension.",
+            "at the speed of a startled twilight twilight turtle.", "inside a comfortable pocket dimension.",
             "approved by intergalactic wizards."
         ];
 
-        // Load titles and subtitles from resources/ files dynamically, with cascading fallbacks
+        let currentVersion = "v0.1 (alpha)"; // Global version number fallback
+
+        // Load titles and subtitles from files dynamically, with cascading fallback strategies
         async function loadResourceData() {
             // Fetch titles
             const titlesData = await fetchFileLines('resources/rndTitles.txt') || await fetchFileLines('rndTitles.txt');
             if (titlesData && titlesData.length > 0) {
                 // Filter comments and empty lines
-                generalSearchTitles = titlesData.filter(line => !line.startsWith('#') && line.length > 0);
+                generalSearchTitles = titlesData.filter(line => !line.startsWith('#') && line.trim().length > 0);
             }
 
             // Fetch subtitles
             const subsData = await fetchFileText('resources/rndSubtitles.txt') || await fetchFileText('rndSubtitles.txt');
             if (subsData) {
                 parseSubtitlesText(subsData);
+            }
+
+            // Fetch version string
+            const versionData = await fetchFileText('currentVersionNr.txt') || await fetchFileText('resources/currentVersionNr.txt');
+            if (versionData) {
+                const trimmedVer = versionData.trim();
+                if (trimmedVer.length > 0) {
+                    currentVersion = trimmedVer;
+                }
             }
         }
 
@@ -699,7 +710,7 @@
                 if (line.startsWith('#')) {
                     const lower = line.toLowerCase();
                     if (lower.includes('intro')) currentSection = 'intro';
-                    else if (lower.includes('adjective')) currentSection = 'adjective';
+                    else if (lower.includes('adjective')) currentSection = 'adkey'; // matches adjective block headers
                     else if (lower.includes('subject')) currentSection = 'subject';
                     else if (lower.includes('ending')) currentSection = 'ending';
                     continue;
@@ -707,7 +718,7 @@
                 if (line.length === 0) continue;
 
                 if (currentSection === 'intro') tempIntros.push(line);
-                else if (currentSection === 'adjective') tempAdjectives.push(line);
+                else if (currentSection === 'adkey') tempAdjectives.push(line);
                 else if (currentSection === 'subject') tempSubjects.push(line);
                 else if (currentSection === 'ending') tempEndings.push(line);
             }
@@ -716,16 +727,6 @@
             if (tempAdjectives.length > 0) subtitleAdjectives = tempAdjectives;
             if (tempSubjects.length > 0) subtitleSubjects = tempSubjects;
             if (tempEndings.length > 0) subtitleEndings = tempEndings;
-        }
-
-        // Advanced Combinatorial Subtitle Builder with rich permutations
-        function generatePermutatedSubtitle() {
-            const intro = subtitleIntros[Math.floor(Math.random() * subtitleIntros.length)];
-            const adj = subtitleAdjectives[Math.floor(Math.random() * subtitleAdjectives.length)];
-            const subject = subtitleSubjects[Math.floor(Math.random() * subtitleSubjects.length)];
-            const ending = subtitleEndings[Math.floor(Math.random() * subtitleEndings.length)];
-
-            return `${intro} ${adj} ${subject} ${ending}`;
         }
 
         // Sourced and added a robust, searchable index of top-tier community-built platforms
@@ -897,6 +898,7 @@
             }
 
             try {
+                // Fixed Traders query: removed non-existent field 'imageLink' to guarantee API execution success
                 const fallbackTradersQuery = `query {
                     traders(lang: en) {
                         id name wikiLink
@@ -988,7 +990,7 @@
             const versionTag = document.getElementById('version-tag');
             if (!versionTag) return;
             
-            const targetText = "v0.1 (alpha)";
+            const targetText = currentVersion;
             const possibleChars = "0123456789_#@*&%$?![]=+/\\";
             let iterations = 0;
             
