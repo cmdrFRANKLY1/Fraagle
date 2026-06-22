@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape from Tarkov · Status Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0e14;
+            color: #b7c9d6;
+            font-family: 'Courier New', Courier, 'Fira Code', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .terminal {
+            max-width: 820px;
+            width: 100%;
+            background: #12181f;
+            border: 1px solid #2a3a48;
+            border-radius: 12px;
+            padding: 28px 30px 32px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px solid #2a3a48;
+            padding-bottom: 14px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h1 {
+            font-size: 1.3rem;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            color: #8ab4d6;
+            text-transform: uppercase;
+        }
+
+        .header h1 span {
+            color: #d4e6f0;
+            background: #1f2e3c;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            letter-spacing: 0;
+            margin-left: 6px;
+        }
+
+        .header .timestamp {
+            font-size: 0.75rem;
+            color: #5d7f94;
+            background: #1a2630;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid #2a3a48;
+        }
+
+        .status-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin: 18px 0 20px;
+        }
+
+        .service-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            background: #141c24;
+            border-radius: 6px;
+            border-left: 4px solid #2a3a48;
+            transition: background 0.15s;
+            font-size: 0.95rem;
+        }
+
+        .service-row:hover {
+            background: #1a2530;
+        }
+
+        .service-name {
+            font-weight: 400;
+            color: #cbdae6;
+        }
+
+        .service-status {
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.4px;
+            padding: 2px 12px;
+            border-radius: 30px;
+            background: #1a2630;
+            border: 1px solid transparent;
+        }
+
+        /* status colors */
+        .status-operational {
+            color: #7bdcb5;
+            border-color: #2b6b55;
+            background: #142b24;
+        }
+        .status-degraded {
+            color: #f5c842;
+            border-color: #7a6b2b;
+            background: #2f2a18;
+        }
+        .status-outage {
+            color: #f27a7a;
+            border-color: #8a3a3a;
+            background: #3a1e1e;
+        }
+        .status-maintenance {
+            color: #96b8d4;
+            border-color: #3a4f66;
+            background: #1d2a38;
+        }
+        .status-unknown {
+            color: #8a9baa;
+            border-color: #3d4d5c;
+            background: #1c2630;
+        }
+
+        .overall-status-box {
+            background: #0f171f;
+            border: 1px solid #2a3a48;
+            border-radius: 8px;
+            padding: 14px 20px;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .overall-label {
+            font-size: 0.85rem;
+            color: #7b93a8;
+            letter-spacing: 0.5px;
+        }
+
+        .overall-value {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .refresh-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .refresh-btn {
+            background: #1f2e3c;
+            border: 1px solid #2f4455;
+            color: #b7c9d6;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        .refresh-btn:hover {
+            background: #2a3f52;
+            border-color: #4b6b84;
+            color: #e6f0fa;
+        }
+
+        .refresh-btn:active {
+            transform: scale(0.96);
+        }
+
+        .status-message {
+            font-size: 0.8rem;
+            color: #5d7f94;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.2s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        .error-box {
+            background: #2a1818;
+            border: 1px solid #6b3a3a;
+            color: #f5a0a0;
+            padding: 16px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .raw-fallback {
+            background: #111a22;
+            border: 1px solid #2a3a48;
+            border-radius: 8px;
+            padding: 16px 18px;
+            font-size: 0.82rem;
+            color: #8aa4b8;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: inherit;
+        }
+
+        .raw-fallback::-webkit-scrollbar {
+            width: 6px;
+            background: #0f171f;
+        }
+        .raw-fallback::-webkit-scrollbar-thumb {
+            background: #2a3a48;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .terminal { padding: 18px; }
+            .header h1 { font-size: 1rem; }
+            .service-row { font-size: 0.85rem; padding: 6px 10px; flex-wrap: wrap; gap: 6px; }
+            .service-status { font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="terminal" role="main">
+    <div class="header">
+        <h1>🧢 TARKOV · <span>STATUS</span></h1>
+        <div class="timestamp" id="timestamp">—</div>
+    </div>
+
+    <div id="statusContainer">
+        <div class="status-grid" id="serviceList">
+            <div class="service-row" style="justify-content:center; color:#5d7f94; border-left-color:#2a3a48;">
+                <span class="loading-dots">⏳ Loading current status</span>
+            </div>
+        </div>
+        <div class="overall-status-box" id="overallBox">
+            <span class="overall-label">⬤ OVERALL STATUS</span>
+            <span class="overall-value" id="overallValue" style="color:#5d7f94;">—</span>
+        </div>
+    </div>
+
+    <div class="refresh-area">
+        <span class="status-message" id="statusMessage">last check: —</span>
+        <button class="refresh-btn" id="refreshBtn">⟳ REFRESH</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        const serviceListEl = document.getElementById('serviceList');
+        const overallValueEl = document.getElementById('overallValue');
+        const timestampEl = document.getElementById('timestamp');
+        const statusMessageEl = document.getElementById('statusMessage');
+        const refreshBtn = document.getElementById('refreshBtn');
+
+        // ---------- helpers ----------
+        function getTimestamp() {
+            return new Date().toLocaleString('en-US', {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+        }
+
+        function setTimestamp() {
+            const ts = getTimestamp();
+            timestampEl.textContent = ts;
+            statusMessageEl.textContent = `last check: ${ts}`;
+        }
+
+        // map statuspage v2 status -> label + css class
+        function mapStatuspageStatus(statusKey) {
+            const map = {
+                'operational': { label: 'Operational', cls: 'status-operational' },
+                'degraded_performance': { label: 'Degraded', cls: 'status-degraded' },
+                'partial_outage': { label: 'Partial Outage', cls: 'status-outage' },
+                'major_outage': { label: 'Major Outage', cls: 'status-outage' },
+                'maintenance': { label: 'Maintenance', cls: 'status-maintenance' },
+            };
+            return map[statusKey] || { label: statusKey || 'Unknown', cls: 'status-unknown' };
+        }
+
+        // map Cachet status code -> label + css class
+        function mapCachetStatus(code) {
+            const map = {
+                1: { label: 'Operational', cls: 'status-operational' },
+                2: { label: 'Performance Issues', cls: 'status-degraded' },
+                3: { label: 'Partial Outage', cls: 'status-outage' },
+                4: { label: 'Major Outage', cls: 'status-outage' },
+            };
+            return map[code] || { label: `Status ${code}`, cls: 'status-unknown' };
+        }
+
+        // ---------- render services ----------
+        function renderServices(services, overallStatus) {
+            if (!services || services.length === 0) {
+                serviceListEl.innerHTML = `
+                    <div class="service-row" style="justify-content:center; color:#5d7f94; border-left-color:#2a3a48;">
+                        <span>ℹ️ No service components found.</span>
+                    </div>
+                `;
+                if (overallStatus) {
+                    overallValueEl.textContent = overallStatus;
+                    overallValueEl.style.color = '#7bdcb5';
+                } else {
+                    overallValueEl.textContent = '—';
+                    overallValueEl.style.color = '#5d7f94';
+                }
+                return;
+            }
+
+            let html = '';
+            let overall = 'All Systems Operational';
+            let hasIssue = false;
+
+            services.forEach(svc => {
+                let displayName = svc.name || 'Unnamed';
+                let statusInfo = { label: 'Unknown', cls: 'status-unknown' };
+
+                // try to infer status from various formats
+                const rawStatus = (svc.status || '').toString().trim().toLowerCase();
+
+                if (svc.statusCode !== undefined && typeof svc.statusCode === 'number') {
+                    // Cachet style
+                    statusInfo = mapCachetStatus(svc.statusCode);
+                } else if (svc.statusKey && typeof svc.statusKey === 'string') {
+                    // Statuspage v2 style
+                    statusInfo = mapStatuspageStatus(svc.statusKey);
+                } else if (rawStatus) {
+                    // heuristics from text
+                    if (rawStatus.includes('operational') || rawStatus.includes('online') || rawStatus === 'ok') {
+                        statusInfo = { label: 'Operational', cls: 'status-operational' };
+                    } else if (rawStatus.includes('degraded') || rawStatus.includes('performance')) {
+                        statusInfo = { label: 'Degraded', cls: 'status-degraded' };
+                    } else if (rawStatus.includes('partial outage') || rawStatus.includes('partial')) {
+                        statusInfo = { label: 'Partial Outage', cls: 'status-outage' };
+                    } else if (rawStatus.includes('major outage') || rawStatus.includes('outage') || rawStatus.includes('down')) {
+                        statusInfo = { label: 'Outage', cls: 'status-outage' };
+                    } else if (rawStatus.includes('maintenance')) {
+                        statusInfo = { label: 'Maintenance', cls: 'status-maintenance' };
+                    } else {
+                        statusInfo = { label: rawStatus, cls: 'status-unknown' };
+                    }
+                }
+
+                // track overall
+                if (statusInfo.cls === 'status-degraded' || statusInfo.cls === 'status-outage') {
+                    if (statusInfo.cls === 'status-outage') overall = 'Major Outage';
+                    else if (overall !== 'Major Outage') overall = 'Partial Degradation';
+                    hasIssue = true;
+                }
+
+                html += `
+                    <div class="service-row" style="border-left-color: ${statusInfo.cls.includes('operational') ? '#2b6b55' : statusInfo.cls.includes('degraded') ? '#7a6b2b' : statusInfo.cls.includes('outage') ? '#8a3a3a' : '#3d4d5c'};">
+                        <span class="service-name">${displayName}</span>
+                        <span class="service-status ${statusInfo.cls}">${statusInfo.label}</span>
+                    </div>
+                `;
+            });
+
+            serviceListEl.innerHTML = html;
+
+            if (overall === 'Major Outage') {
+                overallValueEl.textContent = '🔴 MAJOR OUTAGE';
+                overallValueEl.style.color = '#f27a7a';
+            } else if (overall === 'Partial Degradation') {
+                overallValueEl.textContent = '🟡 PARTIAL DEGRADATION';
+                overallValueEl.style.color = '#f5c842';
+            } else {
+                overallValueEl.textContent = '✅ ALL SYSTEMS OPERATIONAL';
+                overallValueEl.style.color = '#7bdcb5';
+            }
+        }
+
+        // ---------- API fetch attempts ----------
+        async function fetchStatuspageV2() {
+            const url = 'https://status.escapefromtarkov.com/api/v2/components.json';
+            const resp = await fetch(url, { mode: 'cors' });
+            if (!resp.ok) throw new Error(`Statuspage API responded with ${resp.status}`);
+            const data = await resp.json();
+            if (!data || !data.components) throw new Error('Invalid Statuspage response');
+            return data.components.map(c => ({
+                name: c.name || 'Unnamed',
+                statusKey: c.status || 'unknown',
+                // keep original status text just in case
+                status: c.status || 'unknown'
+            }));
+        }
+
+        async function fetchCachetV1() {
+            const url = 'https://status.escapefromtarkov.com/api/v1/components';
+            const resp = await fetch(url, { mode: 'cors' });
+            if (!resp.ok) throw new Error(`Cachet API responded with ${resp.status}`);
+            const data = await resp.json();
+            if (!data || !data.data) throw new Error('Invalid Cachet response');
+            return data.data.map(c => ({
+                name: c.name || 'Unnamed',
+                statusCode: c.status !== undefined ? Number(c.status) : undefined,
+                status: c.status || 'unknown'
+            }));
+        }
+
+        // ---------- proxy fallback (HTML scrape) ----------
+        async function fetchViaProxy() {
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const target = 'https://status.escapefromtarkov.com/';
+            const resp = await fetch(proxyUrl + encodeURIComponent(target));
+            if (!resp.ok) throw new Error(`Proxy fetch failed (${resp.status})`);
+            const html = await resp.text();
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // try Cachet style .component
+            let components = doc.querySelectorAll('.component');
+            let results = [];
+            if (components.length > 0) {
+                components.forEach(el => {
+                    const nameEl = el.querySelector('.component-name');
+                    const statusEl = el.querySelector('.component-status');
+                    if (nameEl && statusEl) {
+                        results.push({
+                            name: nameEl.textContent.trim(),
+                            status: statusEl.textContent.trim()
+                        });
+                    }
+                });
+                if (results.length > 0) return results;
+            }
+
+            // try Statuspage style .component-container
+            components = doc.querySelectorAll('.component-container');
+            if (components.length > 0) {
+                components.forEach(el => {
+                    const nameEl = el.querySelector('.name');
+                    const statusEl = el.querySelector('.status');
+                    if (nameEl && statusEl) {
+                        results.push({
+                            name: nameEl.textContent.trim(),
+                            status: statusEl.textContent.trim()
+                        });
+                    }
+                });
+                if (results.length > 0) return results;
+            }
+
+            // fallback: try to find any status-like text in the body
+            const bodyText = doc.body.innerText || '';
+            const lines = bodyText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            // look for "All Systems Operational" or known phrases
+            let foundOverall = null;
+            for (let line of lines) {
+                const lower = line.toLowerCase();
+                if (lower.includes('all systems operational')) { foundOverall = 'All Systems Operational'; break; }
+                if (lower.includes('partial outage')) { foundOverall = 'Partial Outage'; break; }
+                if (lower.includes('major outage')) { foundOverall = 'Major Outage'; break; }
+                if (lower.includes('degraded performance')) { foundOverall = 'Degraded Performance'; break; }
+            }
+
+            // if we found something, present it as a single "service"
+            if (foundOverall) {
+                return [{ name: 'Overall Status', status: foundOverall }];
+            }
+
+            // last resort: return the first 30 non-empty lines as raw text
+            const preview = lines.slice(0, 30).join('\n');
+            return [{ name: 'Raw Status Text', status: preview }];
+        }
+
+        // ---------- main fetch orchestrator ----------
+        async function fetchStatus() {
+            // show loading
+            serviceListEl.innerHTML = `
+                <div class="service-row" style="justify-content:center; color:#5d7f94; border-left-color:#2a3a48;">
+                    <span class="loading-dots">⏳ Fetching status</span>
+                </div>
+            `;
+            overallValueEl.textContent = '—';
+            overallValueEl.style.color = '#5d7f94';
+
+            try {
+                let services = null;
+
+                // 1. try Statuspage v2 API
+                try {
+                    services = await fetchStatuspageV2();
+                } catch (e) {
+                    // 2. try Cachet v1 API
+                    try {
+                        services = await fetchCachetV1();
+                    } catch (e2) {
+                        // 3. fallback to proxy HTML scrape
+                        services = await fetchViaProxy();
+                    }
+                }
+
+                if (services && services.length > 0) {
+                    renderServices(services);
+                } else {
+                    // empty response
+                    serviceListEl.innerHTML = `
+                        <div class="service-row" style="justify-content:center; color:#f5a0a0; border-left-color:#6b3a3a;">
+                            <span>⚠️ No status data available.</span>
+                        </div>
+                    `;
+                    overallValueEl.textContent = '⚠️ UNKNOWN';
+                    overallValueEl.style.color = '#f5a0a0';
+                }
+            } catch (err) {
+                // catastrophic failure
+                serviceListEl.innerHTML = `
+                    <div class="error-box">
+                        <strong>⛔ FETCH ERROR</strong>\n${err.message || 'Unknown error'}
+                    </div>
+                `;
+                overallValueEl.textContent = '⛔ ERROR';
+                overallValueEl.style.color = '#f27a7a';
+            }
+
+            setTimestamp();
+        }
+
+        // ---------- refresh & init ----------
+        refreshBtn.addEventListener('click', () => {
+            fetchStatus();
+        });
+
+        // initial load
+        fetchStatus();
+
+        // auto-refresh every 60 seconds
+        setInterval(fetchStatus, 60000);
+
+    })();
+</script>
+</body>
+</html>

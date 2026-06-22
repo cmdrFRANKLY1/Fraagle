@@ -118,16 +118,16 @@
         </div>
     </header>
 
+    <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned completely to the left, matching header) -->
+    <aside id="left-sidebar-links" class="hidden lg:flex absolute left-0 pl-5 top-32 flex-col w-52 select-none text-left z-20">
+        <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-2 border-b border-darkBorder pb-1">Directory</h4>
+        <nav id="quick-links-list" class="flex flex-col gap-0">
+            <!-- Loaded dynamically -->
+        </nav>
+    </aside>
+
     <!-- Unified Split Sidebar & Content Container -->
     <div class="flex-grow w-full max-w-5xl mx-auto px-6 py-4 z-10 relative flex items-center justify-center min-h-[70vh]">
-
-        <!-- Left Sidebar (Clean Text-Only Directory Shortcuts, No Icons, aligned left with 'by cmdrFRANKLY') -->
-        <aside id="left-sidebar-links" class="hidden lg:flex absolute left-5 top-32 flex-col w-52 select-none text-left">
-            <h4 class="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-3 border-b border-darkBorder pb-1.5">Directory</h4>
-            <nav id="quick-links-list" class="flex flex-col gap-0">
-                <!-- Loaded dynamically -->
-            </nav>
-        </aside>
 
         <!-- Main Search Container (Remains perfectly centered) -->
         <main id="main-container" class="w-full max-w-2xl mx-auto flex flex-col items-center justify-center text-center">
@@ -144,7 +144,7 @@
                     <div class="absolute left-full ml-3 flex flex-col items-start justify-center text-left whitespace-nowrap top-1/2 -translate-y-1/2 select-none">
                         <!-- Version Number tag -->
                         <span id="version-number" class="text-[10px] sm:text-xs font-bold tracking-widest text-zinc-400 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase"></span>
-                        <!-- Version Name tag -->
+                        <!-- Version Name tag (moved below the number) -->
                         <span id="version-name" class="text-[8px] sm:text-[10px] font-bold tracking-widest text-zinc-500 opacity-0 drop-shadow-[0_0_4px_rgba(255,255,255,0.15)] uppercase mt-0.5"></span>
                     </div>
                 </div>
@@ -292,9 +292,9 @@
 
                         <div class="flex flex-wrap items-center gap-1 mt-1.5">
                             <!-- Font increased by 1 (text-[10px] -> text-[11px]) & whitespace-nowrap applied so no text is cut off -->
-                            <span id="char-race" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-400 rounded font-semibold border border-darkBorder whitespace-nowrap">Race: Loading...</span>
-                            <span id="char-profession" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-400 rounded font-semibold border border-darkBorder font-medium whitespace-nowrap">Profession: Loading...</span>
-                            <span id="char-gender" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-400 rounded font-semibold border border-darkBorder font-medium whitespace-nowrap">Gender: Loading...</span>
+                            <span id="char-race" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder whitespace-nowrap">Race: Loading...</span>
+                            <span id="char-profession" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium whitespace-nowrap">Profession: Loading...</span>
+                            <span id="char-gender" class="text-[11px] px-1.5 py-0.5 bg-darkBg text-zinc-300 rounded font-semibold border border-darkBorder font-medium whitespace-nowrap">Gender: Loading...</span>
                         </div>
                     </div>
                 </div>
@@ -384,7 +384,18 @@
         let tarkovItemsMap = new Map();
         let activeCategoryFilter = "All";
         let loadedCategoriesList = ["All"];
-        let officialLinks = []; // Store the high-performance URL array
+
+        // Hardcoded & Instant-cached Tarkov Website directory replacing external network fetches
+        let officialLinks = [
+            { "name": "Official Website", "url": "https://www.escapefromtarkov.com" },
+            { "name": "Official Forums", "url": "https://forum.escapefromtarkov.com" },
+            { "name": "Official Support", "url": "https://www.escapefromtarkov.com/support" },
+            { "name": "Tarkov Wiki", "url": "https://escapefromtarkov.fandom.com" },
+            { "name": "Tarkov Dev API", "url": "https://tarkov.dev" },
+            { "name": "Tarkov Market", "url": "https://tarkov-market.com" },
+            { "name": "Arena Platform", "url": "https://arena.tarkov.com" },
+            { "name": "Profile Portal", "url": "https://profile.tarkov.com" }
+        ];
 
         // Clean default email domain fallbacks
         let emailProvidersList = ["gmail.com", "outlook.com", "yahoo.com", "proton.me", "icloud.com", "mail.com", "zoho.com"];
@@ -1103,14 +1114,15 @@
                 sidebarAside.classList.remove('hidden');
             }
 
-            // Render left sidebar text-based shortcuts (No icons, aligned left, clean list, Verdana)
+            // Render left sidebar text-based shortcuts (No icons, aligned completely left, tight line height and spacing)
             const dockFragment = document.createDocumentFragment();
             officialLinks.forEach(link => {
                 const btn = document.createElement('a');
                 btn.href = link.url;
                 btn.target = "_blank";
                 btn.rel = "noopener noreferrer";
-                btn.className = "text-[11px] font-medium text-zinc-400 hover:text-white transition-colors duration-200 block py-1 text-left";
+                // Super compact spacing layout rules: py-[0.5px] and leading-[1.1] with zero margins
+                btn.className = "text-[11px] font-medium text-zinc-400 hover:text-white transition-colors duration-200 block py-[0.5px] my-0 leading-[1.1] text-left";
                 btn.textContent = link.name;
                 dockFragment.appendChild(btn);
             });
@@ -1411,7 +1423,17 @@
                 if (linksPayload && linksPayload.length > 0) {
                     officialLinks = linksPayload;
                 } else {
-                    officialLinks = [];
+                    // Fall back to our hardcoded instantly-cached community references
+                    officialLinks = [
+                        { "name": "Official Website", "url": "https://www.escapefromtarkov.com" },
+                        { "name": "Official Forums", "url": "https://forum.escapefromtarkov.com" },
+                        { "name": "Official Support", "url": "https://www.escapefromtarkov.com/support" },
+                        { "name": "Tarkov Wiki", "url": "https://escapefromtarkov.fandom.com" },
+                        { "name": "Tarkov Dev API", "url": "https://tarkov.dev" },
+                        { "name": "Tarkov Market", "url": "https://tarkov-market.com" },
+                        { "name": "Arena Platform", "url": "https://arena.tarkov.com" },
+                        { "name": "Profile Portal", "url": "https://profile.tarkov.com" }
+                    ];
                 }
 
                 loadDynamicTitleAndSubtitle();
