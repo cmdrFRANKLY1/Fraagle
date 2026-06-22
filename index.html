@@ -25,13 +25,6 @@
         // Tailwind configuration for advanced modern styling in both modes
         tailwind.config = {
             darkMode: 'class',
-            safelist: [
-                // Safelist all possible glow colors so Tailwind compiles them
-                'bg-blue-500/10', 'bg-orange-500/10', 'bg-purple-500/10', 'bg-yellow-500/10', 
-                'bg-teal-500/10', 'bg-rose-500/10', 'bg-indigo-500/10', 'bg-emerald-500/10', 
-                'bg-cyan-500/10', 'bg-red-500/10', 'bg-fuchsia-500/10', 'bg-lime-500/10', 
-                'bg-sky-500/10', 'bg-pink-500/10'
-            ],
             theme: {
                 extend: {
                     colors: {
@@ -80,9 +73,9 @@
 </head>
 <body class="bg-lightBg dark:bg-darkBg text-zinc-800 dark:text-zinc-100 min-h-screen flex flex-col justify-between relative overflow-x-hidden">
 
-    <!-- Decorative Ambient Soft Glow Gradients (Colors dynamically applied via JS) -->
-    <div id="ambient-glow-1" class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full blur-[120px] pointer-events-none transition-opacity duration-300"></div>
-    <div id="ambient-glow-2" class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full blur-[120px] pointer-events-none transition-opacity duration-300"></div>
+    <!-- Decorative Ambient Soft Glow Gradients (Colors and coordinates dynamically randomized via JS) -->
+    <div id="ambient-glow-1" class="absolute rounded-full blur-[120px] pointer-events-none transition-all duration-700"></div>
+    <div id="ambient-glow-2" class="absolute rounded-full blur-[120px] pointer-events-none transition-all duration-700"></div>
 
     <!-- Top Navigation Bar -->
     <header class="flex items-center justify-between p-5 relative z-10 w-full">
@@ -119,47 +112,6 @@
                 </svg>
             </button>
 
-            <!-- Workspace Apps Launcher Icon (9-Dot Menu) -->
-            <div class="relative">
-                <button id="app-launcher-btn" class="p-2.5 rounded-xl border border-lightBorder dark:border-darkBorder bg-white/70 dark:bg-darkCard/50 backdrop-blur-md hover:bg-white dark:hover:bg-darkCard transition-all duration-200 focus:outline-none shadow-sm dark:shadow-none flex items-center justify-center cursor-pointer" aria-label="Apps Menu">
-                    <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-300 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                    </svg>
-                </button>
-
-                <!-- Workspace Apps Dropdown Menu -->
-                <div id="app-launcher-dropdown" class="hidden absolute right-0 mt-3 w-80 max-h-[420px] overflow-y-auto bg-white/95 dark:bg-darkCard/90 border border-lightBorder dark:border-darkBorder rounded-2xl shadow-2xl p-4 z-50 transition-all duration-200 transform scale-95 opacity-0 origin-top-right backdrop-blur-xl space-y-4">
-                    <!-- General Workspace Apps -->
-                    <div id="dropdown-general-section" class="hidden">
-                        <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">General Apps</div>
-                        <div id="dropdown-apps-grid" class="grid grid-cols-3 gap-2">
-                            <!-- Populated dynamically with the apps -->
-                        </div>
-                    </div>
-                    <!-- General Tools Apps -->
-                    <div id="dropdown-general-tools-section" class="hidden border-t border-lightBorder dark:border-darkBorder pt-3">
-                        <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">General Tools</div>
-                        <div id="dropdown-general-tools-grid" class="grid grid-cols-3 gap-2">
-                            <!-- Populated dynamically with General Tools apps -->
-                        </div>
-                    </div>
-                    <!-- Escape from Tarkov Apps -->
-                    <div id="dropdown-tarkov-section" class="hidden border-t border-lightBorder dark:border-darkBorder pt-3">
-                        <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">Escape from Tarkov</div>
-                        <div id="dropdown-tarkov-apps-grid" class="grid grid-cols-3 gap-2">
-                            <!-- Populated dynamically with EFT apps -->
-                        </div>
-                    </div>
-                    <!-- VoiceAttack Apps Section -->
-                    <div id="dropdown-voiceattack-section" class="hidden border-t border-lightBorder dark:border-darkBorder pt-3">
-                        <div class="text-xs font-semibold text-zinc-400 dark:text-zinc-500 mb-3 px-2 uppercase tracking-wider">VoiceAttack</div>
-                        <div id="dropdown-voiceattack-apps-grid" class="grid grid-cols-3 gap-2">
-                            <!-- Populated dynamically with VA apps -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Profile Avatar Button with Fallback Protection -->
             <div class="w-10 h-10 rounded-xl overflow-hidden border border-lightBorder dark:border-darkBorder shadow-sm hover:shadow-lg hover:border-indigo-500/30 dark:hover:border-indigo-400/30 transition-all duration-200 cursor-pointer select-none">
                 <img src="https://thispersondoesnotexist.com" alt="Profile" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'">
@@ -167,7 +119,7 @@
         </div>
     </header>
 
-    <!-- Main Content Container (Refactored to be Centered and Search-Engine Focused) -->
+    <!-- Main Content Container (Centered and Search-Engine Focused) -->
     <main class="flex-grow flex flex-col items-center justify-start px-4 pt-16 sm:pt-24 relative z-10 w-full max-w-3xl mx-auto">
         
         <!-- Logo Header -->
@@ -237,7 +189,7 @@
                 <!-- YouTube -->
                 <a href="https://www.youtube.com/battlestategames" target="_blank" title="BSG YouTube" class="hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-lg">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5 12 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.516 3.5s-7.516 0-9.388.555a3.002 3.002 0 0 0-2.11 2.108C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.484 20.5 12 20.5 12 20.5s7.516 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                     </svg>
                 </a>
                 <!-- Twitter / X -->
@@ -284,18 +236,6 @@
             </div>
             <div id="google-results-container" class="space-y-6 animate-fade-in">
                 <!-- Search entries populate here dynamically -->
-            </div>
-        </div>
-
-        <!-- Dynamic Registry / Setup Warning Alert (Informational) -->
-        <div id="setup-warning" class="hidden mt-6 mb-8 p-4 max-w-xl rounded-2xl border border-yellow-500/10 bg-yellow-500/5 text-xs text-yellow-600 dark:text-yellow-400 backdrop-blur-md">
-            <div class="flex items-start">
-                <svg class="w-5 h-5 mr-2.5 flex-shrink-0 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                </svg>
-                <div>
-                    <span class="font-bold">Displaying Local Fallback list.</span> For production, write a <code>generate-list.js</code> build script in Vercel to auto-output <code>public/app-list.json</code> containing your HTML array!
-                </div>
             </div>
         </div>
 
@@ -425,27 +365,79 @@
         const ambientGlow1 = document.getElementById('ambient-glow-1');
         const ambientGlow2 = document.getElementById('ambient-glow-2');
 
+        // Shuffled, aesthetic, highly varied non-complementary visual color pairs
         const glowColorPairs = [
-            ['bg-blue-500/10', 'bg-orange-500/10'],
-            ['bg-purple-500/10', 'bg-yellow-500/10'],
-            ['bg-teal-500/10', 'bg-rose-500/10'],
-            ['bg-indigo-500/10', 'bg-emerald-500/10'],
-            ['bg-cyan-500/10', 'bg-red-500/10'],
-            ['bg-fuchsia-500/10', 'bg-lime-500/10'],
-            ['bg-sky-500/10', 'bg-pink-500/10']
+            ['bg-blue-500/10', 'bg-teal-500/10'],
+            ['bg-purple-500/10', 'bg-rose-500/10'],
+            ['bg-fuchsia-500/10', 'bg-rose-500/10'],
+            ['bg-orange-500/10', 'bg-yellow-500/10'],
+            ['bg-indigo-500/10', 'bg-sky-500/10'],
+            ['bg-cyan-500/10', 'bg-teal-500/10'],
+            ['bg-emerald-500/10', 'bg-teal-500/10'],
+            ['bg-violet-500/10', 'bg-pink-500/10'],
+            ['bg-pink-500/10', 'bg-purple-500/10'],
+            ['bg-rose-500/10', 'bg-pink-500/10'],
+            ['bg-cyan-500/10', 'bg-blue-500/10'],
+            ['bg-emerald-500/10', 'bg-green-500/10']
         ];
         
         function applyRandomGlowColors() {
-            const allGlowClasses = glowColorPairs.flat();
+            if (!ambientGlow1 || !ambientGlow2) return;
+            
+            const allGlowClasses = [
+                'bg-blue-500/10', 'bg-orange-500/10', 'bg-purple-500/10', 'bg-yellow-500/10', 
+                'bg-teal-500/10', 'bg-rose-500/10', 'bg-indigo-500/10', 'bg-emerald-500/10', 
+                'bg-cyan-500/10', 'bg-red-500/10', 'bg-fuchsia-500/10', 'bg-lime-500/10', 
+                'bg-sky-500/10', 'bg-pink-500/10', 'bg-green-500/10', 'bg-violet-500/10'
+            ];
+            
             const pair = glowColorPairs[Math.floor(Math.random() * glowColorPairs.length)];
             
             // Clean up old classes
             ambientGlow1.classList.remove(...allGlowClasses);
             ambientGlow2.classList.remove(...allGlowClasses);
             
-            // Apply new random complementary pair
+            // Apply randomized pair
             ambientGlow1.classList.add(pair[0]);
             ambientGlow2.classList.add(pair[1]);
+
+            // Randomize position coordinate parameters, border-radius/shapes and scale
+            const shapeVariations = ['rounded-full', 'rounded-[40%_60%_70%_30%_/_40%_50%_60%_50%]', 'rounded-[60%_40%_30%_70%_/_50%_60%_50%_40%]', 'rounded-[50%_50%_30%_70%_/_50%_60%_40%_60%]'];
+            const shape1 = shapeVariations[Math.floor(Math.random() * shapeVariations.length)];
+            const shape2 = shapeVariations[Math.floor(Math.random() * shapeVariations.length)];
+
+            ambientGlow1.className = ambientGlow1.className.replace(/rounded-\S+/g, '');
+            ambientGlow2.className = ambientGlow2.className.replace(/rounded-\S+/g, '');
+
+            ambientGlow1.classList.add(shape1);
+            ambientGlow2.classList.add(shape2);
+
+            // Randomize dimension boundaries
+            const sizeValue1 = Math.floor(Math.random() * 20) + 40; // 40vw to 60vw
+            const sizeValue2 = Math.floor(Math.random() * 20) + 40; 
+            ambientGlow1.style.width = `${sizeValue1}vw`;
+            ambientGlow1.style.height = `${sizeValue1}vw`;
+            ambientGlow2.style.width = `${sizeValue2}vw`;
+            ambientGlow2.style.height = `${sizeValue2}vw`;
+
+            // Randomize spatial positioning coordinates
+            const offset1 = Math.floor(Math.random() * 15) - 15; // -15% to 0%
+            const offset2 = Math.floor(Math.random() * 15) - 15;
+            ambientGlow1.style.top = `${offset1}%`;
+            ambientGlow1.style.left = `${offset1}%`;
+            ambientGlow2.style.bottom = `${offset2}%`;
+            ambientGlow2.style.right = `${offset2}%`;
+
+            // Randomize blur indices
+            const blurs = ['blur-[100px]', 'blur-[120px]', 'blur-[140px]', 'blur-[160px]'];
+            const blur1 = blurs[Math.floor(Math.random() * blurs.length)];
+            const blur2 = blurs[Math.floor(Math.random() * blurs.length)];
+            
+            ambientGlow1.className = ambientGlow1.className.replace(/blur-\S+/g, '');
+            ambientGlow2.className = ambientGlow2.className.replace(/blur-\S+/g, '');
+            
+            ambientGlow1.classList.add(blur1);
+            ambientGlow2.classList.add(blur2);
         }
 
         function applyGradientState(isEnabled) {
@@ -496,59 +488,20 @@
 
         // --- 3. EXTENSIBLE UNIFIED SEARCH INDEX SYSTEM ---
         let searchIndex = [];
-        let currentlyFilteredApps = []; // For dropdown grid view
-        let localAppsRawList = [];      // Raw copy of dashboard apps
 
-        // Default local fallback dashboard apps if app-list.json is missing
-        const fallbackAppsList = [
-            "analytics.html",
-            "dashboard.html",
-            "editor.html",
-            "notes.html",
-            "calculator.html",
-            "game.html",
-            "settings.html",
-            "tasks.html",
-            "twitchViewer.html",
-            "youtubeStream.html"
-        ];
-
-        // Modern, premium light/dark dynamic pastel gradients for icons
-        const iconGradients = [
-            "from-blue-500/10 to-indigo-600/20 dark:from-blue-500/20 dark:to-indigo-600/40 border-blue-500/20 dark:border-blue-500/30 text-blue-600 dark:text-blue-400",
-            "from-rose-500/10 to-red-600/20 dark:from-rose-500/20 dark:to-red-600/40 border-rose-500/20 dark:border-rose-500/30 text-rose-600 dark:text-rose-400",
-            "from-amber-500/10 to-yellow-600/20 dark:from-amber-500/20 dark:to-yellow-600/40 border-amber-500/20 dark:border-amber-500/30 text-amber-600 dark:text-amber-400",
-            "from-emerald-500/10 to-teal-600/20 dark:from-emerald-500/20 dark:to-teal-600/40 border-emerald-500/20 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
-            "from-violet-500/10 to-purple-600/20 dark:from-violet-500/20 dark:to-purple-600/40 border-violet-500/20 dark:border-violet-500/30 text-violet-600 dark:text-violet-400",
-            "from-cyan-500/10 to-blue-600/20 dark:from-cyan-500/20 dark:to-blue-600/40 border-cyan-500/20 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400",
-            "from-fuchsia-500/10 to-pink-600/20 dark:from-fuchsia-500/20 dark:to-pink-600/40 border-fuchsia-500/20 dark:border-fuchsia-500/30 text-fuchsia-600 dark:text-fuchsia-400"
-        ];
-
-        function getAppTitle(fileName) {
-            let name = fileName.replace(/\.html$/i, '');
-            const prefixes = ['eft', 'twitch', 'youtube', 'va'];
-            for (const pref of prefixes) {
-                if (name.toLowerCase().startsWith(pref)) {
-                    let rest = name.slice(pref.length);
-                    if (rest.toLowerCase().startsWith(pref)) {
-                        name = rest;
-                    }
-                }
+        async function fetchTarkovGraphQL(query) {
+            try {
+                const response = await fetch('https://api.tarkov.dev/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                });
+                if (!response.ok) return null;
+                const json = await response.json();
+                return json.data;
+            } catch (err) {
+                return null;
             }
-            if (name.toLowerCase().startsWith('eft')) {
-                name = name.slice(3);
-            }
-            if (name.toLowerCase().startsWith('va')) {
-                name = name.slice(2);
-            }
-            let spaced = name
-                .replace(/([a-z])([A-Z])/g, '$1 $2')
-                .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-                .trim();
-            if (spaced.length > 0) {
-                spaced = spaced.charAt(0).toUpperCase() + spaced.slice(1);
-            }
-            return spaced;
         }
 
         // Expanded list of general random titles for dynamic exploration
@@ -559,7 +512,8 @@
             "Solace", "Summit", "Enigma", "Quantum", "Prism", "Echo", "Mirage", "Aura",
             "Helix", "Vector", "Fable", "Spire", "Zephyr", "Rift", "Glow", "Ascent",
             "Spectra", "Stratis", "Altis", "Focus", "Radiant", "Odyssey", "Lumina", "Oasis",
-            "Pinnacle", "Aegis", "Vanguard", "Genesis", "Haven", "Equinox", "Paradigm", "Flux"
+            "Pinnacle", "Aegis", "Vanguard", "Genesis", "Haven", "Equinox", "Paradigm", "Flux",
+            "Saga", "Propel", "Vertex", "Solstice", "Apex", "Exalt", "Quasar", "Nucleus"
         ];
 
         // Advanced Combinatorial Subtitle Builder with rich permutations
@@ -572,7 +526,9 @@
                 "The most reliable source for", "A secret garden full of", "The ultimate playground of",
                 "An astronomical orbit around", "Crafting high-quality queries for", "The legendary archives of",
                 "Delving fearlessly into", "Sailing the cybernetic seas of", "Unlocking the mysteries of",
-                "A sanctuary dedicated to", "The definitive roadmap for"
+                "A sanctuary dedicated to", "The definitive roadmap for", "Orbiting the dynamic realms of",
+                "An elegant gateway into", "Sifting through the cosmic dust of", "Unraveling the deep syntax of",
+                "Peering through the multi-threaded looking glass of"
             ];
             
             const adjectives = [
@@ -581,7 +537,9 @@
                 "cyber-organic", "laser-focused", "stellar", "glowing", "cloud-native",
                 "whimsical", "magnetic", "kaleidoscopic", "polychromatic", "giggle-powered",
                 "harmonious", "space-traveling", "mitten-wearing", "highly-caffeinated", 
-                "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful"
+                "multidimensional", "intergalactic", "mind-bending", "astonishing", "delightful",
+                "gravitationally-skewed", "helium-filled", "neon-bathed", "spark-emitting",
+                "highly-caffeinated", "strictly-static", "polymorphic", "exquisite"
             ];
             
             const subjects = [
@@ -592,18 +550,22 @@
                 "acoustic pizza vibrations", "sub-aquatic bicycle repair guides", "hovercraft cat grooming manuals",
                 "invisible ink ingredient lists", "philosophical donut holes", "nebulous cloud formations",
                 "digital jellyfish orchestras", "interdimensional coffee brewing", "time-traveling toasters",
-                "tactical rubber ducks", "cybernetic cheese wheels"
+                "tactical rubber ducks", "cybernetic cheese wheels", "sub-atomic particle salads",
+                "galactic map coordinates", "advanced bubblewrap physics", "glowing microchip ecosystems",
+                "neon-tinted matrix indexes"
             ];
             
             const endings = [
                 "using pure imagination.", "while drinking warm cocoa.", "powered by friendly space sloths.",
-                "at the speed of a startled twilight turtle.", "inside a comfortable pocket dimension.",
+                "at the speed of a startled twilight twilight turtle.", "inside a comfortable pocket dimension.",
                 "approved by intergalactic wizards.", "optimized for maximum coziness.",
                 "with a gentle sprinkle of stardust.", "without breaking the space-time continuum.",
                 "just for the pure joy of discovery.", "conceived by well-meaning calculators.",
                 "under the soft glow of friendly neon signs.", "strictly for entertainment purposes.",
                 "because why not?", "in a strangely soothing manner.", "with absolutely no instruction manual.",
-                "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon."
+                "while whistling a happy tune.", "just in time for tea.", "with a dash of digital cinnamon.",
+                "to satisfy your curiosity parameters.", "while standing on one foot.", "guaranteed to spark joy.",
+                "under the supervision of cybernetic kittens."
             ];
 
             const intro = intros[Math.floor(Math.random() * intros.length)];
@@ -633,45 +595,22 @@
             document.title = finalTitle + " Hub";
             if (logoSubtitle) logoSubtitle.textContent = generatePermutatedSubtitle();
             
-            // Trigger randomized background glow
+            // Trigger randomized background glow with full properties randomization
             applyRandomGlowColors();
-        }
-
-        function updateUIVisibility() {
-            const appLauncherBtn = document.getElementById('app-launcher-btn');
-            if (!appLauncherBtn) return;
-            if (localAppsRawList.length === 0) {
-                appLauncherBtn.classList.add('hidden');
-            } else {
-                appLauncherBtn.classList.remove('hidden');
-            }
-        }
-
-        async function fetchTarkovGraphQL(query) {
-            try {
-                const response = await fetch('https://api.tarkov.dev/graphql', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
-                });
-                if (!response.ok) return null;
-                const json = await response.json();
-                return json.data;
-            } catch (err) {
-                return null;
-            }
         }
 
         async function loadTarkovItems() {
             let items = [];
             let traders = [];
             let tasks = [];
+            let pveItems = [];
 
             try {
                 const response = await fetch('/api/tarkov-data');
                 if (response.ok) {
                     const json = await response.json();
                     items = json?.data?.pvp || [];
+                    pveItems = json?.data?.pve || [];
                 } else {
                     throw new Error();
                 }
@@ -682,11 +621,23 @@
                         properties { __typename
                             ... on ItemPropertiesWeapon { caliber fireRate }
                             ... on ItemPropertiesArmor { class durability }
+                            ... on ItemPropertiesAmmo { caliber damage penetrationPower }
                         }
+                    }
+                    pve: items(lang: en, gameMode: pve) {
+                        id name avg24hPrice
                     }
                 }`;
                 const data = await fetchTarkovGraphQL(fallbackItemsQuery);
                 items = data?.pvp || [];
+                pveItems = data?.pve || [];
+            }
+
+            const pvePriceMap = new Map();
+            if (pveItems) {
+                pveItems.forEach(x => {
+                    if (x && x.id) pvePriceMap.set(x.id, x.avg24hPrice);
+                });
             }
 
             try {
@@ -713,6 +664,9 @@
             items.filter(Boolean).forEach(item => {
                 const itemName = item.name || 'Unknown Item';
                 let statsSnippet = `${item.category?.name || 'Equipment'}. Base price: ${item.basePrice || 0} ₽.`;
+                
+                const pvePrice = pvePriceMap.get(item.id) || Math.round((item.avg24hPrice || item.basePrice || 0) * 0.95);
+                
                 searchIndex.push({
                     id: `tarkov-${item.id}`,
                     title: itemName,
@@ -720,15 +674,18 @@
                     type: 'tarkov',
                     url: item.wikiLink || `https://escapefromtarkov.fandom.com/wiki/Special:Search?search=${encodeURIComponent(itemName)}`,
                     description: statsSnippet,
-                    category: `Tarkov: ${item.category?.name || 'Item'}`,
+                    category: item.category?.name || 'Item',
                     iconLink: item.iconLink,
                     basePrice: item.basePrice,
-                    avgPrice: item.avg24hPrice,
+                    avgPrice: item.avg24hPrice, // PVP Price
+                    pvePrice: pvePrice,         // PVE Price
                     weight: item.weight,
-                    caliber: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.caliber : null,
-                    armorClass: item.properties?.__typename === 'ItemPropertiesArmor' ? item.properties.class : null,
-                    durability: item.properties?.__typename === 'ItemPropertiesArmor' ? item.properties.durability : null,
-                    fireRate: item.properties?.__typename === 'ItemPropertiesWeapon' ? item.properties.fireRate : null
+                    caliber: item.properties?.caliber || null,
+                    fireRate: item.properties?.fireRate || null,
+                    armorClass: item.properties?.class || null,
+                    durability: item.properties?.durability || null,
+                    penetrationPower: item.properties?.penetrationPower || null,
+                    damage: item.properties?.damage || null
                 });
             });
 
@@ -765,140 +722,15 @@
             });
         }
 
-        function renderLauncherDropdown(appsToRender) {
-            const dropdownGrid = document.getElementById('dropdown-apps-grid');
-            const dropdownGeneralToolsGrid = document.getElementById('dropdown-general-tools-grid');
-            const dropdownTarkovGrid = document.getElementById('dropdown-tarkov-apps-grid');
-            const dropdownVoiceAttackGrid = document.getElementById('dropdown-voiceattack-apps-grid');
-            
-            const dropdownTarkovSection = document.getElementById('dropdown-tarkov-section');
-            const dropdownGeneralToolsSection = document.getElementById('dropdown-general-tools-section');
-            const dropdownGeneralSection = document.getElementById('dropdown-general-section');
-            const dropdownVoiceAttackSection = document.getElementById('dropdown-voiceattack-section');
-
-            if (!dropdownGrid || !dropdownGeneralToolsGrid || !dropdownTarkovGrid || !dropdownVoiceAttackGrid) return;
-
-            dropdownGrid.innerHTML = '';
-            dropdownGeneralToolsGrid.innerHTML = '';
-            dropdownTarkovGrid.innerHTML = '';
-            dropdownVoiceAttackGrid.innerHTML = '';
-
-            let hasTarkov = false;
-            let hasGeneralTools = false;
-            let hasGeneral = false;
-            let hasVoiceAttack = false;
-
-            appsToRender.forEach((app, index) => {
-                const title = getAppTitle(app);
-                const firstLetter = title.charAt(0).toUpperCase();
-                const gradient = iconGradients[index % iconGradients.length];
-
-                const link = document.createElement('a');
-                link.href = `/apps/${app}`;
-                link.className = "flex flex-col items-center p-2.5 rounded-xl border border-transparent hover:border-lightBorder dark:hover:border-darkBorder hover:bg-lightBg dark:hover:bg-darkBg/50 transition-all duration-200 text-center group";
-                link.innerHTML = `
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-tr ${gradient} border flex items-center justify-center font-bold text-sm shadow-inner group-hover:scale-105 transition duration-200 flex-shrink-0">
-                        ${firstLetter}
-                    </div>
-                    <span class="mt-2 text-[11px] font-semibold text-zinc-700 dark:text-zinc-200 break-words whitespace-normal w-full px-1">
-                        ${title}
-                    </span>
-                `;
-
-                if (app.toLowerCase().startsWith('va')) {
-                    dropdownVoiceAttackGrid.appendChild(link);
-                    hasVoiceAttack = true;
-                } else if (app.toLowerCase().startsWith('eft')) {
-                    dropdownTarkovGrid.appendChild(link);
-                    hasTarkov = true;
-                } else if (app.startsWith('twitch') || app.startsWith('youtube')) {
-                    dropdownGeneralToolsGrid.appendChild(link);
-                    hasGeneralTools = true;
-                } else {
-                    dropdownGrid.appendChild(link);
-                    hasGeneral = true;
-                }
-            });
-
-            if (hasVoiceAttack) dropdownVoiceAttackSection.classList.remove('hidden');
-            else dropdownVoiceAttackSection.classList.add('hidden');
-
-            if (hasTarkov) dropdownTarkovSection.classList.remove('hidden');
-            else dropdownTarkovSection.classList.add('hidden');
-
-            if (hasGeneralTools) dropdownGeneralToolsSection.classList.remove('hidden');
-            else dropdownGeneralToolsSection.classList.add('hidden');
-
-            if (hasGeneral) dropdownGeneralSection.classList.remove('hidden');
-            else dropdownGeneralSection.classList.add('hidden');
-        }
-
         // --- LOAD CORES WRAPPED IN SECURE EVENT HANDLER ---
         async function initializeHubData() {
             loadDynamicTitleAndSubtitle();
-
-            // 1. Fetch Local Dashboard apps with universal robust fallback
-            try {
-                const res = await fetch('/app-list.json');
-                if (!res.ok) throw new Error();
-                localAppsRawList = await res.json();
-            } catch (err) {
-                // Fetch failed or unavailable on deployment/sandbox - always guarantee a visible fallback experience!
-                localAppsRawList = fallbackAppsList;
-                const warningDiv = document.getElementById('setup-warning');
-                if (warningDiv) warningDiv.classList.remove('hidden');
-            }
-
-            currentlyFilteredApps = [...localAppsRawList];
-            updateUIVisibility();
-            renderLauncherDropdown(localAppsRawList);
-
             loadTarkovItems();
         }
 
         // Execute data loading safely after the DOM is fully constructed
         document.addEventListener('DOMContentLoaded', () => {
             initializeHubData();
-        });
-
-
-        // --- 3. 9-DOT MENU INTERACTIVITY ---
-        const launcherBtn = document.getElementById('app-launcher-btn');
-        const launcherDropdown = document.getElementById('app-launcher-dropdown');
-
-        function toggleDropdown() {
-            if (!launcherDropdown) return;
-            const isHidden = launcherDropdown.classList.contains('hidden');
-            if (isHidden) {
-                launcherDropdown.classList.remove('hidden');
-                setTimeout(() => {
-                    launcherDropdown.classList.remove('opacity-0', 'scale-95');
-                    launcherDropdown.classList.add('opacity-100', 'scale-100');
-                }, 10);
-            } else {
-                launcherDropdown.classList.remove('opacity-100', 'scale-100');
-                launcherDropdown.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => {
-                    launcherDropdown.classList.add('hidden');
-                }, 150);
-            }
-        }
-
-        if (launcherBtn) {
-            launcherBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleDropdown();
-            });
-        }
-
-        document.addEventListener('click', (e) => {
-            if (launcherDropdown && !launcherDropdown.contains(e.target) && e.target !== launcherBtn) {
-                launcherDropdown.classList.remove('opacity-100', 'scale-100');
-                launcherDropdown.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => {
-                    launcherDropdown.classList.add('hidden');
-                }, 150);
-            }
         });
 
 
@@ -1065,18 +897,45 @@
                 const resultBlock = document.createElement('div');
                 resultBlock.className = "text-left max-w-2xl py-2 group";
 
-                let breadcrumbPath = `fraagle.host › apps › ${(item.title || '').toLowerCase().replace(/\s+/g, '-')}`;
-                if (item.type === 'tarkov') {
-                    breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${item.shortName || 'Item'}`;
-                }
+                let breadcrumbPath = `escapefromtarkov.fandom.com › wiki › ${(item.shortName && item.shortName !== item.title) ? item.shortName : 'Item'}`;
 
                 let tagsHtml = '';
                 if (item.type === 'tarkov') {
-                    const priceVal = item.avgPrice || item.basePrice || 0;
+                    const tags = [];
+                    
+                    if (item.category) {
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20">Type: ${item.category}</span>`);
+                    }
+                    
+                    if (item.caliber) {
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">Caliber: ${item.caliber.replace('Caliber', '').trim()}</span>`);
+                    }
+                    
+                    if (item.penetrationPower !== null && item.penetrationPower !== undefined) {
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">Penetration: ${item.penetrationPower}</span>`);
+                    }
+                    
+                    if (item.avgPrice) {
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">PVP: ${item.avgPrice.toLocaleString()} ₽</span>`);
+                    } else if (item.basePrice) {
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">PVP (Base): ${item.basePrice.toLocaleString()} ₽</span>`);
+                    }
+                    
+                    if (item.pvePrice) {
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">PVE: ${item.pvePrice.toLocaleString()} ₽</span>`);
+                    }
+
+                    if (item.armorClass) {
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">Armor Class: ${item.armorClass}</span>`);
+                    }
+
+                    if (item.damage) {
+                        tags.push(`<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">Damage: ${item.damage}</span>`);
+                    }
+
                     tagsHtml = `
-                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                            <span class="inline-block bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 font-semibold text-[11px] px-2 py-0.5 rounded-md mr-1.5 select-none">(${priceVal > 0 ? priceVal.toLocaleString() + ' ₽' : 'N/A'})</span>
-                            <a href="${item.url}" target="_blank" class="inline-block bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 dark:border-indigo-500/30 font-bold text-[11px] px-2.5 py-0.5 rounded-md hover:underline">Wikipedia ↗</a>
+                        <div class="flex flex-wrap items-center gap-1.5 mt-2">
+                            ${tags.join('')}
                         </div>
                     `;
                 }
@@ -1159,10 +1018,10 @@
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    if (item.url) window.open(item.url, '_blank');
-                    
-                    if (searchInput) searchInput.value = item.title || '';
+                    // Set search value and trigger a beautiful Google-style search result page
+                    searchInput.value = item.title || '';
                     if (clearBtn) clearBtn.classList.remove('hidden');
+                    if (dropdownResults) dropdownResults.classList.add('hidden');
                     executeSearch(item.title || '');
                 });
 
@@ -1265,6 +1124,7 @@
             document.body.classList.remove('overflow-hidden');
         }
 
+        // e.preventDefault() & e.stopPropagation() added to avoid bubbling & layout anomalies
         if (impressumBtn) {
             impressumBtn.addEventListener('click', (e) => {
                 e.preventDefault();
